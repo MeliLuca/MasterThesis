@@ -3,7 +3,6 @@ from globalSettings import *
 class AlexNetModel(pl.LightningModule):
     def __init__(self, aux_logits=False):
         super(AlexNetModel, self).__init__()
-        self.log("loss", 'loss', on_epoch=True, prog_bar=True, sync_dist=True)
         
         self.cnn = torch.nn.Sequential(
             torch.nn.Conv2d(3, 35, kernel_size=11, stride=4),

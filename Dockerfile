@@ -25,6 +25,7 @@ RUN pip3 install opencv-python
 RUN pip3 install scikit-learn
 RUN pip3 install scikit-image
 RUN pip3 install tqdm
+RUN pip3 install gpustat
 USER $NB_UID
 
 #CMD ["jupyter", "notebook", "--port=8887", "--no-browser", "--ip=0.0.0.0", "--allow-root"]

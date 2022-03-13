@@ -1,5 +1,5 @@
 # imports 
-import os, time, math, random, json
+import os, time, math, random, json, copy
 from PIL import Image
 import pytorch_lightning as pl
 # torch imports
@@ -36,6 +36,7 @@ class Config():
     VOC_TEST_PATH = '/VOC_test'
     DATASET_PATH = './dataset'
     SAVING_PATH = './models'
+    num_workers = 4
 
 # Neural Network base model config object
 class BaseModelConfig():
