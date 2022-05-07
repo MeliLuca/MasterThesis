@@ -6,7 +6,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Hyper-parameters
 NUM_EPOCHS = BaseModelConfig.num_epochs
-LEARNING_RATE = BaseModelConfig.lr
+LEARNING_RATE = BaseModelConfig.learning_rate
 BATCH_SIZE = BaseModelConfig.batch_size
 DATASET_NAME = Config.DATASET_NAME
 NUM_WORKERS = Config.num_workers
