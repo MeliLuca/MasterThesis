@@ -5,14 +5,15 @@ from PIL import Image
 import torchvision
 from torchvision import transforms
 import torch
-from torch.utils.data import random_split
+from torch.utils.data.sampler import SubsetRandomSampler
+import numpy as np
 import math
 import torch.nn.functional as F
 
 def get_datasets(args):
 
     # CIFAR-10 dataset
-    if (args.dataset_name == 'cifar10') :
+    if (args.dataset == 'cifar10') :
         # Image preprocessing modules
         transform = transforms.Compose([
             transforms.Pad(4),
@@ -20,21 +21,31 @@ def get_datasets(args):
             transforms.RandomCrop(34),
             transforms.ToTensor()])
 
-        dataset = torchvision.datasets.CIFAR10(root=f'{args.dataset_path}/{args.dataset_name}',
+        dataset = torchvision.datasets.CIFAR10(root=f'{args.data_base_path}/{args.dataset}',
                                                     train=True, 
                                                     transform=transform,
                                                     download=True)
-        train_size = (len(dataset)*70)//100
-        train_dataset, val_dataset = random_split(dataset, [train_size, len(dataset)-train_size])
-
-        test_dataset = torchvision.datasets.CIFAR10(root=f'{args.dataset_path}/{args.dataset_name}',
+        validation_split = .2
+       # Creating data indices for training and validation splits:
+        dataset_size = len(dataset)
+        indices = list(range(dataset_size))
+        split = int(np.floor(validation_split * dataset_size))
+        np.random.seed(1245)
+        np.random.shuffle(indices)
+        train_indices, val_indices = indices[split:], indices[:split]
+        # Creating PT data samplers and loaders:
+        train_sampler = SubsetRandomSampler(train_indices)
+        valid_sampler = SubsetRandomSampler(val_indices)
+        test_dataset = torchvision.datasets.CIFAR10(root=f'{args.data_base_path}/{args.dataset}',
                                                     train=False, 
                                                     transform=transforms.ToTensor())
     dss = {
-        'train' : train_dataset,
-        'validation' : val_dataset,
+        'train' : dataset,
+        'train_sampler' : train_sampler,
+        'valid_sampler' : valid_sampler,
         'test' : test_dataset,
     }
+    return dss
 
 def get_dataloaders(args):
     """
@@ -56,9 +67,8 @@ def get_dataloaders(args):
         'pin_memory': True,
     }
     dls = {
-        'train': DataLoader(dss['train'], shuffle=False, **dl_args),
-        'validation': DataLoader(dss['validation'], shuffle=False, **dl_args),
-        'test':  DataLoader(dss['test'], shuffle=False, **dl_args),
-        'train_simsiam': DataLoader(dss['train_simsiam'], shuffle=True, **dl_args) if args.task == 'upstream' else None,
+        'train': torch.utils.data.DataLoader(dss['train'], sampler=dss['train_sampler'], **dl_args),
+        'validation': torch.utils.data.DataLoader(dss['train'], sampler=dss['valid_sampler'], **dl_args),
+        'test': torch.utils.data.DataLoader(dss['test'], shuffle=True, **dl_args),
     }
     return dls

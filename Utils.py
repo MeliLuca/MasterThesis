@@ -2,6 +2,7 @@ import torch
 import math
 import torch.nn.functional as F
 import numpy as np
+import pytorch_lightning as pl
 
 def cross_entropy(logits, labels, smooth=0.0, dropout=0.0):
     """
@@ -105,3 +106,21 @@ def get_rel_matrix (args):
     conn_matrix = torch.from_numpy(conn_matrix).to(torch.int64)
     target = conn_matrix.unsqueeze(0).repeat(64, 1, 1)
     return target
+
+def get_callbacks(args):
+    """
+    Callbacks for the PyTorch Lightning Trainer.
+    """
+    # Model checkpoint
+    model_checkpoint_clbk = pl.callbacks.model_checkpoint.ModelCheckpoint(
+        dirpath=None,
+        filename='best',
+        monitor=args.metric_monitor,
+        save_last=True,
+        mode=args.metric_maxmin,
+    )
+    model_checkpoint_clbk.CHECKPOINT_NAME_LAST = '{epoch}-{step}'
+    callbacks = [
+        model_checkpoint_clbk,
+    ]
+    return callbacks

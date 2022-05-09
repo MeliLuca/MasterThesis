@@ -6,7 +6,8 @@ import subprocess
 from config import get_args
 
 from Dataloaders import get_dataloaders
-import Models
+from Utils import get_callbacks
+from Models import ResNetCifar10
 
 
 def get_trainer(args, dls):
@@ -15,7 +16,6 @@ def get_trainer(args, dls):
     """
 
     # Logger and callbacks
-    logger = get_logger(args)
     callbacks = get_callbacks(args)
 
     # Trainer
@@ -24,7 +24,6 @@ def get_trainer(args, dls):
         'max_epochs': args.epochs,
         'deterministic': True,
         'callbacks': callbacks,
-        'logger': logger,
         'gradient_clip_val': args.grad_clip_val,
         'max_steps': args.epochs * len(dls['train'])
     }
@@ -39,7 +38,7 @@ def main (args):
 
     if args.model == 'resnet':
         if args.dataset_name == 'cifar10':
-            model = Models.ResNetCifar10(args)
+            model = ResNetCifar10.get_model(args)
    
 
     # Mode
@@ -51,12 +50,14 @@ def main (args):
         trainer.validate(model, val_dataloaders=dls['validation'])
 
     elif args.mode in ['self_supervise']:
-        
-        trainer.fit(model, dls['train_aug'], dls['validation'])
-        trainer.validate(model, val_dataloaders=dls['validation'])
+        trainer.fit(model,dls['train'], dls['validation'], part='multi_attention')
+        trainer.fit(model, dls['train'], dls['validation'], part='')
+        trainer.validate(model, val_dataloaders=dls['validation'], part='multi_attention')
 
     else:
         raise Exception(f'Error. Model "{args.mode}" not supported.')
+    
+    trainer.test(dataloaders=dls['test'])
 
 ##################################################
 # Main

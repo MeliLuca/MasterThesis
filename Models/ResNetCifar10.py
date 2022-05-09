@@ -87,7 +87,7 @@ class ResNetCifar10(nn.Module):
         return out
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), self.learning_rate)
+        optimizer = torch.optim.Adam(self.parameters(), self.lr)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 
                                            mode='min',
                                            patience=5,
@@ -98,82 +98,63 @@ class ResNetCifar10(nn.Module):
            'monitor': 'val_loss'
        }
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch, batch_idx, part='train'):
         images, labels = batch[0], batch[1]
         # Forward pass
         outputs = self(images)
-        if self.use_relations :
+        if part=='multi_attention' :
             target = self.rel_matrix.unsqueeze(0).repeat(outputs.shape[0], 1, 1)
             loss = cross_entropy(outputs, target)
+            acc_rel = accuracy(outputs, target)
+            self.log(f'acc_rel', acc_rel, prog_bar=True)
+            self.log(f'loss_rel', loss.item())
         else :    
-            loss = criterion(outputs, labels)
+            loss = F.cross_entropy(outputs, labels)
             self.log("train_loss", loss.item())
         return loss
     
-    def validation_step(self, batch, batch_idx):
-        uniform_patch, random_patch, random_patch_label = batch[0], batch[1], batch[2]
-        output, _, _ = self(uniform_patch, random_patch)
-        val_loss = torch.nn.functional.cross_entropy(output, random_patch_label)
-        del uniform_patch, random_patch, random_patch_label
-        self.log("val_loss", val_loss.item())
+    def validation_step(self, batch, batch_idx, part='val'):
+        images, labels = batch[0], batch[1]
+        # Forward pass
+        outputs = self(images)
+        if part=='multi_attention' :
+            target = self.rel_matrix.unsqueeze(0).repeat(outputs.shape[0], 1, 1)
+            loss = cross_entropy(outputs, target)
+            acc_rel = accuracy(outputs, target)
+            self.log(f'val_acc_rel', acc_rel, prog_bar=True)
+            self.log(f'val_loss_rel', loss.item())
+        else :    
+            loss = F.cross_entropy(outputs, labels)
+            self.log("val_loss", loss.item())
+        return loss
 
     def test_step(self, batch, batch_idx):
-        uniform_patch, random_patch, random_patch_label = batch[0], batch[1], batch[2]
-        output, _, _ = self(uniform_patch, random_patch)
-        test_loss = torch.nn.functional.cross_entropy(output, random_patch_label)
-        del uniform_patch, random_patch, random_patch_label
-        self.log("test_loss", test_loss.item())
-
-
-# Loss and optimizer
-criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
-
-# For updating learning rate
-def update_lr(optimizer, lr):    
-    for param_group in optimizer.param_groups:
-        param_group['lr'] = lr
-
-# Train the model
-total_step = len(train_loader)
-curr_lr = LEARNING_RATE
-for epoch in range(NUM_EPOCHS):
-    for i, (images, labels) in enumerate(train_loader):
-        images = images.to(device)
-        labels = labels.to(device)
-
+        images, labels = batch[0], batch[1]
         # Forward pass
-        outputs = model(images)
-        loss = criterion(outputs, labels)
+        outputs = self(images)
+        loss = F.cross_entropy(outputs, labels)
+        acc = accuracy(outputs, labels)
+        self.log("test_loss", loss.item())
+        return loss
+    
+    def on_load_checkpoint(self, checkpoint: dict) -> None:
+        state_dict = checkpoint["state_dict"]
+        model_state_dict = self.state_dict()
+        is_changed = False
+        for k in state_dict:
+            if k in model_state_dict:
+                if state_dict[k].shape != model_state_dict[k].shape:
+                    logging.info(f"Skip loading parameter: {k}, "
+                                f"required shape: {model_state_dict[k].shape}, "
+                                f"loaded shape: {state_dict[k].shape}")
+                    state_dict[k] = model_state_dict[k]
+                    is_changed = True
+            else:
+                logging.info(f"Dropping parameter {k}")
+                is_changed = True
 
-        # Backward and optimize
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+        if is_changed:
+            checkpoint.pop("optimizer_states", None)
 
-        if (i+1) % 100 == 0:
-            print ("Epoch [{}/{}], Step [{}/{}] Loss: {:.4f}"
-                   .format(epoch+1, NUM_EPOCHS, i+1, total_step, loss.item()))
-
-    # Decay learning rate
-    if (epoch+1) % 20 == 0:
-        curr_lr /= 3
-        update_lr(optimizer, curr_lr)
-
-# Test the model
-model.eval()
-with torch.no_grad():
-    correct = 0
-    total = 0
-    for images, labels in test_loader:
-        images = images.to(device)
-        labels = labels.to(device)
-        outputs = model(images)
-        _, predicted = torch.max(outputs.data, 1)
-        total += labels.size(0)
-        correct += (predicted == labels).sum().item()
-
-    print('Accuracy of the model on the test images: {} %'.format(100 * correct / total))
-
-# Save the model checkpoint
-torch.save(model.state_dict(), f'resnet_solo_{NUM_EPOCHS}_{LEARNING_RATE}_{BATCH_SIZE}_{DATASET_NAME}.ckpt')
+def get_model(args):
+    return ResNetCifar10(ResidualBlock, [2, 2, 2], args)

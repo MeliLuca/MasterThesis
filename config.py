@@ -104,7 +104,7 @@ def get_args(stdin, verbose=False):
         args.metric_monitor = 'val_loss'
         args.metric_maxmin = 'min'
 
-    # Patch size
+    # Patch size=
     if args.patch_size == -1:
         patch_size = {
             'cifar10': 4,
