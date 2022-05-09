@@ -1,69 +1,107 @@
-from globalSettings import *
+import torch
+import math
+import torch.nn.functional as F
+import numpy as np
 
-def resize_image(image, pad = 0):
-    im = np.array(image)
-    im = im.copy()
-    
-    min_dim = (BaseModelConfig.patch_dim * 3) + (BaseModelConfig.gap * 2) + 2 + (BaseModelConfig.jitter * 2) + pad * 2
-    
-    if im.shape[0] < min_dim or im.shape[1] < min_dim:
-        # resize image
-        ratio1 = float(min_dim)/float(im.shape[0])
-        ratio2 = float(min_dim)/float(im.shape[1])
-        
-        ratio = max(ratio1, ratio2)
-        im = cv2.resize(im,(int(im.shape[0]*ratio), int(im.shape[1]*ratio)))
-    
-    immax=float(im.shape[0]*im.shape[1])
-    
-    if immax > 450000:
-        return im
-    
-    maxdim=random.randint(immax,450000 + 1)
-    ratio=float(maxdim)/float(immax)
-    im = cv2.resize(im,(int(im.shape[0]*np.sqrt(ratio)), int(im.shape[1]*np.sqrt(ratio))))
-    return im
+def cross_entropy(logits, labels, smooth=0.0, dropout=0.0):
+    """
+    Compute the cross entropy.
+    Args:
+        logits: tensor of shape [bs, num_classes(, ...)].
+        labels: tensor of shape [bs(, num_classes, ...)].
+        smooth: scalar, for label smoothing.
+    Output:
+        xent: scalar.
+    """
+    if smooth == 0.0:
+        return F.cross_entropy(logits, labels)
 
-def plot_image(img,text=None,should_save=False):
-    plt.figure(figsize=(10, 10))
-    npimg = img.numpy()
-    plt.axis("off")
-    if text:
-        plt.text(75, 8, text, style='italic',fontweight='bold',
-            bbox={'facecolor':'white', 'alpha':0.8, 'pad':10})
-    plt.imshow(np.transpose(npimg, (1, 2, 0)))
-    plt.show()  
+    logprobs = F.log_softmax(logits, dim=1)
+    nll_loss = - logprobs.gather(dim=1, index=labels.unsqueeze(1))
+    nll_loss = nll_loss.squeeze(1)
+    smooth_loss = - logprobs.mean(dim=1)
+    loss = (1.0 - smooth) * nll_loss + smooth * smooth_loss 
+    if dropout > 0.0:
+        loss = F.dropout(loss, p=dropout)
+    return loss.mean()
 
-def show_plot(iteration,loss,fname):
-    plt.plot(iteration,loss)
-    plt.savefig(fname)
-    plt.show()
-    
-def display_canvas(patch_bucket, coordinates, title):
-    x = np.linspace(8, 8, 100)
-    y = np.cos(x)
+def accuracy(preds, labels, preds_with_logits=True):
+    """
+    Compute the accuracy.
 
-    fig, ax = plt.subplots()
+    Args:
+        preds: tensor of shape [bs, num_classes(, ...)].
+        labels: tensor of shape [bs(, ...)].
+        preds_with_logits: bool.
 
-    idx = 0
-    for i in reversed(range(3)):
-        for j in range(0, 9, 3):
-            ax.imshow(patch_bucket[idx], extent=[coordinates[i+j][0], 
-                                          coordinates[i+j][0]+BaseModelConfig.patch_dim, 
-                                          coordinates[i+j][1], 
-                                          coordinates[i+j][1]+BaseModelConfig.patch_dim], aspect='auto')
-            idx += 1
-    ax.plot(x, y)
-    plt.title(title)
-    plt.show()
+    Output:
+        acc: scalar.
+    """
+    if preds_with_logits:
+        preds = F.softmax(preds, 1)
+    preds = preds.argmax(1)
+    acc = (1.0 * (preds == labels)).mean()
+    return acc
 
-class UnNormalize(object):
-    def __init__(self, mean, std):
-        self.mean = mean
-        self.std = std
+## per creazione del target 
+## patches sarà il vettore contenente tutte le 64 posizioni delle patches.(TR, TC, TL ecc..) alto destra, alto sinistra, alto in centro ...
+def create_patch_matrix(num_patches):
+    side = int(math.sqrt(num_patches))
+    patches = np.arange(num_patches).reshape(side, side)
+    return patches
 
-    def __call__(self, tensor):
-        for t, m, s in zip(tensor, self.mean, self.std):
-            t.mul_(s).add_(m)
-        return tensor
-    
+def create_label_matrix(num_patches):
+    """
+    Create the spatial location matrix (as the example above).
+    """
+    labels = np.arange(9) # Spatial location encoded as int...
+    labels_matrix = labels.reshape(3, 3)
+    patch_matrix_side = int(math.sqrt(num_patches))
+
+    side = 2 * patch_matrix_side - 1
+    lu, cu, ru = labels_matrix[0, 0], labels_matrix[0, 1], labels_matrix[0, 2]
+    lc, cc, rc = labels_matrix[1, 0], labels_matrix[1, 1], labels_matrix[1, 2]
+    ld, cd, rd = labels_matrix[2, 0], labels_matrix[2, 1], labels_matrix[2, 2]
+
+    corner_side = int((side - 1) / 2)
+    cor = np.ones([corner_side, corner_side]).astype(labels.dtype)
+    cen = np.ones([1, 1]).astype(labels.dtype)
+    ver = np.ones([corner_side, 1]).astype(labels.dtype)
+    hor = np.ones([1, corner_side]).astype(labels.dtype)
+
+    labels_matrix = np.concatenate([
+        np.concatenate([lu * cor, cu * ver, ru * cor], 1),
+        np.concatenate([lc * hor, cc * cen, rc * hor], 1),
+        np.concatenate([ld * cor, cd * ver, rd * cor], 1),
+    ], 0)
+
+    return labels_matrix
+
+def create_connectivity_matrix(patches):
+    patch_flat = patches.reshape(-1)
+    num_patches = len(patch_flat)
+    labels_matrix = create_label_matrix(num_patches)
+
+    side = int(math.sqrt(num_patches))
+    conn_matrix = - 1 * np.ones([num_patches, num_patches]).astype(labels_matrix.dtype)
+    center = int((labels_matrix.shape[0] - 1) / 2)
+    for i in range(side):
+        for j in range(side):
+            labels_ij_matrix = labels_matrix[center - i: center - i  + side, center - j: center - j  + side]
+            labels_ij_matrix = labels_ij_matrix.reshape(-1)
+            #idx_flat = patch_flat[i * side + j]
+            idx_flat = i * side + j
+            conn_matrix[idx_flat, :] = labels_ij_matrix
+
+    conn_matrix = conn_matrix.T
+    conn_matrix = conn_matrix[patch_flat, :][:, patch_flat]
+    return conn_matrix
+
+def get_rel_matrix (args):
+    num_patches = args.classes
+    side = int(np.sqrt(num_patches))
+    patches_init = torch.arange(num_patches).reshape(side, side).numpy()
+    conn_matrix = create_connectivity_matrix(patches_init)
+    conn_matrix = torch.from_numpy(conn_matrix).to(torch.int64)
+    target = conn_matrix.unsqueeze(0).repeat(64, 1, 1)
+    return target
