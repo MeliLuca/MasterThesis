@@ -1,45 +1,13 @@
-from ../globalSettings import *
-from models.Models import *
-
-
-# Device configuration
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-# Hyper-parameters
-NUM_EPOCHS = BaseModelConfig.num_epochs
-LEARNING_RATE = BaseModelConfig.learning_rate
-BATCH_SIZE = BaseModelConfig.batch_size
-DATASET_NAME = Config.DATASET_NAME
-NUM_WORKERS = Config.num_workers
-
-if (DATASET_NAME == 'cifar_dataset') :
-    # Image preprocessing modules
-    transform = transforms.Compose([
-        transforms.Pad(4),
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomCrop(34),
-        transforms.ToTensor()])
-
-    # CIFAR-10 dataset
-    train_dataset = torchvision.datasets.CIFAR10(root=f'{Config.DATASET_PATH}/{Config.DATASET_NAME}',
-                                                train=True, 
-                                                transform=transform,
-                                                download=True)
-
-    test_dataset = torchvision.datasets.CIFAR10(root=f'{Config.DATASET_PATH}/{Config.DATASET_NAME}',
-                                                train=False, 
-                                                transform=transforms.ToTensor())
-
-    # Data loader
-    train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
-                                            batch_size=100, 
-                                            shuffle=True,
-                                            num_workers= NUM_WORKERS)
-
-    test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
-                                            batch_size=100, 
-                                            shuffle=False,
-                                            num_workers= NUM_WORKERS)
+import pytorch_lightning as pl
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torch.optim import SGD, Adam, AdamW
+import logging
+from Utils import cross_entropy, accuracy, get_rel_matrix
+from matplotlib import cm
+import numpy as np
+from PIL import Image
 
 
 
@@ -73,9 +41,9 @@ class ResidualBlock(nn.Module):
         return out
 
 # ResNet
-class ResNet(nn.Module):
-    def __init__(self, block, layers, num_classes=10):
-        super(ResNet, self).__init__()
+class ResNetCifar10(nn.Module):
+    def __init__(self, block, layers, args, use_relations=False):
+        super(ResNetCifar10, self).__init__()
         self.in_channels = 16
         self.conv = conv3x3(3, 16)
         self.bn = nn.BatchNorm2d(16)
@@ -84,7 +52,11 @@ class ResNet(nn.Module):
         self.layer2 = self.make_layer(block, 32, layers[1], 2)
         self.layer3 = self.make_layer(block, 64, layers[2], 2)
         self.avg_pool = nn.AvgPool2d(8)
-        self.fc = nn.Linear(64, num_classes)
+        self.fc = nn.Linear(64, args.num_classes)
+        self.learning_rate = args.leargning_rate
+        self.use_relations = use_relations
+        if(use_relations):
+            self.rel_matrix = get_rel_matrix(args)
 
     def make_layer(self, block, out_channels, blocks, stride=1):
         downsample = None
@@ -106,12 +78,51 @@ class ResNet(nn.Module):
         out = self.layer1(out)
         out = self.layer2(out)
         out = self.layer3(out)
-        out = self.avg_pool(out)
-        out = out.view(out.size(0), -1)
-        out = self.fc(out)
+        if (self.use_relations):
+            out = self.rel_head(out)
+        else :
+            out = self.avg_pool(out)
+            out = out.view(out.size(0), -1)
+            out = self.fc(out)
         return out
 
-model = ResNet(ResidualBlock, [2, 2, 2]).to(device)
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters(), self.learning_rate)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 
+                                           mode='min',
+                                           patience=5,
+                                           factor=0.3, verbose=True)
+        return {
+           'optimizer': optimizer,
+           'lr_scheduler': scheduler,
+           'monitor': 'val_loss'
+       }
+
+    def training_step(self, batch, batch_idx):
+        images, labels = batch[0], batch[1]
+        # Forward pass
+        outputs = self(images)
+        if self.use_relations :
+            target = self.rel_matrix.unsqueeze(0).repeat(outputs.shape[0], 1, 1)
+            loss = cross_entropy(outputs, target)
+        else :    
+            loss = criterion(outputs, labels)
+            self.log("train_loss", loss.item())
+        return loss
+    
+    def validation_step(self, batch, batch_idx):
+        uniform_patch, random_patch, random_patch_label = batch[0], batch[1], batch[2]
+        output, _, _ = self(uniform_patch, random_patch)
+        val_loss = torch.nn.functional.cross_entropy(output, random_patch_label)
+        del uniform_patch, random_patch, random_patch_label
+        self.log("val_loss", val_loss.item())
+
+    def test_step(self, batch, batch_idx):
+        uniform_patch, random_patch, random_patch_label = batch[0], batch[1], batch[2]
+        output, _, _ = self(uniform_patch, random_patch)
+        test_loss = torch.nn.functional.cross_entropy(output, random_patch_label)
+        del uniform_patch, random_patch, random_patch_label
+        self.log("test_loss", test_loss.item())
 
 
 # Loss and optimizer

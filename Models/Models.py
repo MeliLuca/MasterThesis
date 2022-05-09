@@ -92,43 +92,4 @@ class AlexNetModel(pl.LightningModule):
         self.log("test_loss", test_loss.item())
 
 
-class ResNetModel(torch.nn.Module):
-    
-    def __init__(self, aux_logits=False):
-        super(ResNetModel, self).__init__()
-        resNet = torchvision.models.resnet18(pretrained=False)
-        resNet.fc = torch.nn.Linear(512, 4096,bias=True)
-        self.cnn = resNet
-        self.fc6 = torch.nn.Sequential(
-            torch.nn.Linear(4096,4096),
-            torch.nn.ReLU(inplace=True),
-            torch.nn.BatchNorm1d(4096),
-          )
-        self.fc = torch.nn.Sequential(
-            torch.nn.Linear(2*4096,4096),
-            torch.nn.ReLU(inplace=True),
-
-            torch.nn.Linear(4096, 4096),
-            torch.nn.ReLU(inplace=True),
-
-            torch.nn.Linear(4096, 8)
-          )
-
-    def forward_once(self, x):
-        output= self.cnn(x)
-        output = output.view(output.size()[0], -1)
-        output = self.fc6(output)
-        return output
-
-
-    def forward(self, uniform_patch, random_patch):
-        output_fc6_uniform = self.forward_once(uniform_patch)
-        output_fc6_random = self.forward_once(random_patch)
-        output = torch.cat((output_fc6_uniform,output_fc6_random), 1)
-        output = self.fc(output)
-        return output, output_fc6_uniform, output_fc6_random
-
-
-
-
-    
+#class ResNetCifar10(pl.LightningModule):
