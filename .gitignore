@@ -2,3 +2,5 @@
 .pyc
 .png
 .tar
+__pycache__
+datasets/

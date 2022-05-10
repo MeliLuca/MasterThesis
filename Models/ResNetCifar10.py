@@ -17,7 +17,7 @@ def conv3x3(in_channels, out_channels, stride=1):
                      stride=stride, padding=1, bias=False)
 
 # Residual block
-class ResidualBlock(nn.Module):
+class ResidualBlock(pl.LightningModule):
     def __init__(self, in_channels, out_channels, stride=1, downsample=None):
         super(ResidualBlock, self).__init__()
         self.conv1 = conv3x3(in_channels, out_channels, stride)
@@ -41,7 +41,7 @@ class ResidualBlock(nn.Module):
         return out
 
 # ResNet
-class ResNetCifar10(nn.Module):
+class ResNetCifar10(pl.LightningModule):
     def __init__(self, block, layers, args, use_relations=False):
         super(ResNetCifar10, self).__init__()
         self.in_channels = 16
@@ -53,7 +53,7 @@ class ResNetCifar10(nn.Module):
         self.layer3 = self.make_layer(block, 64, layers[2], 2)
         self.avg_pool = nn.AvgPool2d(8)
         self.fc = nn.Linear(64, args.num_classes)
-        self.learning_rate = args.leargning_rate
+        self.lr = args.lr
         self.use_relations = use_relations
         if(use_relations):
             self.rel_matrix = get_rel_matrix(args)

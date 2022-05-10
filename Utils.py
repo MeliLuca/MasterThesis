@@ -113,8 +113,6 @@ def get_callbacks(args):
     """
     # Model checkpoint
     model_checkpoint_clbk = pl.callbacks.model_checkpoint.ModelCheckpoint(
-        dirpath=None,
-        filename='best',
         monitor=args.metric_monitor,
         save_last=True,
         mode=args.metric_maxmin,
