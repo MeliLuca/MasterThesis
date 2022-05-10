@@ -1,4 +1,4 @@
-name: base
+name: thesis
 channels:
   - pytorch
   - conda-forge
@@ -161,4 +161,3 @@ dependencies:
   - zeromq=4.3.4=he49afe7_1
   - zlib=1.2.11=h6c3fc93_1014
   - zstd=1.5.2=h582d3a0_0
-prefix: /Users/lucamelissari/opt/miniconda3
