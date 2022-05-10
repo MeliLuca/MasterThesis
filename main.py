@@ -1,66 +1,77 @@
+##################################################
+# Imports
+##################################################
+
 import sys
 import pytorch_lightning as pl
 import logging
 import os
 import subprocess
+
+# Custom
 from config import get_args
-import torch
-from pytorch_lightning import loggers as pl_loggers
-
-from Dataloaders import get_dataloaders
-from Utils import get_callbacks
+from Dataloaders import get_datasets, get_dataloaders
 from Models import ResNetCifar10
+from utils import get_logger, get_callbacks
+from trainer import get_trainer
+
+# Settings
+format_str = '%(asctime)s - [%(levelname)s] - %(message)s'
+logging.basicConfig(level=logging.INFO, format=format_str, datefmt='%d-%b-%y %H:%M:%S')
 
 
-def get_trainer(args, dls):
-    """
-    Return the PyTorch Lightning Trainer.
-    """
-    # Logger and callbacks
-    callbacks = get_callbacks(args)
-    logger = pl_loggers.TensorBoardLogger(save_dir=f'logs/{args.dataset}')
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # Trainer
-    trainer_args = {
-        'gpus': (args.num_gpus if torch.cuda.is_available() else 0),
-        'max_epochs': args.epochs,
-        'deterministic': True,
-        'callbacks': callbacks,
-        'logger': logger,
-        'gradient_clip_val': args.grad_clip_val,
-        'max_steps': args.epochs * len(dls['train'])
-    }
-    trainer = pl.Trainer(**trainer_args)
-    return trainer
+# Main function
+def main(args):
+    import torch
 
-
-def main (args):
-
+    # Logging
+    if args.num_gpus > 0:
+        nvidia_smi = subprocess.Popen(['nvidia-smi'], stdout=subprocess.PIPE, 
+                                      stderr=subprocess.PIPE).communicate()[0].decode('utf8')
+        logging.info(nvidia_smi)
+    else:
+        logging.info('Using CPU!')
+    hostname = os.uname().nodename # Node name
+    logging.info(f'hostname:{hostname}')
+    
+    # Dataloaders
     dls = get_dataloaders(args)
-    trainer = get_trainer(args,dls)
 
-    if args.backbone == 'resnet':
-        if args.dataset == 'cifar10':
-            model = ResNetCifar10.get_model(args)
-   
+    # Get model
+    if args.backbone in ['resnet']:
+        model = ResNetCifar10.get_model(args)
+    # elif args.backbone == 'simsiam':
+    #     model = relvit_simsiam.get_model(args)
+    # elif args.bacbkone == 'cnn':
+    #     model = relcnn.get_model(args)
+    else:
+        raise Exception(f'Error. Backbone "{args.backbone}" not supported.')
+
+    # Trainer
+    trainer = get_trainer(args, dls)
 
     # Mode
     if args.mode in ['train', 'training']:
-        trainer.fit(model, dls['train'], dls['validation'])
-        trainer.validate(model=None, val_dataloaders=dls['validation'])
+        trainer.fit(model, dls['train_aug'], dls['validation'])
+        trainer.validate(model=None, dataloaders=dls['validation'])
 
     elif args.mode in ['validate', 'validation', 'validating']:
-        trainer.validate(model, val_dataloaders=dls['validation'])
+        trainer.validate(model, dataloaders=dls['validation'])
 
-    elif args.mode in ['self_supervise']:
-        trainer.fit(model,dls['train'], dls['validation'], part='multi_attention')
-        trainer.fit(model, dls['train'], dls['validation'], part='')
-        trainer.validate(model, val_dataloaders=dls['validation'], part='multi_attention')
+    elif args.mode in ['train_linear']:
+        trainer.fit(model, dls['train_aug'], dls['validation'])
+        trainer.validate(model, dataloaders=dls['validation'])
+
+    elif args.mode in ['validate_lienar', 'validation_linear', 'validating_linear']:
+        trainer.validate(model, dataloaders=dls['validation'])
+
+    elif args.mode == 'train_simsiam':
+        trainer.fit(model, dls['train_simsiam'], dls['validation'])
+        trainer.validate(model=None, val_dataloaders=dls['validation'])
 
     else:
         raise Exception(f'Error. Model "{args.mode}" not supported.')
-    
-    trainer.test(dataloaders=dls['test'])
+
 
 ##################################################
 # Main
@@ -72,7 +83,7 @@ if __name__ == '__main__':
     args = get_args(sys.stdin, verbose=True)
 
     # Set random seed
-    pl.seed_everything(args.seed)
+    pl.seed_everything(args.seed, workers=True)
 
     # Run main
     main(args)

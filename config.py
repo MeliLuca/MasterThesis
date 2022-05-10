@@ -15,7 +15,7 @@ def get_args(stdin, verbose=False):
 
     # Global params
     parser.add_argument('--seed', type=int, default=35771, help='The random seed.')
-    parser.add_argument('--logger', type=str, default='wandb', help='The logger to use for the experiments.')
+    parser.add_argument('--logger', type=str, default='tensorboard', help='The logger to use for the experiments.')
     parser.add_argument('--mode', type=str, default='train', help='The mode of the program, can "train" or "validate"')
     parser.add_argument('--num_gpus', type=int, default=1, help='The number of GPUs.')
     parser.add_argument('--epochs', type=int, default=100, help='The number of epochs for the training.')
@@ -123,7 +123,7 @@ def get_args(stdin, verbose=False):
         }
         args.patch_size = patch_size[args.dataset]
     img_height = {
-        'cifar10': 32,
+        'cifar10': 34,
         'cifar10_36': 36,
         'cifar10_224': 224,
         'cifar100': 32,

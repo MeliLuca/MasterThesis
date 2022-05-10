@@ -1,13 +1,15 @@
+from cgitb import reset
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.optim import SGD, Adam, AdamW
 import logging
-from Utils import cross_entropy, accuracy, get_rel_matrix
+from utils import cross_entropy, accuracy, get_rel_matrix
 from matplotlib import cm
 import numpy as np
 from PIL import Image
+from Layers import MultiHeadAttention
 
 
 
@@ -42,8 +44,18 @@ class ResidualBlock(pl.LightningModule):
 
 # ResNet
 class ResNetCifar10(pl.LightningModule):
-    def __init__(self, block, layers, args, use_relations=False):
+    def __init__(self, block, layers, args, num_classes, num_rel_classes=9, use_relations=False, 
+                 use_supervision=False, dropout=0.1, freeze_fet_enc=False, proj_dropout=0.0):
         super(ResNetCifar10, self).__init__()
+        self.save_hyperparameters()
+        self.args = args
+        self.num_classes = num_classes
+        self.use_supervision = use_supervision
+        self.num_rel_classes = num_rel_classes
+        self.use_relations = use_relations
+        self.dropout = dropout
+        self.proj_dropout = proj_dropout
+        self.freeze_fet_enc = freeze_fet_enc
         self.in_channels = 16
         self.conv = conv3x3(3, 16)
         self.bn = nn.BatchNorm2d(16)
@@ -55,8 +67,10 @@ class ResNetCifar10(pl.LightningModule):
         self.fc = nn.Linear(64, args.num_classes)
         self.lr = args.lr
         self.use_relations = use_relations
-        if(use_relations):
-            self.rel_matrix = get_rel_matrix(args)
+        if self.use_relations:
+            ## DA CAMBIAREEEE
+            print(f'rel head viene creato con {num_rel_classes*num_rel_classes}, {num_rel_classes}')
+            self.rel_head = MultiHeadAttention.MultiHeadAttentionScores(num_rel_classes*num_rel_classes, num_rel_classes)
 
     def make_layer(self, block, out_channels, blocks, stride=1):
         downsample = None
@@ -79,6 +93,7 @@ class ResNetCifar10(pl.LightningModule):
         out = self.layer2(out)
         out = self.layer3(out)
         if (self.use_relations):
+            print(out.shape)
             out = self.rel_head(out)
         else :
             out = self.avg_pool(out)
@@ -87,54 +102,61 @@ class ResNetCifar10(pl.LightningModule):
         return out
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), self.lr)
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 
-                                           mode='min',
-                                           patience=5,
-                                           factor=0.3, verbose=True)
-        return {
-           'optimizer': optimizer,
-           'lr_scheduler': scheduler,
-           'monitor': 'val_loss'
-       }
+        """
+        Configure optimizer for the learning process.
+        """
+        if self.args.optimizer == 'adam':
+            optimizer = Adam(self.parameters(), self.args.lr, weight_decay=self.args.weight_decay)
+        elif self.args.optimizer == 'sgd':
+            optimizer = SGD(self.parameters(), self.args.lr, momentum=0.9, weight_decay=self.args.weight_decay)
+        elif self.args.optimizer == 'adamw':
+            optimizer = AdamW(self.parameters(), self.args.lr, weight_decay=self.args.weight_decay)
+        else:
+            raise Exception(f'Error. Optimizer "{self.args.optimizer}" not supported.')
+        self.optimizer = optimizer
+        return optimizer
 
     def training_step(self, batch, batch_idx, part='train'):
-        images, labels = batch[0], batch[1]
+        images = batch['images']
         # Forward pass
         outputs = self(images)
         if part=='multi_attention' :
-            target = self.rel_matrix.unsqueeze(0).repeat(outputs.shape[0], 1, 1)
+            target = batch['relations']
             loss = cross_entropy(outputs, target)
             acc_rel = accuracy(outputs, target)
             self.log(f'acc_rel', acc_rel, prog_bar=True)
             self.log(f'loss_rel', loss.item())
         else :    
+            labels=batch['labels']
             loss = F.cross_entropy(outputs, labels)
             self.log("train_loss", loss.item())
         return loss
     
     def validation_step(self, batch, batch_idx, part='val'):
-        images, labels = batch[0], batch[1]
+        images = batch['images']
         # Forward pass
         outputs = self(images)
         if part=='multi_attention' :
-            target = self.rel_matrix.unsqueeze(0).repeat(outputs.shape[0], 1, 1)
+            target = batch['relations']
             loss = cross_entropy(outputs, target)
             acc_rel = accuracy(outputs, target)
             self.log(f'val_acc_rel', acc_rel, prog_bar=True)
             self.log(f'val_loss_rel', loss.item())
         else :    
+            labels=batch['labels']
             loss = F.cross_entropy(outputs, labels)
             self.log("val_loss", loss.item())
         return loss
 
     def test_step(self, batch, batch_idx):
-        images, labels = batch[0], batch[1]
+        images = batch['images']
         # Forward pass
         outputs = self(images)
+        labels=batch['labels']
         loss = F.cross_entropy(outputs, labels)
         acc = accuracy(outputs, labels)
         self.log("test_loss", loss.item())
+        self.log("test_acc", acc.item())
         return loss
     
     def on_load_checkpoint(self, checkpoint: dict) -> None:
@@ -157,4 +179,14 @@ class ResNetCifar10(pl.LightningModule):
             checkpoint.pop("optimizer_states", None)
 
 def get_model(args):
-    return ResNetCifar10(ResidualBlock, [2, 2, 2], args)
+    model_args = {
+        'args': args,
+        'num_classes': args.num_classes,
+        'num_rel_classes': 9,
+        'use_relations': args.use_relations,
+        'use_supervision': args.use_supervision,
+        'dropout': args.dropout,
+        'freeze_fet_enc': args.freeze_fet_enc,
+        'proj_dropout': args.proj_dropout,
+    }
+    return ResNetCifar10(ResidualBlock, [2, 2, 2], **model_args)

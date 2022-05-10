@@ -84,6 +84,7 @@ class MultiHeadAttentionScores(nn.Module):
     def forward(self, input, k=None, v=None, mask=None):
         B, num_patches = input.shape[0:2]
         q= input.reshape(B, num_patches, -1)
+        print(f'Q matrix is {q.shape}')
         q= torch.transpose(q, 1,2)
         x = [head(q, k, v, mask=mask) for head in self.heads]
         x = torch.stack(x, 1) # [B, num_heads, NUM_PATCH, NUM_PATCH]
