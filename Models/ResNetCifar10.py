@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.optim import SGD, Adam, AdamW
 import logging
-from utils import cross_entropy, accuracy, get_rel_matrix
+from utils import cross_entropy, accuracy
 from matplotlib import cm
 import numpy as np
 from PIL import Image
@@ -44,7 +44,7 @@ class ResidualBlock(pl.LightningModule):
 
 # ResNet
 class ResNetCifar10(pl.LightningModule):
-    def __init__(self, block, layers, args, num_classes, num_rel_classes=9, use_relations=False, 
+    def __init__(self, block, layers, args, num_classes, num_rel_classes, use_relations=False, 
                  use_supervision=False, dropout=0.1, freeze_fet_enc=False, proj_dropout=0.0):
         super(ResNetCifar10, self).__init__()
         self.save_hyperparameters()
@@ -93,7 +93,6 @@ class ResNetCifar10(pl.LightningModule):
         out = self.layer2(out)
         out = self.layer3(out)
         if (self.use_relations):
-            print(out.shape)
             out = self.rel_head(out)
         else :
             out = self.avg_pool(out)
@@ -116,12 +115,13 @@ class ResNetCifar10(pl.LightningModule):
         self.optimizer = optimizer
         return optimizer
 
-    def training_step(self, batch, batch_idx, part='train'):
+    def training_step(self, batch, batch_idx):
         images = batch['images']
         # Forward pass
         outputs = self(images)
-        if part=='multi_attention' :
+        if self.use_relations :
             target = batch['relations']
+            print('Mi rompooooo ')
             loss = cross_entropy(outputs, target)
             acc_rel = accuracy(outputs, target)
             self.log(f'acc_rel', acc_rel, prog_bar=True)
@@ -182,7 +182,7 @@ def get_model(args):
     model_args = {
         'args': args,
         'num_classes': args.num_classes,
-        'num_rel_classes': 9,
+        'num_rel_classes': 8,
         'use_relations': args.use_relations,
         'use_supervision': args.use_supervision,
         'dropout': args.dropout,

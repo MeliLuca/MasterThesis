@@ -12,7 +12,7 @@ def attention_scores(q, k, v, mask=None):
         out: tensor of shape [B, T_Q, D_v]
     """
     B = q.shape[0]
-    #print(f'k shape is {k.shape}')
+    # print(f'k shape is {k.shape}')
     scale = math.sqrt(k.shape[2])
     att = torch.bmm(q, k.transpose(1, 2)) / scale # [B, T_Q, T_V]
     if mask is not None:
@@ -46,16 +46,14 @@ class HeadScores(nn.Module):
         self.q_lin = nn.Linear(h_dim, head_out_dim, bias=False)
         self.k_lin = nn.Linear(h_dim, head_out_dim, bias=False)
         self.v_lin = nn.Linear(h_dim, head_out_dim, bias=False)
-
+        # print(f'dim head e out is {h_dim}, {head_out_dim}')
     def forward(self, q, k=None, v=None, mask=None):
-        q= torch.transpose(q, 1,2)
         if k is None:
             k = q
         if v is None:
             v = k
-        #print(f'q shape is {q.shape}')
         q = self.q_lin(q)
-        #print(f'q shape after linearization is {q.shape}')
+        # print(f'q shape after linearization is {q.shape}')
         k = self.k_lin(k)
         v = self.v_lin(v)
         x = attention_scores(q, k, v, mask=mask) # [B, NUM_PATCH, NUM_PATCH]
@@ -76,6 +74,7 @@ class MultiHeadAttentionScores(nn.Module):
         super().__init__()
         self.h_dim = h_dim
         self.num_heads = num_heads
+        # print(f'dim head e out is {h_dim}, { h_dim // num_heads}')
         self.heads = nn.ModuleList([
             HeadScores(h_dim, h_dim // num_heads) for _ in range(num_heads)
         ])
@@ -84,8 +83,7 @@ class MultiHeadAttentionScores(nn.Module):
     def forward(self, input, k=None, v=None, mask=None):
         B, num_patches = input.shape[0:2]
         q= input.reshape(B, num_patches, -1)
-        print(f'Q matrix is {q.shape}')
-        q= torch.transpose(q, 1,2)
+        # print(f'Q matrix is {q.shape}')
         x = [head(q, k, v, mask=mask) for head in self.heads]
         x = torch.stack(x, 1) # [B, num_heads, NUM_PATCH, NUM_PATCH]
         #x = self.linear(x) # [B, T, h_dim]

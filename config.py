@@ -25,7 +25,7 @@ def get_args(stdin, verbose=False):
                         help='Experiment ID (like "u1").')
 
     # Datasets params
-    parser.add_argument('--dataset', type=str, default='imagenet', help='Name of the dataset.')
+    parser.add_argument('--dataset', type=str, default='cifar10', help='Name of the dataset.')
     parser.add_argument('--data_base_path', type=str, default='./datasets/data', help='The data base path.')
     parser.add_argument('--batch_size', type=int, default=256, help='The batch size.')
     parser.add_argument('--num_workers', type=int, default=8, help='The number of workers for the dataloader.')
