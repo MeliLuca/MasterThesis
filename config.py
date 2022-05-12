@@ -45,7 +45,7 @@ def get_args(stdin, verbose=False):
     # Model params
     parser.add_argument('--backbone', type=str, default='resnet', help='Backbone of the model.', choices=['vit', 'resnet', 'simsiam'])
     parser.add_argument('--model_size', type=str, default='small', help='Backbone of the model.')
-    parser.add_argument('--model_checkpoint', type=str, default='stats/{args.dataset}/checkpoints', help='The model checkpoint path (*.ckpt).')
+    parser.add_argument('--model_checkpoint', type=str, default='', help='The model checkpoint path (*.ckpt).')
     parser.add_argument('--patch_size', type=int, default=-1, help='The patch size.')
     parser.add_argument('--use_relations', dest='use_relations', action='store_true', 
                         help='Learn patches spatial relations.')
