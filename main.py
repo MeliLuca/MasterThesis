@@ -36,7 +36,6 @@ def main(args):
     
     # Dataloaders
     dls = get_dataloaders(args)
-
     # Get model
     if args.backbone in ['resnet']:
         model = ResNetCifar10.get_model(args)
@@ -53,18 +52,17 @@ def main(args):
     # Mode
     if args.mode in ['train', 'training']:
         if args.use_relations :
-            trainer.fit(model, dls['train'], dls['validation'])
-            for param in model.parameters():
-                print(param)
             trainer.fit(model, dls['train_aug'], dls['validation'])
+            trainer.fit(model, dls['train'], dls['validation'])
+
             trainer.validate(model=None, dataloaders=dls['validation'])
         else:
-            trainer.fit(model, dls['train_aug'], dls['validation'])
+            trainer.fit(model, dls['train'], dls['validation'])
             trainer.validate(model=None, dataloaders=dls['validation'])
 
     elif args.mode in ['validate', 'validation', 'validating']:
         trainer.validate(model, dataloaders=dls['validation'])
-
+    
     elif args.mode in ['train_linear']:
         trainer.fit(model, dls['train_aug'], dls['validation'])
         trainer.validate(model, dataloaders=dls['validation'])

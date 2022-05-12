@@ -17,6 +17,7 @@ import torch.nn.functional as F
 import tarfile
 import requests
 import logging
+import datetime
 from tqdm import tqdm
 
 
@@ -118,10 +119,9 @@ def get_callbacks(args):
     """
     Callbacks for the PyTorch Lightning Trainer.
     """
-
     # Model checkpoint
     model_checkpoint_clbk = pl.callbacks.model_checkpoint.ModelCheckpoint(
-        dirpath=None,
+        dirpath=os.path.join(os.getcwd(), f'stats/{args.dataset}/checkpoints'),
         filename='best',
         monitor=args.metric_monitor,
         save_last=True,
@@ -138,41 +138,16 @@ def get_logger(args):
     """
     Logger for the PyTorchLightning Trainer.
     """
-    logger_kind = 'tensorboard' if 'logger' not in args.__dict__ else args.logger
-    if logger_kind == 'tensorboard':
+    logger_kind = 'csv' if 'logger' not in args.__dict__ else args.logger
+    save_dir = os.path.join(os.getcwd(), f'stats/{args.dataset}/logs')
+    if logger_kind == 'csv':
+        logger = pl.loggers.CSVLogger(
+            save_dir=save_dir,
+        )
+    elif logger_kind == 'tensorboard':
         logger = pl.loggers.tensorboard.TensorBoardLogger(
-            save_dir=os.path.join(os.getcwd(), 'tmp'),
-            name=args.dataset,
+            save_dir=save_dir,
         )
-
-    elif logger_kind == 'wandb':
-        task_str = []
-        if args.use_supervision:
-            task_str += ['clf']
-        if args.use_relations:
-            task_str += ['rel']
-        if args.use_dist:
-            task_str += ['dist']
-        if args.use_angle:
-            task_str += ['angle']
-        if args.use_abs_positions:
-            task_str += ['abs_pos']
-        name = [
-            str(args.exp_id), args.dataset, '-'.join(task_str), 
-            '-'.join([str(args.backbone), str(args.model_size), str(args.patch_size), str(args.img_height)])
-        ]
-        if len(args.attn_mask):
-            name += [f'attn_mask-{args.attn_mask}']
-        if args.add_clf_to_patches:
-            name += ['add_clf_to_patches']
-        if args.mega_patches:
-            name += [f'mega_patches_{args.side_megapatches}']
-        logger = pl.loggers.WandbLogger(
-            save_dir=os.path.join(os.getcwd(), 'tmp'),
-            name='/'.join(name),
-            project='relvit_v2',
-        )
-
     else:
         raise Exception(f'Error. Logger "{lokker_kind}" is not supported.')
     return logger

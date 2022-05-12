@@ -123,7 +123,6 @@ class ResNetCifar10(pl.LightningModule):
         outputs = self(images)
         if self.use_relations :
             target = batch['relations']
-            print('Mi rompooooo ')
             loss = cross_entropy(outputs, target)
             acc_rel = accuracy(outputs, target)
             self.log(f'acc_rel', acc_rel, prog_bar=True)
@@ -135,20 +134,17 @@ class ResNetCifar10(pl.LightningModule):
         return loss
     
     def validation_step(self, batch, batch_idx):
-        print('#### entro validation step')
+        # print('#### entro validation step')
         images = batch['images']
         # Forward pass
         outputs = self(images)
-        print(f'grandezza immagine {images.shape}')
         if self.use_relations:
             target = batch['relations']
-            print(f'relations {target.shape} outputs {outputs.shape}')
-            print('###############')
-            print(target)
+            # print(target)
             loss = F.cross_entropy(outputs, target)
             acc_rel = accuracy(outputs, target)
-            self.log(f'val_acc_rel', acc_rel, prog_bar=True)
-            self.log(f'val_loss_rel', loss.item())
+            self.log(f'val_acc', acc_rel, prog_bar=True)
+            self.log(f'val_loss', loss.item())
         else :    
             labels=batch['labels']
             loss = F.cross_entropy(outputs, labels)
@@ -196,4 +192,10 @@ def get_model(args):
         'freeze_fet_enc': args.freeze_fet_enc,
         'proj_dropout': args.proj_dropout,
     }
-    return ResNetCifar10(ResidualBlock, [2, 2, 2], **model_args)
+    ResNetCifar10(ResidualBlock, [2, 2, 2], **model_args)
+    model = ResNetCifar10(ResidualBlock, [2, 2, 2], **model_args)
+    if len(args.model_checkpoint) > 0:
+        model = model.load_from_checkpoint(args.model_checkpoint, strict=False, **model_args)
+        print(f'Loaded model at "{args.model_checkpoint}"')
+    return model
+

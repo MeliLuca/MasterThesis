@@ -206,14 +206,9 @@ def get_datasets(args, transform='default', target_transform='default', patch_tr
     if args.task == 'upstream':
         shuffle_dataset_args = {
             'debug': args.debug_dataset,
-            'patch_size': args.patch_size,
             'img_size': args.img_height,
-            'mega_patches': args.mega_patches,
             'side_megapatches': args.side_megapatches,
             'use_relations': args.use_relations,
-            'use_distances': args.use_dist,
-            'use_angles': args.use_angle,
-            'use_abs_positions': args.use_abs_positions,
         }
         dss = {
             'train': ShuffleDataset(ds_train, patch_transform=patch_transform['train'], **shuffle_dataset_args),
