@@ -4,5 +4,4 @@
 .tar
 __pycache__
 datasets/data
-logs/
-tmp/
+

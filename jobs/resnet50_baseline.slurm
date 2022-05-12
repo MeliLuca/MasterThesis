@@ -1,33 +1,33 @@
 #!/bin/sh
 ### job name
-#SBATCH --job-name=MRes18-0023
+SBATCH --job-name=Res50-baseline
 
 #SBATCH --mail-user=alex.dametto@studenti.unipd.it
 
 ### Redirezione dello standard output e standard error del programma
-#SBATCH --error=outputs/MRes18-0023.err
-#SBATCH --output=outputs/MRes18-0023.out
+SBATCH --error=outputs/Res50-baseline.err
+SBATCH --output=outputs/Res50-baseline.out
 
 
 ### Scelta della coda "testing" per tesisti
-#SBATCH --partition=testing
+SBATCH --partition=testing
 
 ### Numero di host (nodes) occupati dal Job e numero di processi da allocare per nodo (ppn)
-#SBATCH --ntasks=1
+SBATCH --ntasks=1
 
 ### Memoria che ci si aspetta che il programma utilizzi
-#SBATCH --mem=50G
+SBATCH --mem=50G
 
 ### Limite di tempo che vogliamo assegnare al nostro job (qui un'ora: HH:MM:SS)
-#SBATCH --time=500:00:00
+SBATCH --time=500:00:00
 
 ### Richiesta della macchina
-#SBATCH --constraint=vgpu2-0
+SBATCH --constraint=dellsrv2
 
 ### Richiesta della percentuale di GPU
-#SBATCH --gres=gpu:1
+SBATCH --gres=gpu:1
 
-#SBATCH --cpus-per-task=4
+SBATCH --cpus-per-task=4
 
 ### Alcuni comandi di shell che stampano lo stato 
 ### del sistema prima dell'esecuzione
@@ -44,5 +44,5 @@ which nvcc
 
 ### Without singularity...
 source $HOME/miniconda3/etc/profile.d/conda.sh
-conda activate torch
-bash ${HOME}/storage/TinyActionChallenge/commands/MRes18-0023.sh
+conda activate jigvit
+bash ${HOME}/storage/MasterThesis/python3 main.py --use_relation --epochs=300
