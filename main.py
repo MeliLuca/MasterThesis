@@ -88,7 +88,7 @@ if __name__ == '__main__':
     args = get_args(sys.stdin, verbose=True)
 
     # Set random seed
-    pl.seed_everything(args.seed, workers=True)
+    pl.seed_everything(args.seed)
 
     # Run main
     main(args)
