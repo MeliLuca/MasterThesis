@@ -63,14 +63,16 @@ class ResNetCifar10(pl.LightningModule):
         self.layer1 = self.make_layer(block, 16, layers[0])
         self.layer2 = self.make_layer(block, 32, layers[1], 2)
         self.layer3 = self.make_layer(block, 64, layers[2], 2)
-        self.avg_pool = nn.AvgPool2d(8)
-        self.fc = nn.Linear(64, args.num_classes)
-        self.lr = args.lr
-        self.use_relations = use_relations
         if self.use_relations:
             ## DA CAMBIAREEEE
             print(f'rel head viene creato con {num_rel_classes*num_rel_classes}, {num_rel_classes}')
-            self.rel_head = MultiHeadAttention.MultiHeadAttentionScores(num_rel_classes*num_rel_classes, num_rel_classes)
+            self.rel_head = MultiHeadAttention.MultiHeadAttentionScores(81, 9)
+        else :
+            self.avg_pool = nn.AvgPool2d(8)
+            self.fc = nn.Linear(64, args.num_classes)
+        self.lr = args.lr
+        self.use_relations = use_relations
+       
 
     def make_layer(self, block, out_channels, blocks, stride=1):
         downsample = None
@@ -132,13 +134,18 @@ class ResNetCifar10(pl.LightningModule):
             self.log("train_loss", loss.item())
         return loss
     
-    def validation_step(self, batch, batch_idx, part='val'):
+    def validation_step(self, batch, batch_idx):
+        print('#### entro validation step')
         images = batch['images']
         # Forward pass
         outputs = self(images)
-        if part=='multi_attention' :
+        print(f'grandezza immagine {images.shape}')
+        if self.use_relations:
             target = batch['relations']
-            loss = cross_entropy(outputs, target)
+            print(f'relations {target.shape} outputs {outputs.shape}')
+            print('###############')
+            print(target)
+            loss = F.cross_entropy(outputs, target)
             acc_rel = accuracy(outputs, target)
             self.log(f'val_acc_rel', acc_rel, prog_bar=True)
             self.log(f'val_loss_rel', loss.item())
@@ -182,7 +189,7 @@ def get_model(args):
     model_args = {
         'args': args,
         'num_classes': args.num_classes,
-        'num_rel_classes': 8,
+        'num_rel_classes': 9,
         'use_relations': args.use_relations,
         'use_supervision': args.use_supervision,
         'dropout': args.dropout,

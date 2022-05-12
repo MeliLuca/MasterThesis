@@ -31,7 +31,6 @@ def cross_entropy(logits, labels, smooth=0.0, dropout=0.0):
         xent: scalar.
     """
     if smooth == 0.0:
-        print(f'logits shape {logits.shape} labels shape {labels.shape}')
         return F.cross_entropy(logits, labels)
 
     logprobs = F.log_softmax(logits, dim=1)

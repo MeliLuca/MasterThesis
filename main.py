@@ -53,7 +53,7 @@ def main(args):
     # Mode
     if args.mode in ['train', 'training']:
         if args.use_relations :
-            trainer.fit(model, dls['train_aug'], dls['validation'])
+            trainer.fit(model, dls['train'], dls['validation'])
             for param in model.parameters():
                 print(param)
             trainer.fit(model, dls['train_aug'], dls['validation'])

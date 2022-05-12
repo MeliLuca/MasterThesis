@@ -43,6 +43,7 @@ class HeadScores(nn.Module):
     """
     def __init__(self, h_dim, head_out_dim):
         super().__init__()
+        ## usare il full connected
         self.q_lin = nn.Linear(h_dim, head_out_dim, bias=False)
         self.k_lin = nn.Linear(h_dim, head_out_dim, bias=False)
         self.v_lin = nn.Linear(h_dim, head_out_dim, bias=False)
@@ -52,6 +53,7 @@ class HeadScores(nn.Module):
             k = q
         if v is None:
             v = k
+        print(q.shape)
         q = self.q_lin(q)
         # print(f'q shape after linearization is {q.shape}')
         k = self.k_lin(k)
