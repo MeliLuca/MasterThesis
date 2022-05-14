@@ -1,12 +1,12 @@
 #!/bin/sh
 ### job name
-SBATCH --job-name=Res50-baseline
+SBATCH --job-name=Res50small-baseline
 
 #SBATCH --mail-user=alex.dametto@studenti.unipd.it
 
 ### Redirezione dello standard output e standard error del programma
-SBATCH --error=outputs/Res50-baseline.err
-SBATCH --output=outputs/Res50-baseline.out
+SBATCH --error=outputs/Res50small-baseline.err
+SBATCH --output=outputs/Res50small-baseline.out
 
 
 ### Scelta della coda "testing" per tesisti
