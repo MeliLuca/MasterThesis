@@ -141,7 +141,7 @@ def get_logger(args):
     """
     logger_kind = 'csv' if 'logger' not in args.__dict__ else args.logger
     path = f'stats/{args.dataset}/{args.backbone}/logs' if args.stats_path == '' else f'stats/{args.stats_path}/logs'
-    save_dir = os.path.join(os.getcwd(), f'stats/{args.dataset}/logs')
+    save_dir = os.path.join(os.getcwd(), path)
     if logger_kind == 'csv':
         logger = pl.loggers.CSVLogger(
             save_dir=save_dir,
