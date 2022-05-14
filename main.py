@@ -11,7 +11,7 @@ import subprocess
 # Custom
 from config import get_args
 from datasets.dataloaders import get_datasets, get_dataloaders
-from Models import ResNetCifar10
+from Models import ResNetCifar10, module
 from utils import get_logger, get_callbacks
 from trainer import get_trainer
 
@@ -22,8 +22,6 @@ logging.basicConfig(level=logging.INFO, format=format_str, datefmt='%d-%b-%y %H:
 
 # Main function
 def main(args):
-    import torch
-
     # Logging
     if args.num_gpus > 0:
         nvidia_smi = subprocess.Popen(['nvidia-smi'], stdout=subprocess.PIPE, 
@@ -36,9 +34,12 @@ def main(args):
     
     # Dataloaders
     dls = get_dataloaders(args)
+    inputs = next(iter(dls['train']))
     # Get model
-    if args.backbone in ['resnet']:
+    if args.backbone in ['resnet-small']:
         model = ResNetCifar10.get_model(args)
+    elif args.backbone in ['resnet']:
+        model = module.ResNetModule(args)
     # elif args.backbone == 'simsiam':
     #     model = relvit_simsiam.get_model(args)
     # elif args.bacbkone == 'cnn':
