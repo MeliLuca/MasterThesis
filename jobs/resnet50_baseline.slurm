@@ -22,7 +22,7 @@ SBATCH --mem=50G
 SBATCH --time=500:00:00
 
 ### Richiesta della macchina
-SBATCH --constraint=dellsrv2
+SBATCH --constraint=dellsrv6
 
 ### Richiesta della percentuale di GPU
 SBATCH --gres=gpu:1
@@ -45,4 +45,4 @@ which nvcc
 ### Without singularity...
 source $HOME/miniconda3/etc/profile.d/conda.sh
 conda activate jigvit
-bash ${HOME}/storage/MasterThesis/python3 main.py --use_relation --epochs=300
+python3 $HOME/storage/MasterThesis/main.py --epochs=300 --stats_path=small_res_cifar10
