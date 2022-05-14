@@ -120,8 +120,9 @@ def get_callbacks(args):
     Callbacks for the PyTorch Lightning Trainer.
     """
     # Model checkpoint
+    dir_path = f'stats/{args.dataset}/{args.backbone}/checkpoints' if args.stats_path == '' else f'stats/{args.stats_path}/checkpoints'
     model_checkpoint_clbk = pl.callbacks.model_checkpoint.ModelCheckpoint(
-        dirpath=os.path.join(os.getcwd(), f'stats/{args.dataset}/checkpoints'),
+        dirpath=os.path.join(os.getcwd(), dir_path),
         filename='best',
         monitor=args.metric_monitor,
         save_last=True,
@@ -139,6 +140,7 @@ def get_logger(args):
     Logger for the PyTorchLightning Trainer.
     """
     logger_kind = 'csv' if 'logger' not in args.__dict__ else args.logger
+    path = f'stats/{args.dataset}/{args.backbone}/logs' if args.stats_path == '' else f'stats/{args.stats_path}/logs'
     save_dir = os.path.join(os.getcwd(), f'stats/{args.dataset}/logs')
     if logger_kind == 'csv':
         logger = pl.loggers.CSVLogger(
