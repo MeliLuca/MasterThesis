@@ -1,12 +1,12 @@
 #!/bin/sh
 ### job name
-SBATCH --job-name=Res50-baseline
+SBATCH --job-name=Res50small-baseline
 
 #SBATCH --mail-user=alex.dametto@studenti.unipd.it
 
 ### Redirezione dello standard output e standard error del programma
-SBATCH --error=outputs/Res50-baseline.err
-SBATCH --output=outputs/Res50-baseline.out
+SBATCH --error=outputs/Res50small-baseline.err
+SBATCH --output=outputs/Res50small-baseline.out
 
 
 ### Scelta della coda "testing" per tesisti
@@ -22,7 +22,7 @@ SBATCH --mem=50G
 SBATCH --time=500:00:00
 
 ### Richiesta della macchina
-SBATCH --constraint=dellsrv2
+SBATCH --constraint=dellsrv6
 
 ### Richiesta della percentuale di GPU
 SBATCH --gres=gpu:1
@@ -45,4 +45,4 @@ which nvcc
 ### Without singularity...
 source $HOME/miniconda3/etc/profile.d/conda.sh
 conda activate jigvit
-python3 ${HOME}/storage/MasterThesis/main.py --use_relation --epochs=300
+python3 $HOME/storage/MasterThesis/main.py --epochs=300 --stats_path=small_res_cifar10
