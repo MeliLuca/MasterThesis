@@ -45,4 +45,4 @@ which nvcc
 ### Without singularity...
 source $HOME/miniconda3/etc/profile.d/conda.sh
 conda activate jigvit
-bash ${HOME}/storage/MasterThesis/python3 main.py --use_relation --epochs=300
+python3 ${HOME}/storage/MasterThesis/main.py --use_relation --epochs=300
