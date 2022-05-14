@@ -280,11 +280,11 @@ def get_dataloaders(args):
     # Datasets
     transform = 'default'
     target_transform = 'default'
-    if args.backbone in ['vit', 'simsiam']:
-        patch_transform = 'default'
-    else:
-        patch_transform = {'train': None, 'train_aug': None, 'validation': None, 'test': None}
-    dss = get_datasets(args, transform=transform, target_transform=target_transform, patch_transform=patch_transform)
+    # if args.backbone in ['vit', 'simsiam']:
+    #     patch_transform = 'default'
+    # else:
+    #     patch_transform = {'train': None, 'train_aug': None, 'validation': None, 'test': None}
+    dss = get_datasets(args, transform=transform, target_transform=target_transform, patch_transform='default')
 
     # Dataloaders
     dl_args = {

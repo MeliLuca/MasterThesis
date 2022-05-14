@@ -10,7 +10,7 @@ import subprocess
 
 # Custom
 from config import get_args
-from Dataloaders import get_datasets, get_dataloaders
+from datasets.dataloaders import get_datasets, get_dataloaders
 from Models import ResNetCifar10
 from utils import get_logger, get_callbacks
 from trainer import get_trainer
@@ -53,8 +53,6 @@ def main(args):
     if args.mode in ['train', 'training']:
         if args.use_relations :
             trainer.fit(model, dls['train_aug'], dls['validation'])
-            trainer.fit(model, dls['train'], dls['validation'])
-
             trainer.validate(model=None, dataloaders=dls['validation'])
         else:
             trainer.fit(model, dls['train'], dls['validation'])

@@ -97,14 +97,14 @@ def get_args(stdin, verbose=False):
         'svhn': 10,
     }
     args.num_classes = num_classes[args.dataset]
-    # if args.task == 'downstream':
-    #     args.metric_monitor = 'val_acc_clf'
-    #     args.metric_maxmin = 'max'
-    # else:
-    args.metric_monitor = 'val_loss'
-    args.metric_maxmin = 'min'
+    if args.task == 'downstream':
+        args.metric_monitor = 'val_acc_clf'
+        args.metric_maxmin = 'max'
+    else:
+        args.metric_monitor = 'val_loss'
+        args.metric_maxmin = 'min'
 
-    # Patch size=
+    # Patch size
     if args.patch_size == -1:
         patch_size = {
             'cifar10': 4,
@@ -123,7 +123,7 @@ def get_args(stdin, verbose=False):
         }
         args.patch_size = patch_size[args.dataset]
     img_height = {
-        'cifar10': 34,
+        'cifar10': 32,
         'cifar10_36': 36,
         'cifar10_224': 224,
         'cifar100': 32,

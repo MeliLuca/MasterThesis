@@ -1,3 +1,4 @@
+from cProfile import label
 from cgitb import reset
 import pytorch_lightning as pl
 import torch
@@ -140,7 +141,7 @@ class ResNetCifar10(pl.LightningModule):
         outputs = self(images)
         if self.use_relations:
             target = batch['relations']
-            # print(target)
+            assert target.shape[0]
             loss = F.cross_entropy(outputs, target)
             acc_rel = accuracy(outputs, target)
             self.log(f'val_acc', acc_rel, prog_bar=True)
@@ -148,7 +149,9 @@ class ResNetCifar10(pl.LightningModule):
         else :    
             labels=batch['labels']
             loss = F.cross_entropy(outputs, labels)
+            acc = accuracy(outputs, labels)
             self.log("val_loss", loss.item())
+            self.log("val_acc", acc)
         return loss
 
     def test_step(self, batch, batch_idx):
@@ -192,7 +195,6 @@ def get_model(args):
         'freeze_fet_enc': args.freeze_fet_enc,
         'proj_dropout': args.proj_dropout,
     }
-    ResNetCifar10(ResidualBlock, [2, 2, 2], **model_args)
     model = ResNetCifar10(ResidualBlock, [2, 2, 2], **model_args)
     if len(args.model_checkpoint) > 0:
         model = model.load_from_checkpoint(args.model_checkpoint, strict=False, **model_args)
