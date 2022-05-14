@@ -1,0 +1,55 @@
+args: !!python/object:argparse.Namespace
+  add_clf_to_patches: false
+  attn_drop: 0.0
+  attn_mask: ''
+  backbone: resnet
+  batch_size: 256
+  data_base_path: ./datasets/data
+  dataset: cifar10
+  debug_dataset: false
+  drop_path_rate: 0.0
+  dropout: 0.1
+  dropout_rel: 0.0
+  epochs: 10
+  exp_id: ''
+  freeze_fet_enc: false
+  grad_clip_val: 1.0
+  img_height: 32
+  logger: csv
+  lr: 0.0005
+  mega_patches: false
+  metric_maxmin: min
+  metric_monitor: val_loss
+  mode: train
+  model_checkpoint: ''
+  model_size: small
+  num_classes: 10
+  num_gpus: 1
+  num_workers: 8
+  optimizer: adamw
+  patch_size: 4
+  proj_dropout: 0.0
+  seed: 35771
+  shuffle_patches: false
+  side_megapatches: 5
+  smooth_rel: 0.0
+  task: upstream
+  use_abs_positions: false
+  use_angle: false
+  use_dist: false
+  use_positional_embeddings: false
+  use_relations: false
+  use_supervision: false
+  weight_decay: 0.0
+block: ABCMeta
+dropout: 0.1
+freeze_fet_enc: false
+layers:
+- 2
+- 2
+- 2
+num_classes: 10
+num_rel_classes: 9
+proj_dropout: 0.0
+use_relations: false
+use_supervision: false
