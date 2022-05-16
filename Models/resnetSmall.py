@@ -44,10 +44,10 @@ class ResidualBlock(pl.LightningModule):
         return out
 
 # ResNet
-class ResNetCifar10(pl.LightningModule):
+class resnetSmall(pl.LightningModule):
     def __init__(self, block, layers, args, num_classes, num_rel_classes, use_relations=False, 
                  use_supervision=False, dropout=0.1, freeze_fet_enc=False, proj_dropout=0.0):
-        super(ResNetCifar10, self).__init__()
+        super(resnetSmall, self).__init__()
         self.save_hyperparameters()
         self.args = args
         self.num_classes = num_classes
@@ -195,7 +195,7 @@ def get_model(args):
         'freeze_fet_enc': args.freeze_fet_enc,
         'proj_dropout': args.proj_dropout,
     }
-    model = ResNetCifar10(ResidualBlock, [2, 2, 2], **model_args)
+    model = resnetSmall(ResidualBlock, [2, 2, 2], **model_args)
     if len(args.model_checkpoint) > 0:
         model = model.load_from_checkpoint(args.model_checkpoint, strict=False, **model_args)
         print(f'Loaded model at "{args.model_checkpoint}"')
