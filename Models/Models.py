@@ -92,4 +92,4 @@ class AlexNetModel(pl.LightningModule):
         self.log("test_loss", test_loss.item())
 
 
-#class ResNetCifar10(pl.LightningModule):
+#class resnetSmall(pl.LightningModule):

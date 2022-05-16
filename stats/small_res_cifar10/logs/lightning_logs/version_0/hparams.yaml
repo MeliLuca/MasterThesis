@@ -42,7 +42,7 @@ args: !!python/object:argparse.Namespace
   use_relations: false
   use_supervision: false
   weight_decay: 0.0
-block: !!python/name:Models.ResNetCifar10.ResidualBlock ''
+block: !!python/name:Models.resnetSmall.ResidualBlock ''
 dropout: 0.1
 freeze_fet_enc: false
 layers:

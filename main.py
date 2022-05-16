@@ -11,7 +11,7 @@ import subprocess
 # Custom
 from config import get_args
 from datasets.dataloaders import get_datasets, get_dataloaders
-from Models import ResNetCifar10, module
+from Models import resnetSmall, resnetStandard
 from utils import get_logger, get_callbacks
 from trainer import get_trainer
 
@@ -37,9 +37,9 @@ def main(args):
     inputs = next(iter(dls['train']))
     # Get model
     if args.backbone in ['resnet-small']:
-        model = ResNetCifar10.get_model(args)
+        model = resnetSmall.get_model(args)
     elif args.backbone in ['resnet']:
-        model = module.ResNetModule(args)
+        model = resnetStandard.get_model(args)
     # elif args.backbone == 'simsiam':
     #     model = relvit_simsiam.get_model(args)
     # elif args.bacbkone == 'cnn':
@@ -52,12 +52,8 @@ def main(args):
 
     # Mode
     if args.mode in ['train', 'training']:
-        if args.use_relations :
-            trainer.fit(model, dls['train_aug'], dls['validation'])
-            trainer.validate(model=None, dataloaders=dls['validation'])
-        else:
-            trainer.fit(model, dls['train'], dls['validation'])
-            trainer.validate(model=None, dataloaders=dls['validation'])
+        trainer.fit(model, dls['train'], dls['validation'])
+        trainer.validate(model=None, dataloaders=dls['validation'])
 
     elif args.mode in ['validate', 'validation', 'validating']:
         trainer.validate(model, dataloaders=dls['validation'])
@@ -72,6 +68,7 @@ def main(args):
     elif args.mode == 'train_simsiam':
         trainer.fit(model, dls['train_simsiam'], dls['validation'])
         trainer.validate(model=None, val_dataloaders=dls['validation'])
+    
 
     else:
         raise Exception(f'Error. Model "{args.mode}" not supported.')
