@@ -22,7 +22,7 @@ SBATCH --mem=50G
 SBATCH --time=500:00:00
 
 ### Richiesta della macchina
-SBATCH --constraint=dellsrv4
+SBATCH --constraint=dellcuda2
 
 ### Richiesta della percentuale di GPU
 SBATCH --gres=gpu:1
@@ -46,5 +46,3 @@ which nvcc
 source $HOME/miniconda3/etc/profile.d/conda.sh
 conda activate jigvit
 python3 $HOME/storage/MasterThesis/main.py --epochs=300 --stats_path=baseline_resnet50
-
-## Submitted batch job 258526
