@@ -14,7 +14,7 @@ from PIL import Image
 from Layers import MultiHeadAttention
 
 class ResNetModule(pl.LightningModule):
-    def __init__(self, args):
+    def __init__(self, args, use_relations):
         """
         Inputs:
             model_name - Name of the model/CNN to run. Used for creating the model (see function below)
@@ -27,7 +27,7 @@ class ResNetModule(pl.LightningModule):
         self.save_hyperparameters()
         self.args = args
         # Create model
-        self.model = torchvision.models.resnet50(pretrained=False)
+        self.model = torchvision.models.resnet50(pretrained=args.pretrained)
         # Create loss module
         self.loss_module = nn.CrossEntropyLoss()
 
@@ -83,6 +83,25 @@ class ResNetModule(pl.LightningModule):
         self.log("test_loss", loss)
         self.log("test_acc", acc)
 
+    def on_load_checkpoint(self, checkpoint: dict) -> None:
+        state_dict = checkpoint["state_dict"]
+        model_state_dict = self.state_dict()
+        is_changed = False
+        for k in state_dict:
+            if k in model_state_dict:
+                if state_dict[k].shape != model_state_dict[k].shape:
+                    logging.info(f"Skip loading parameter: {k}, "
+                                f"required shape: {model_state_dict[k].shape}, "
+                                f"loaded shape: {state_dict[k].shape}")
+                    state_dict[k] = model_state_dict[k]
+                    is_changed = True
+            else:
+                logging.info(f"Dropping parameter {k}")
+                is_changed = True
+
+        if is_changed:
+            checkpoint.pop("optimizer_states", None)
+
 def get_model(args):
     model_args = {
         'args': args,
@@ -94,8 +113,8 @@ def get_model(args):
         'freeze_fet_enc': args.freeze_fet_enc,
         'proj_dropout': args.proj_dropout,
     }
-    model = ResNetModule(args)
-    # if len(args.model_checkpoint) > 0:
-    #     model = model.load_from_checkpoint(args.model_checkpoint, strict=False, args)
-    #     print(f'Loaded model at "{args.model_checkpoint}"')
+    model = ResNetModule(**model_args)
+    if len(args.model_checkpoint) > 0:
+        model = model.load_from_checkpoint(args.model_checkpoint, strict=False, **model_args)
+        print(f'Loaded model at "{args.model_checkpoint}"')
     return model
