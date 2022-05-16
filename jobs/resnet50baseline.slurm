@@ -22,7 +22,7 @@ SBATCH --mem=50G
 SBATCH --time=500:00:00
 
 ### Richiesta della macchina
-SBATCH --constraint=dellcuda2
+SBATCH --constraint=dellsrv3
 
 ### Richiesta della percentuale di GPU
 SBATCH --gres=gpu:1
