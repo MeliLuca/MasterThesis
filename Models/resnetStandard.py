@@ -109,7 +109,7 @@ def get_model(args):
         # 'num_rel_classes': 9,
         # 'use_relations': args.use_relations,
         # 'use_supervision': args.use_supervision,
-        'dropout': args.dropout,
+        # 'dropout': args.dropout,
         # 'freeze_fet_enc': args.freeze_fet_enc,
         # 'proj_dropout': args.proj_dropout,
     }
