@@ -66,18 +66,21 @@ class ResNetModule(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         imgs = batch['images']
         labels = batch['labels']
-        print(imgs.shape)
         preds = self.model(imgs)
+        loss = self.loss_module(preds, labels)
         acc = accuracy(preds, labels)
         # By default logs it per epoch (weighted average over batches)
+        self.log("val_loss", loss)
         self.log("val_acc", acc)
 
     def test_step(self, batch, batch_idx):
         imgs = batch['images']
         labels = batch['labels']
         preds = self.model(imgs)
+        loss = self.loss_module(preds, labels)
         acc = accuracy(preds, labels)
         # By default logs it per epoch (weighted average over batches), and returns it afterwards
+        self.log("test_loss", loss)
         self.log("test_acc", acc)
 
 def get_model(args):
