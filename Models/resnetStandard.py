@@ -14,7 +14,7 @@ from PIL import Image
 from Layers import MultiHeadAttention
 
 class ResNetModule(pl.LightningModule):
-    def __init__(self, args, use_relations):
+    def __init__(self, args):
         """
         Inputs:
             model_name - Name of the model/CNN to run. Used for creating the model (see function below)
