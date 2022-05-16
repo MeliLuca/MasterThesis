@@ -1,4 +1,4 @@
-name: jigvit
+name: jigvit2
 channels:
   - defaults
 dependencies:
