@@ -81,4 +81,4 @@ dependencies:
     - werkzeug==2.0.0
     - yarl==1.6.3
     - zipp==3.4.1
-prefix: /home/guglielmo/anaconda3/envs/jigvit
+prefix: /home/lmelissa/anaconda3/envs/jigvit
