@@ -28,6 +28,8 @@ class ResNetModule(pl.LightningModule):
         self.args = args
         # Create model
         self.model = torchvision.models.resnet50(pretrained=args.pretrained)
+        if self.args.use_relations :
+            self.rel_head = MultiHeadAttention.MultiHeadAttentionScores(num_rel_classes*num_rel_classes, num_rel_classes)
         # Create loss module
         self.loss_module = nn.CrossEntropyLoss()
 
@@ -106,8 +108,8 @@ def get_model(args):
     model_args = {
         'args': args,
         # 'num_classes': args.num_classes,
-        # 'num_rel_classes': 9,
-        # 'use_relations': args.use_relations,
+        'num_rel_classes': args.num_rel_classes,
+        'use_relations': args.use_relations,
         # 'use_supervision': args.use_supervision,
         # 'dropout': args.dropout,
         # 'freeze_fet_enc': args.freeze_fet_enc,

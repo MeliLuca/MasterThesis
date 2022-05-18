@@ -26,7 +26,7 @@ SBATCH --gres=gpu:1
 
 SBATCH --cpus-per-task=4
 
-### Alcuni comandi di shell che stampano lo stato 
+### Alcuni comandi di shell che stampano lo stato
 ### del sistema prima dell'esecuzione
 echo -n 'Date: '
 date
@@ -44,4 +44,4 @@ source $HOME/miniconda3/etc/profile.d/conda.sh
 conda activate new_env
 python3 $HOME/storage/MasterThesis/main.py --epochs=300 --stats_path=baseline_226_imgSize --dataset=cifar10_226
 
-## 258741
+## 258744
