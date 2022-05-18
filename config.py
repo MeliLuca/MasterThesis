@@ -85,7 +85,7 @@ def get_args(stdin, verbose=False):
     num_classes = {
         'cifar10': 10,
         'cifar10_36': 10,
-        'cifar10_224': 10,
+        'cifar10_226': 10,
         'cifar100': 100,
         'cifar100_224': 100,
         'tiny_imagenet': 200,
@@ -111,7 +111,7 @@ def get_args(stdin, verbose=False):
         patch_size = {
             'cifar10': 4,
             'cifar10_36': 4,
-            'cifar10_224': 32,
+            'cifar10_226': 32,
             'cifar100': 4,
             'cifar100_224': 32,
             'tiny_imagenet': 8,
