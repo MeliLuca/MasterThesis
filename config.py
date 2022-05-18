@@ -127,7 +127,7 @@ def get_args(stdin, verbose=False):
     img_height = {
         'cifar10': 32,
         'cifar10_36': 36,
-        'cifar10_224': 224,
+        'cifar10_226': 226,
         'cifar100': 32,
         'cifar100_224': 224,
         'tiny_imagenet': 64,
