@@ -44,4 +44,4 @@ source $HOME/miniconda3/etc/profile.d/conda.sh
 conda activate new_env
 python3 $HOME/storage/MasterThesis/main.py --epochs=300 --stats_path=baseline_226imgSize_Pretrained --dataset=cifar10_226 --batch_size=128 --pretrained=true
 
-## 258744
+## 258817

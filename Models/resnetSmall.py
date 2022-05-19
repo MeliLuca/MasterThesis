@@ -195,7 +195,7 @@ def get_model(args):
         'freeze_fet_enc': args.freeze_fet_enc,
         'proj_dropout': args.proj_dropout,
     }
-    model = resnetSmall(ResidualBlock, [2, 2, 2], **model_args)
+    model = resnetSmall(ResidualBlock, [9, 9, 9], **model_args)
     if len(args.model_checkpoint) > 0:
         model = model.load_from_checkpoint(args.model_checkpoint, strict=False, **model_args)
         print(f'Loaded model at "{args.model_checkpoint}"')
