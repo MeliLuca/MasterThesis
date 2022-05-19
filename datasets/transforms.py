@@ -296,64 +296,66 @@ def get_transforms(args):
         }
 
     elif args.dataset in ['cifar10', 'cifar100', 'tiny_imagenet', 'svhn']:
-        # Cifar10 with small model
-        # trans = {
-        #     'train_aug': transforms.Compose([
-        #         to_rgb_ifneeded,
-        #         transforms.Pad(4),
-        #         transforms.RandomCrop(34),
-        #         transforms.RandomHorizontalFlip(),
-        #         transforms.ToTensor(),
-        #         transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-        #     ]),
-        #     'train': transforms.Compose([
-        #         to_rgb_ifneeded,
-        #         transforms.Pad(4),
-        #         transforms.RandomHorizontalFlip(),
-        #         transforms.RandomCrop(34),
-        #         transforms.ToTensor(),
-        #         transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-        #     ]),
-        #     'validation': transforms.Compose([
-        #         to_rgb_ifneeded,
-        #         transforms.Pad(4),
-        #         transforms.RandomHorizontalFlip(),
-        #         transforms.RandomCrop(34),
-        #         transforms.ToTensor(),
-        #         transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-        #     ]),
-        #     'test': transforms.Compose([
-        #         to_rgb_ifneeded,
-        #         transforms.ToTensor(),
-        #         transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-        #     ]),
-        #     'train_simsiam': get_simsiam_transform(args),
-        # }
-        trans = {
-            'train_aug': transforms.Compose([
-                to_rgb_ifneeded,
-                transforms.RandomCrop(args.img_height, padding=4),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-            ]),
-            'train': transforms.Compose([
-                to_rgb_ifneeded,
-                transforms.ToTensor(),
-                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-            ]),
-            'validation': transforms.Compose([
-                to_rgb_ifneeded,
-                transforms.ToTensor(),
-                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-            ]),
-            'test': transforms.Compose([
-                to_rgb_ifneeded,
-                transforms.ToTensor(),
-                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-            ]),
-            'train_simsiam': get_simsiam_transform(args),
-        }
+        if args.dataset == ['cifar10']:
+             # Cifar10
+            trans = {
+                'train_aug': transforms.Compose([
+                    to_rgb_ifneeded,
+                    transforms.Pad(4),
+                    transforms.RandomCrop(34),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.ToTensor(),
+                    transforms.Normalize(*constants.NORMALIZATION[args.dataset])
+                ]),
+                'train': transforms.Compose([
+                    to_rgb_ifneeded,
+                    transforms.Pad(4),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.RandomCrop(34),
+                    transforms.ToTensor(),
+                    transforms.Normalize(*constants.NORMALIZATION[args.dataset])
+                ]),
+                'validation': transforms.Compose([
+                    to_rgb_ifneeded,
+                    transforms.Pad(4),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.RandomCrop(34),
+                    transforms.ToTensor(),
+                    transforms.Normalize(*constants.NORMALIZATION[args.dataset])
+                ]),
+                'test': transforms.Compose([
+                    to_rgb_ifneeded,
+                    transforms.ToTensor(),
+                    transforms.Normalize(*constants.NORMALIZATION[args.dataset])
+                ]),
+                'train_simsiam': get_simsiam_transform(args),
+            }
+        else:
+            trans = {
+                'train_aug': transforms.Compose([
+                    to_rgb_ifneeded,
+                    transforms.RandomCrop(args.img_height, padding=4),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.ToTensor(),
+                    transforms.Normalize(*constants.NORMALIZATION[args.dataset])
+                ]),
+                'train': transforms.Compose([
+                    to_rgb_ifneeded,
+                    transforms.ToTensor(),
+                    transforms.Normalize(*constants.NORMALIZATION[args.dataset])
+                ]),
+                'validation': transforms.Compose([
+                    to_rgb_ifneeded,
+                    transforms.ToTensor(),
+                    transforms.Normalize(*constants.NORMALIZATION[args.dataset])
+                ]),
+                'test': transforms.Compose([
+                    to_rgb_ifneeded,
+                    transforms.ToTensor(),
+                    transforms.Normalize(*constants.NORMALIZATION[args.dataset])
+                ]),
+                'train_simsiam': get_simsiam_transform(args),
+            }
         trans_target = {
             'train': None,
             'train_aug': None,   
