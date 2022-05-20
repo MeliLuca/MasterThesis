@@ -45,6 +45,6 @@ which nvcc
 ### Without singularity...
 source $HOME/miniconda3/etc/profile.d/conda.sh
 conda activate jigvit
-python3 $HOME/storage/MasterThesis/main.py --epochs=300 --stats_path=baseline_resnet50_PRETRAINED --pretrained=true --num_gpus=0
+python3 $HOME/storage/MasterThesis/main.py --epochs=300 --stats_path=baseline_resnet50_PRETRAINED --pretrained=true 
 
 ## Submitted batch job 258526
