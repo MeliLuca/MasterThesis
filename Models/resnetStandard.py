@@ -12,6 +12,7 @@ import numpy as np
 import torchvision
 from PIL import Image
 from Layers import MultiHeadAttention
+import resnet_cifar10
 
 class ResNetModule(pl.LightningModule):
     def __init__(self, args):
@@ -27,7 +28,10 @@ class ResNetModule(pl.LightningModule):
         self.save_hyperparameters()
         self.args = args
         # Create model
-        self.model = torchvision.models.resnet50(pretrained=args.pretrained)
+        if self.backbone == 'torch_model':
+            self.model = torchvision.models.resnet50(pretrained=args.pretrained)
+        elif self.backbone == 'cifar10_model':
+            self.model = resnet_cifar10.resnet56()
         # if self.args.use_relations :
             # self.rel_head = MultiHeadAttention.MultiHeadAttentionScores(num_rel_classes*num_rel_classes, num_rel_classes)
         # Create loss module
@@ -50,6 +54,8 @@ class ResNetModule(pl.LightningModule):
         else:
             raise Exception(f'Error. Optimizer "{self.args.optimizer}" not supported.')
         self.optimizer = optimizer
+        if self.args.backbone == 'cifar10_model':
+            self.lr_schedulers = torch.optim.lr_scheduler.ConstantLR(self.optimizer, factor=10, total_iters=1)
         return optimizer
 
     def training_step(self, batch, batch_idx):
@@ -59,6 +65,10 @@ class ResNetModule(pl.LightningModule):
         preds = self.model(imgs)
         loss = self.loss_module(preds, labels)
         acc = accuracy(preds, labels)
+        if self.args.backbone == 'cifar10_model':
+            if self.trainer.global_step == 32 or self.trainer.global_step == 48:
+                sch = self.lr_schedulers()
+                sch.step()
 
         # Logs the accuracy per epoch to tensorboard (weighted average over batches)
         self.log("train_acc", acc, on_step=False, on_epoch=True)
@@ -107,8 +117,8 @@ class ResNetModule(pl.LightningModule):
 def get_model(args):
     model_args = {
         'args': args,
-        # 'num_classes': args.num_classes,
-        # 'num_rel_classes': args.num_rel_classes,
+        'num_classes': args.num_classes,
+        'num_rel_classes': args.num_rel_classes,
         # 'use_relations': args.use_relations,
         # 'use_supervision': args.use_supervision,
         # 'dropout': args.dropout,

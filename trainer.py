@@ -2,6 +2,7 @@
 # Imports
 ##################################################
 
+from cgitb import enable
 import pytorch_lightning as pl
 
 # Custom
@@ -25,7 +26,8 @@ def get_trainer(args, dls):
         'callbacks': callbacks,
         'logger': logger,
         'gradient_clip_val': args.grad_clip_val,
-        'max_steps': args.epochs * len(dls['train_aug'])
+        'max_steps': args.epochs * len(dls['train_aug']),
+        'enable_progress_bar': args.enable_progress_bar,
     }
     trainer = pl.Trainer(**trainer_args)
     return trainer

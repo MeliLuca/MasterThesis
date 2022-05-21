@@ -36,23 +36,21 @@ def main(args):
     dls = get_dataloaders(args)
     inputs = next(iter(dls['train']))
     # Get model
-    if args.backbone in ['resnet-small']:
+    if args.backbone =='resnet-small':
         model = resnetSmall.get_model(args)
-    elif args.backbone in ['resnet']:
+    else:
         model = resnetStandard.get_model(args)
     # elif args.backbone == 'simsiam':
     #     model = relvit_simsiam.get_model(args)
     # elif args.bacbkone == 'cnn':
     #     model = relcnn.get_model(args)
-    else:
-        raise Exception(f'Error. Backbone "{args.backbone}" not supported.')
 
     # Trainer
     trainer = get_trainer(args, dls)
 
     # Mode
     if args.mode in ['train', 'training']:
-        trainer.fit(model, dls['train'], dls['validation'])
+        trainer.fit(model, dls['train_aug'], dls['validation'])
         trainer.validate(model=None, dataloaders=dls['validation'])
 
     elif args.mode in ['validate', 'validation', 'validating']:

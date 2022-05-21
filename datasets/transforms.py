@@ -302,24 +302,18 @@ def get_transforms(args):
                 'train_aug': transforms.Compose([
                     to_rgb_ifneeded,
                     transforms.Pad(4),
-                    transforms.RandomCrop(34),
+                    transforms.RandomCrop(32),
                     transforms.RandomHorizontalFlip(),
                     transforms.ToTensor(),
                     transforms.Normalize(*constants.NORMALIZATION[args.dataset])
                 ]),
                 'train': transforms.Compose([
                     to_rgb_ifneeded,
-                    transforms.Pad(4),
-                    transforms.RandomHorizontalFlip(),
-                    transforms.RandomCrop(34),
                     transforms.ToTensor(),
                     transforms.Normalize(*constants.NORMALIZATION[args.dataset])
                 ]),
                 'validation': transforms.Compose([
                     to_rgb_ifneeded,
-                    transforms.Pad(4),
-                    transforms.RandomHorizontalFlip(),
-                    transforms.RandomCrop(34),
                     transforms.ToTensor(),
                     transforms.Normalize(*constants.NORMALIZATION[args.dataset])
                 ]),

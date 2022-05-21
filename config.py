@@ -23,6 +23,7 @@ def get_args(stdin, verbose=False):
                         help='The name of the task, can be "upstream" or "downstream"')
     parser.add_argument('--exp_id', type=str, default='', 
                         help='Experiment ID (like "u1").')
+    parser.add_argument('--enable_progress_bar', type=bool, default=False, help='Show the progress bar')
 
     # Datasets params
     parser.add_argument('--dataset', type=str, default='cifar10', help='Name of the dataset.')
@@ -39,7 +40,7 @@ def get_args(stdin, verbose=False):
     parser.add_argument('--optimizer', type=str, default='adamw', help='The kind of optimizer.', 
                         choices=['sgd', 'adam', 'adamw'])
     parser.add_argument('--lr', type=float, default=5e-4, help='The learning rate.')
-    parser.add_argument('--metric_monitor', type=str, default='val_acc_rel', 
+    parser.add_argument('--metric_monitor', type=str, default='val_acc', 
                         help='The metric used for early stopping.')
     parser.add_argument('--grad_clip_val', type=float, default=1.0, help='Gradient clipping value.')
 
@@ -55,6 +56,7 @@ def get_args(stdin, verbose=False):
     parser.add_argument('--use_angles', dest='use_angle', action='store_true', help='Learn patch angles.')
     parser.add_argument('--use_abs_positions', dest='use_abs_positions', action='store_true', 
                         help='Learn absolute positions of patches.')
+    parser.add_argument('--use_attention', dest='use_attention', action='store_true', help='learn with torch standard attention layer')
     parser.add_argument('--use_positional_embeddings', dest='use_positional_embeddings', action='store_true', 
                         help='Use positional embeddings in the ViT.')
     parser.add_argument('--freeze_fet_enc', dest='freeze_fet_enc', action='store_true', 

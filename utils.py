@@ -9,6 +9,7 @@ import pytorch_lightning as pl
 ##################################################
 
 import pytorch_lightning as pl
+from pytorch_lightning.callbacks import LearningRateMonitor
 import os
 import math
 import numpy as np
@@ -61,23 +62,6 @@ def accuracy(preds, labels, preds_with_logits=True):
     acc = (1.0 * (preds == labels)).mean()
     return acc
 
-def get_callbacks(args):
-    """
-    Callbacks for the PyTorch Lightning Trainer.
-    """
-    # Model checkpoint
-    model_checkpoint_clbk = pl.callbacks.model_checkpoint.ModelCheckpoint(
-        monitor=args.metric_monitor,
-        save_last=True,
-        mode=args.metric_maxmin,
-    )
-    model_checkpoint_clbk.CHECKPOINT_NAME_LAST = '{epoch}-{step}'
-    callbacks = [
-        model_checkpoint_clbk,
-    ]
-    return callbacks
-
-
 def cos_anneal(e0, e1, t0, t1, e):
     """ ramp from (e0, t0) -> (e1, t1) through a cosine schedule based on e \in [e0, e1] """
     alpha = max(0, min(1, (e - e0) / (e1 - e0))) # what fraction of the way through are we
@@ -129,9 +113,11 @@ def get_callbacks(args):
         mode=args.metric_maxmin,
     )
     model_checkpoint_clbk.CHECKPOINT_NAME_LAST = '{epoch}-{step}'
+    lr_monitor = LearningRateMonitor(logging_interval='epoch')
     callbacks = [
         model_checkpoint_clbk,
-        DecayLR(lr_init=args.lr),
+        # DecayLR(lr_init=args.lr),
+        lr_monitor,
     ]
     return callbacks
 
