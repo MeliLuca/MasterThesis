@@ -28,9 +28,9 @@ class ResNetModule(pl.LightningModule):
         self.save_hyperparameters()
         self.args = args
         # Create model
-        if self.backbone == 'torch_model':
+        if self.args.backbone == 'torch_model':
             self.model = torchvision.models.resnet50(pretrained=args.pretrained)
-        elif self.backbone == 'cifar10_model':
+        elif self.args.backbone == 'cifar10_model':
             self.model = resnet_cifar10.resnet56()
         # if self.args.use_relations :
             # self.rel_head = MultiHeadAttention.MultiHeadAttentionScores(num_rel_classes*num_rel_classes, num_rel_classes)
