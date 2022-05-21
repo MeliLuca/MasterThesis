@@ -12,7 +12,7 @@ import numpy as np
 import torchvision
 from PIL import Image
 from Layers import MultiHeadAttention
-import resnet_cifar10
+from Models import resnet_cifar10
 
 class ResNetModule(pl.LightningModule):
     def __init__(self, args):
