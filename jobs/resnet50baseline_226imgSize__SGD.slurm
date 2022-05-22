@@ -42,6 +42,6 @@ which nvcc
 ### Without singularity...
 source $HOME/miniconda3/etc/profile.d/conda.sh
 conda activate new_env
-python3 $HOME/storage/MasterThesis/main.py --epochs=300 --stats_path=baseline_226imgSize_SGD --dataset=cifar10_226 --batch_size=128 --backbone=torch_model --optimizer=sgd
+python3 $HOME/storage/MasterThesis/main.py --epochs=300 --stats_path=baseline_226imgSize_SGD --dataset=cifar10_226 --batch_size=56 --backbone=torch_model --optimizer=sgd
 
 ## 258817
