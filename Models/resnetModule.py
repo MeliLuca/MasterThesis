@@ -32,7 +32,7 @@ class ResNetModule(pl.LightningModule):
             self.model = resnet_cifar10.resnet56(use_relations=args.use_relations)
 
         else :
-            self.model = resnet.resnet50(use_relations=args.use_relations)
+            self.model = resnet.ResNet50(use_relations=args.use_relations)
         # Create loss module
         self.loss_module = nn.CrossEntropyLoss()
 
