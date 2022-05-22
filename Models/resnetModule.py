@@ -31,9 +31,7 @@ class ResNetModule(pl.LightningModule):
         if self.args.backbone == 'torch_model':
             self.model = torchvision.models.resnet50(pretrained=args.pretrained)
         elif self.args.backbone == 'cifar10_model':
-            self.model = resnet_cifar10.resnet56()
-        # if self.args.use_relations :
-            # self.rel_head = MultiHeadAttention.MultiHeadAttentionScores(num_rel_classes*num_rel_classes, num_rel_classes)
+            self.model = resnet_cifar10.resnet56(**self.args)
         # Create loss module
         self.loss_module = nn.CrossEntropyLoss()
 
@@ -64,9 +62,17 @@ class ResNetModule(pl.LightningModule):
         imgs = batch['images']
         labels = batch['labels']
         preds = self.model(imgs)
-        loss = self.loss_module(preds, labels)
+        if self.args.use_relations :
+            target = batch['relations']
+            loss_rel = cross_entropy(preds, target)
+            acc_rel = accuracy(preds, target)
+            self.log(f'acc_rel', acc_rel, prog_bar=True)
+            self.log(f'loss_rel', loss_rel.item())
+
+        loss_class = self.loss_module(preds, labels)
         acc = accuracy(preds, labels)
 
+        loss = loss_class.item() + loss_rel.item()
         # Logs the accuracy per epoch to tensorboard (weighted average over batches)
         self.log("train_acc", acc, on_step=False, on_epoch=True)
         self.log("train_loss", loss)
