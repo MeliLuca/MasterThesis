@@ -55,8 +55,9 @@ class ResNetModule(pl.LightningModule):
             raise Exception(f'Error. Optimizer "{self.args.optimizer}" not supported.')
         self.optimizer = optimizer
         if self.args.backbone == 'cifar10_model':
-            self.lr_schedulers = torch.optim.lr_scheduler.ConstantLR(self.optimizer, factor=0.1, total_iters=1)
-        return optimizer
+            scheduler = torch.optim.lr_scheduler.ConstantLR(self.optimizer, factor=0.1, total_iters=40)
+            return ([optimizer], [scheduler])
+        return optimizer 
 
     def training_step(self, batch, batch_idx):
         # "batch" is the output of the training data loader.
@@ -65,10 +66,6 @@ class ResNetModule(pl.LightningModule):
         preds = self.model(imgs)
         loss = self.loss_module(preds, labels)
         acc = accuracy(preds, labels)
-        if self.args.backbone == 'cifar10_model':
-            if self.trainer.global_step == 32 or self.trainer.global_step == 48:
-                sch = self.lr_schedulers()
-                sch.step()
 
         # Logs the accuracy per epoch to tensorboard (weighted average over batches)
         self.log("train_acc", acc, on_step=False, on_epoch=True)
