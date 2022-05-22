@@ -12,7 +12,7 @@ import numpy as np
 import torchvision
 from PIL import Image
 from Layers import MultiHeadAttention
-from Models import resnet_cifar10
+from Models import resnet_cifar10, resnet
 
 class ResNetModule(pl.LightningModule):
     def __init__(self, args):
@@ -29,9 +29,9 @@ class ResNetModule(pl.LightningModule):
         self.args = args
         # Create model
         if self.args.backbone == 'torch_model':
-            self.model = torchvision.models.resnet50(pretrained=args.pretrained)
+            self.model = resnet.resnet50(use_relations=args.use_relations)
         elif self.args.backbone == 'cifar10_model':
-            self.model = resnet_cifar10.resnet56(**self.args)
+            self.model = resnet_cifar10.resnet56(use_relations=args.use_relations)
         # Create loss module
         self.loss_module = nn.CrossEntropyLoss()
 
@@ -64,15 +64,15 @@ class ResNetModule(pl.LightningModule):
         preds = self.model(imgs)
         if self.args.use_relations :
             target = batch['relations']
-            loss_rel = cross_entropy(preds, target)
-            acc_rel = accuracy(preds, target)
+            loss_rel = cross_entropy(preds['rel_pred'], target)
+            acc_rel = accuracy(preds['rel_pred'], target)
             self.log(f'acc_rel', acc_rel, prog_bar=True)
             self.log(f'loss_rel', loss_rel.item())
 
-        loss_class = self.loss_module(preds, labels)
-        acc = accuracy(preds, labels)
-
-        loss = loss_class.item() + loss_rel.item()
+        loss = self.loss_module(preds['class_pred'], labels)
+        acc = accuracy(preds['class_pred'], labels)
+        if self.use_relations:
+            loss += loss_rel.item()
         # Logs the accuracy per epoch to tensorboard (weighted average over batches)
         self.log("train_acc", acc, on_step=False, on_epoch=True)
         self.log("train_loss", loss)
@@ -82,8 +82,8 @@ class ResNetModule(pl.LightningModule):
         imgs = batch['images']
         labels = batch['labels']
         preds = self.model(imgs)
-        loss = self.loss_module(preds, labels)
-        acc = accuracy(preds, labels)
+        loss = self.loss_module(preds['class_pred'], labels)
+        acc = accuracy(preds['class_pred'], labels)
         # By default logs it per epoch (weighted average over batches)
         self.log("val_loss", loss)
         self.log("val_acc", acc)
@@ -92,8 +92,8 @@ class ResNetModule(pl.LightningModule):
         imgs = batch['images']
         labels = batch['labels']
         preds = self.model(imgs)
-        loss = self.loss_module(preds, labels)
-        acc = accuracy(preds, labels)
+        loss = self.loss_module(preds['class_pred'], labels)
+        acc = accuracy(preds['class_pred'], labels)
         # By default logs it per epoch (weighted average over batches), and returns it afterwards
         self.log("test_loss", loss)
         self.log("test_acc", acc)
