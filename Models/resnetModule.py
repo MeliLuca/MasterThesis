@@ -28,10 +28,11 @@ class ResNetModule(pl.LightningModule):
         self.save_hyperparameters()
         self.args = args
         # Create model
-        if self.args.backbone == 'torch_model':
-            self.model = resnet.resnet50(use_relations=args.use_relations)
-        elif self.args.backbone == 'cifar10_model':
+        if self.args.backbone == 'cifar10_model':
             self.model = resnet_cifar10.resnet56(use_relations=args.use_relations)
+
+        else :
+            self.model = resnet.resnet50(use_relations=args.use_relations)
         # Create loss module
         self.loss_module = nn.CrossEntropyLoss()
 
