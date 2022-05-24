@@ -30,9 +30,13 @@ class ResNetModule(pl.LightningModule):
         # Create model
         if self.args.backbone == 'cifar10_model':
             self.model = resnet_cifar10.resnet56(use_relations=args.use_relations)
-
         else :
-            self.model = resnet.ResNet50(use_relations=args.use_relations)
+            # self.model = resnet.ResNet50(use_relations=args.use_relations)
+            self.model = torchvision.models.resnet50(pretrained = self.args.pretrained)
+        if self.args.use_relations :
+            self.rel_layer = MultiHeadAttention.MultiHeadAttentionScores(64,9)
+            self.pred_layer = torch.nn.Sequential(*(list(self.model.children())[-2:]))
+            self.model = torch.nn.Sequential(*(list(self.model.children())[:-2]))
         # Create loss module
         self.loss_module = nn.CrossEntropyLoss()
 
@@ -62,25 +66,29 @@ class ResNetModule(pl.LightningModule):
         # "batch" is the output of the training data loader.
         imgs = batch['images']
         labels = batch['labels']
+        loss=0
         preds = self.model(imgs)
         if self.args.use_relations :
             target = batch['relations']
-            loss_rel = cross_entropy(preds['rel_pred'], target)
-            acc_rel = accuracy(preds['rel_pred'], target)
+            loss_rel = cross_entropy(preds, target)
+            acc_rel = accuracy(preds, target)
             self.log(f'acc_rel', acc_rel, prog_bar=True)
             self.log(f'loss_rel', loss_rel.item())
-
-        loss = self.loss_module(preds['class_pred'], labels)
-        acc = accuracy(preds['class_pred'], labels)
-        if self.use_relations:
             loss += loss_rel.item()
+            class_preds = self.pred_layer(preds)
+            loss_pred = self.loss_module(class_preds, labels)
+            loss += loss_pred.item()
+
+        # loss += self.loss_module(preds['class_pred'], labels)
+        # acc = accuracy(preds['class_pred'], labels)
         # Logs the accuracy per epoch to tensorboard (weighted average over batches)
-        self.log("train_acc", acc, on_step=False, on_epoch=True)
+        # self.log("train_acc", acc, on_step=False, on_epoch=True)
         self.log("train_loss", loss)
         return loss  # Return tensor to call ".backward" on
 
     def validation_step(self, batch, batch_idx):
         imgs = batch['images']
+        print(f'input shape is {imgs.shape}')
         labels = batch['labels']
         preds = self.model(imgs)
         loss = self.loss_module(preds['class_pred'], labels)

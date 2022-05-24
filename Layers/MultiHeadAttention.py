@@ -55,6 +55,7 @@ class HeadScores(nn.Module):
             v = k
         print(f'q before linearizatioin {q.shape}')
         q = self.q_lin(q)
+        print(f'q AFTER linearizatioin {q.shape}')
         # print(f'q shape after linearization is {q.shape}')
         k = self.k_lin(k)
         v = self.v_lin(v)
@@ -83,9 +84,9 @@ class MultiHeadAttentionScores(nn.Module):
         #self.linear = nn.Linear((h_dim // num_heads) * num_heads, h_dim)
 
     def forward(self, input, k=None, v=None, mask=None):
+        print(f'input shape is {input.shape}')
         B, num_patches = input.shape[0:2]
         q= input.reshape(B, num_patches, -1)
-        # print(f'Q matrix is {q.shape}')
         x = [head(q, k, v, mask=mask) for head in self.heads]
         x = torch.stack(x, 1) # [B, num_heads, NUM_PATCH, NUM_PATCH]
         #x = self.linear(x) # [B, T, h_dim]
