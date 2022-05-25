@@ -53,9 +53,7 @@ class HeadScores(nn.Module):
             k = q
         if v is None:
             v = k
-        print(f'q before linearizatioin {q.shape}')
         q = self.q_lin(q)
-        print(f'q AFTER linearizatioin {q.shape}')
         # print(f'q shape after linearization is {q.shape}')
         k = self.k_lin(k)
         v = self.v_lin(v)
