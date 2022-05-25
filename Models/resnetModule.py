@@ -14,6 +14,14 @@ from PIL import Image
 from Layers import MultiHeadAttention
 from Models import resnet_cifar10, resnet
 
+class Flatten(nn.Module):
+    def __init__(self):
+        super(Flatten, self).__init__()
+        
+    def forward(self, x):
+        x = x.view(x.size(0), -1)
+        return x
+
 class ResNetModule(pl.LightningModule):
     def __init__(self, args):
         """
@@ -35,7 +43,11 @@ class ResNetModule(pl.LightningModule):
             self.model = torchvision.models.resnet50(pretrained = self.args.pretrained)
         if self.args.use_relations :
             self.rel_layer = MultiHeadAttention.MultiHeadAttentionScores(64,9)
-            self.pred_layer = torch.nn.Sequential(*(list(self.model.children())[-2:]))
+            self.class_layer = torch.nn.Sequential(
+                torch.nn.Sequential((list(self.model.children())[-2]), 
+                Flatten(), 
+                (list(self.model.children())[-1]))
+            )
             self.model = torch.nn.Sequential(*(list(self.model.children())[:-2]))
         # Create loss module
         self.loss_module = nn.CrossEntropyLoss()
@@ -70,12 +82,13 @@ class ResNetModule(pl.LightningModule):
         preds = self.model(imgs)
         if self.args.use_relations :
             target = batch['relations']
-            loss_rel = cross_entropy(preds, target)
-            acc_rel = accuracy(preds, target)
+            rel_preds = self.rel_layer(preds)
+            loss_rel = cross_entropy(rel_preds, target)
+            acc_rel = accuracy(rel_preds, target)
             self.log(f'acc_rel', acc_rel, prog_bar=True)
             self.log(f'loss_rel', loss_rel.item())
             loss += loss_rel.item()
-            class_preds = self.pred_layer(preds)
+            class_preds = self.class_layer(preds)
             loss_pred = self.loss_module(class_preds, labels)
             loss += loss_pred.item()
 
@@ -91,8 +104,10 @@ class ResNetModule(pl.LightningModule):
         print(f'input shape is {imgs.shape}')
         labels = batch['labels']
         preds = self.model(imgs)
-        loss = self.loss_module(preds['class_pred'], labels)
-        acc = accuracy(preds['class_pred'], labels)
+        if self.args.use_relations :
+            preds = self.class_layer(preds)
+        loss = self.loss_module(preds, labels)
+        acc = accuracy(preds, labels)
         # By default logs it per epoch (weighted average over batches)
         self.log("val_loss", loss)
         self.log("val_acc", acc)

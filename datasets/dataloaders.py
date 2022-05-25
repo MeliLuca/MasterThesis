@@ -137,7 +137,7 @@ def get_datasets(args, transform='default', target_transform='default', patch_tr
         ds_train_simsiam = TinyImagenetDataset(train=True, transform=transform['train_simsiam'], 
                                            target_transform=target_transform['train_simsiam'], **ds_args)
 
-    elif args.dataset in ['cifar10', 'cifar10_36', 'cifar10_226']:
+    elif args.dataset in ['cifar10', 'cifar10_36', 'cifar10_226', 'cifar10_224']:
         ds_train = CIFAR10(train=True, transform=transform['train'], target_transform=target_transform['train'], 
                            **ds_args)
         ds_train_aug = CIFAR10(train=True, transform=transform['train_aug'], 
