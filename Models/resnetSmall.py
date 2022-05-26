@@ -64,13 +64,8 @@ class resnetSmall(pl.LightningModule):
         self.layer1 = self.make_layer(block, 16, layers[0])
         self.layer2 = self.make_layer(block, 32, layers[1], 2)
         self.layer3 = self.make_layer(block, 64, layers[2], 2)
-        if self.use_relations:
-            ## DA CAMBIAREEEE
-            print(f'rel head viene creato con {num_rel_classes*num_rel_classes}, {num_rel_classes}')
-            self.rel_head = MultiHeadAttention.MultiHeadAttentionScores(81, 9)
-        else :
-            self.avg_pool = nn.AvgPool2d(8)
-            self.fc = nn.Linear(64, args.num_classes)
+        self.avg_pool = nn.AvgPool2d(8)
+        self.fc = nn.Linear(64, args.num_classes)
         self.lr = args.lr
         self.use_relations = use_relations
        
@@ -95,94 +90,91 @@ class resnetSmall(pl.LightningModule):
         out = self.layer1(out)
         out = self.layer2(out)
         out = self.layer3(out)
-        if (self.use_relations):
-            out = self.rel_head(out)
-        else :
-            out = self.avg_pool(out)
-            out = out.view(out.size(0), -1)
-            out = self.fc(out)
+        out = self.avg_pool(out)
+        out = out.view(out.size(0), -1)
+        out = self.fc(out)
         return out
 
-    def configure_optimizers(self):
-        """
-        Configure optimizer for the learning process.
-        """
-        if self.args.optimizer == 'adam':
-            optimizer = Adam(self.parameters(), self.args.lr, weight_decay=self.args.weight_decay)
-        elif self.args.optimizer == 'sgd':
-            optimizer = SGD(self.parameters(), self.args.lr, momentum=0.9, weight_decay=self.args.weight_decay)
-        elif self.args.optimizer == 'adamw':
-            optimizer = AdamW(self.parameters(), self.args.lr, weight_decay=self.args.weight_decay)
-        else:
-            raise Exception(f'Error. Optimizer "{self.args.optimizer}" not supported.')
-        self.optimizer = optimizer
-        return optimizer
+    # def configure_optimizers(self):
+    #     """
+    #     Configure optimizer for the learning process.
+    #     """
+    #     if self.args.optimizer == 'adam':
+    #         optimizer = Adam(self.parameters(), self.args.lr, weight_decay=self.args.weight_decay)
+    #     elif self.args.optimizer == 'sgd':
+    #         optimizer = SGD(self.parameters(), self.args.lr, momentum=0.9, weight_decay=self.args.weight_decay)
+    #     elif self.args.optimizer == 'adamw':
+    #         optimizer = AdamW(self.parameters(), self.args.lr, weight_decay=self.args.weight_decay)
+    #     else:
+    #         raise Exception(f'Error. Optimizer "{self.args.optimizer}" not supported.')
+    #     self.optimizer = optimizer
+    #     return optimizer
 
-    def training_step(self, batch, batch_idx):
-        images = batch['images']
-        # Forward pass
-        outputs = self(images)
-        if self.use_relations :
-            target = batch['relations']
-            loss = cross_entropy(outputs, target)
-            acc_rel = accuracy(outputs, target)
-            self.log(f'acc_rel', acc_rel, prog_bar=True)
-            self.log(f'loss_rel', loss.item())
-        else :    
-            labels=batch['labels']
-            loss = F.cross_entropy(outputs, labels)
-            self.log("train_loss", loss.item())
-        return loss
+    # def training_step(self, batch, batch_idx):
+    #     images = batch['images']
+    #     # Forward pass
+    #     outputs = self(images)
+    #     if self.use_relations :
+    #         target = batch['relations']
+    #         loss = cross_entropy(outputs, target)
+    #         acc_rel = accuracy(outputs, target)
+    #         self.log(f'acc_rel', acc_rel, prog_bar=True)
+    #         self.log(f'loss_rel', loss.item())
+    #     else :    
+    #         labels=batch['labels']
+    #         loss = F.cross_entropy(outputs, labels)
+    #         self.log("train_loss", loss.item())
+    #     return loss
     
-    def validation_step(self, batch, batch_idx):
-        # print('#### entro validation step')
-        images = batch['images']
-        # Forward pass
-        outputs = self(images)
-        if self.use_relations:
-            target = batch['relations']
-            assert target.shape[0]
-            loss = F.cross_entropy(outputs, target)
-            acc_rel = accuracy(outputs, target)
-            self.log(f'val_acc', acc_rel, prog_bar=True)
-            self.log(f'val_loss', loss.item())
-        else :    
-            labels=batch['labels']
-            loss = F.cross_entropy(outputs, labels)
-            acc = accuracy(outputs, labels)
-            self.log("val_loss", loss.item())
-            self.log("val_acc", acc)
-        return loss
+    # def validation_step(self, batch, batch_idx):
+    #     # print('#### entro validation step')
+    #     images = batch['images']
+    #     # Forward pass
+    #     outputs = self(images)
+    #     if self.use_relations:
+    #         target = batch['relations']
+    #         assert target.shape[0]
+    #         loss = F.cross_entropy(outputs, target)
+    #         acc_rel = accuracy(outputs, target)
+    #         self.log(f'val_acc', acc_rel, prog_bar=True)
+    #         self.log(f'val_loss', loss.item())
+    #     else :    
+    #         labels=batch['labels']
+    #         loss = F.cross_entropy(outputs, labels)
+    #         acc = accuracy(outputs, labels)
+    #         self.log("val_loss", loss.item())
+    #         self.log("val_acc", acc)
+    #     return loss
 
-    def test_step(self, batch, batch_idx):
-        images = batch['images']
-        # Forward pass
-        outputs = self(images)
-        labels=batch['labels']
-        loss = F.cross_entropy(outputs, labels)
-        acc = accuracy(outputs, labels)
-        self.log("test_loss", loss.item())
-        self.log("test_acc", acc.item())
-        return loss
+    # def test_step(self, batch, batch_idx):
+    #     images = batch['images']
+    #     # Forward pass
+    #     outputs = self(images)
+    #     labels=batch['labels']
+    #     loss = F.cross_entropy(outputs, labels)
+    #     acc = accuracy(outputs, labels)
+    #     self.log("test_loss", loss.item())
+    #     self.log("test_acc", acc.item())
+    #     return loss
     
-    def on_load_checkpoint(self, checkpoint: dict) -> None:
-        state_dict = checkpoint["state_dict"]
-        model_state_dict = self.state_dict()
-        is_changed = False
-        for k in state_dict:
-            if k in model_state_dict:
-                if state_dict[k].shape != model_state_dict[k].shape:
-                    logging.info(f"Skip loading parameter: {k}, "
-                                f"required shape: {model_state_dict[k].shape}, "
-                                f"loaded shape: {state_dict[k].shape}")
-                    state_dict[k] = model_state_dict[k]
-                    is_changed = True
-            else:
-                logging.info(f"Dropping parameter {k}")
-                is_changed = True
+    # def on_load_checkpoint(self, checkpoint: dict) -> None:
+    #     state_dict = checkpoint["state_dict"]
+    #     model_state_dict = self.state_dict()
+    #     is_changed = False
+    #     for k in state_dict:
+    #         if k in model_state_dict:
+    #             if state_dict[k].shape != model_state_dict[k].shape:
+    #                 logging.info(f"Skip loading parameter: {k}, "
+    #                             f"required shape: {model_state_dict[k].shape}, "
+    #                             f"loaded shape: {state_dict[k].shape}")
+    #                 state_dict[k] = model_state_dict[k]
+    #                 is_changed = True
+    #         else:
+    #             logging.info(f"Dropping parameter {k}")
+    #             is_changed = True
 
-        if is_changed:
-            checkpoint.pop("optimizer_states", None)
+    #     if is_changed:
+    #         checkpoint.pop("optimizer_states", None)
 
 def get_model(args):
     model_args = {
@@ -195,7 +187,7 @@ def get_model(args):
         'freeze_fet_enc': args.freeze_fet_enc,
         'proj_dropout': args.proj_dropout,
     }
-    model = resnetSmall(ResidualBlock, [9, 9, 9], **model_args)
+    model = resnetSmall(ResidualBlock, [2, 2, 2], **model_args)
     if len(args.model_checkpoint) > 0:
         model = model.load_from_checkpoint(args.model_checkpoint, strict=False, **model_args)
         print(f'Loaded model at "{args.model_checkpoint}"')

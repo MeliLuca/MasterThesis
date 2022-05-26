@@ -88,14 +88,15 @@ class ResNetModule(pl.LightningModule):
             self.log(f'acc_rel', acc_rel, prog_bar=True)
             self.log(f'loss_rel', loss_rel.item())
             loss += loss_rel.item()
-            class_preds = self.class_layer(preds)
-            loss_pred = self.loss_module(class_preds, labels)
+            preds = self.class_layer(preds)
+            loss_pred = self.loss_module(preds, labels)
+            acc = accuracy(preds, labels)
             loss += loss_pred.item()
-
-        # loss += self.loss_module(preds['class_pred'], labels)
-        # acc = accuracy(preds['class_pred'], labels)
+        else:
+            loss += self.loss_module(preds, labels)
+            acc = accuracy(preds, labels)
         # Logs the accuracy per epoch to tensorboard (weighted average over batches)
-        # self.log("train_acc", acc, on_step=False, on_epoch=True)
+        self.log("train_acc", acc, on_step=False, on_epoch=True)
         self.log("train_loss", loss)
         return loss  # Return tensor to call ".backward" on
 
@@ -112,12 +113,15 @@ class ResNetModule(pl.LightningModule):
         self.log("val_loss", loss)
         self.log("val_acc", acc)
 
+
     def test_step(self, batch, batch_idx):
         imgs = batch['images']
         labels = batch['labels']
         preds = self.model(imgs)
-        loss = self.loss_module(preds['class_pred'], labels)
-        acc = accuracy(preds['class_pred'], labels)
+        if self.args.use_relations :
+            preds = self.class_layer(preds)
+        loss = self.loss_module(preds, labels)
+        acc = accuracy(preds, labels)
         # By default logs it per epoch (weighted average over batches), and returns it afterwards
         self.log("test_loss", loss)
         self.log("test_acc", acc)
