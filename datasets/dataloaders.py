@@ -63,10 +63,10 @@ class ShuffleDataset(Dataset):
             sample['labels_orig'] = y_cls
 
         # Shuffle patches
-        num_patches = self.patch_size ##int(self.img_size // self.patch_size) ** 2 if not self.mega_patches else self.side_megapatches ** 2
+        num_patches = int(self.img_size // self.patch_size) ** 2 if not self.mega_patches else self.side_megapatches ** 2
         side = int(math.sqrt(num_patches))
         idx_shuffle = torch.randperm(num_patches) if self.shuffle else torch.arange(num_patches)
-        print(f'###  creazione pathces {num_patches}')
+    
         # Mega-patches
         if self.mega_patches:
             x = create_megapatches_grid(x, side=self.side_megapatches, patch_size=self.patch_size)
@@ -77,7 +77,7 @@ class ShuffleDataset(Dataset):
             x = self.patch_transform(x)
             x = x[:, idx_shuffle] # [C, N_PATCH, H_PATCH, W_PATCH]
             x = patches2image(x, output_size=(H, W)) # [C, H, W]
-        ssl_labels = self.ssl_signal(num_patches) # dict of ssl matrices
+        ssl_labels = self.ssl_signal(idx_shuffle.numpy().reshape(side, side)) # dict of ssl matrices
         sample['images'] = x
         sample['labels'] = y_cls
         sample.update(ssl_labels)

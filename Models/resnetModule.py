@@ -11,6 +11,7 @@ from matplotlib import cm
 import numpy as np
 import torchvision
 from PIL import Image
+from datasets.encode_locations import create_connectivity_matrix
 from Layers import MultiHeadAttention
 from Models import resnet_cifar10, resnet
 
@@ -81,7 +82,7 @@ class ResNetModule(pl.LightningModule):
         loss=0
         preds = self.model(imgs)
         if self.args.use_relations :
-            target = batch['relations']
+            target = create_connectivity_matrix(preds.shape[1])
             rel_preds = self.rel_layer(preds)
             loss_rel = cross_entropy(rel_preds, target)
             acc_rel = accuracy(rel_preds, target)
