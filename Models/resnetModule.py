@@ -110,8 +110,8 @@ class ResNetModule(pl.LightningModule):
         loss = self.loss_module(preds, labels)
         acc = accuracy(preds, labels)
         # By default logs it per epoch (weighted average over batches)
-        self.log("val_loss", loss)
-        self.log("val_acc", acc)
+        self.log("val_loss", loss,on_epoch=True, prog_bar=False)
+        self.log("val_acc", acc, on_epoch=True, prog_bar=False)
 
 
     def test_step(self, batch, batch_idx):
@@ -123,8 +123,8 @@ class ResNetModule(pl.LightningModule):
         loss = self.loss_module(preds, labels)
         acc = accuracy(preds, labels)
         # By default logs it per epoch (weighted average over batches), and returns it afterwards
-        self.log("test_loss", loss)
-        self.log("test_acc", acc)
+        self.log("test_loss", loss, on_epoch=True, prog_bar=False)
+        self.log("test_acc", acc,on_epoch=True, prog_bar=False)
 
     def on_load_checkpoint(self, checkpoint: dict) -> None:
         state_dict = checkpoint["state_dict"]
