@@ -77,7 +77,7 @@ class ShuffleDataset(Dataset):
             x = self.patch_transform(x)
             x = x[:, idx_shuffle] # [C, N_PATCH, H_PATCH, W_PATCH]
             x = patches2image(x, output_size=(H, W)) # [C, H, W]
-        ssl_labels = self.ssl_signal(idx_shuffle.numpy().reshape(side, side)) # dict of ssl matrices
+        ssl_labels = self.ssl_signal(num_patches) # dict of ssl matrices
         sample['images'] = x
         sample['labels'] = y_cls
         sample.update(ssl_labels)
