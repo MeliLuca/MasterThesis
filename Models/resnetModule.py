@@ -82,6 +82,7 @@ class ResNetModule(pl.LightningModule):
         loss=0
         preds = self.model(imgs)
         if self.args.use_relations :
+            print(f' pred shape is {preds.shape[1]}')
             target = create_connectivity_matrix(preds.shape[1])
             rel_preds = self.rel_layer(preds)
             loss_rel = cross_entropy(rel_preds, target)
