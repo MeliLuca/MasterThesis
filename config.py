@@ -18,7 +18,7 @@ def get_args(stdin, verbose=False):
     parser.add_argument('--logger', type=str, default='csv', help='The logger to use for the experiments.')
     parser.add_argument('--mode', type=str, default='train', help='The mode of the program, can "train" or "validate"')
     parser.add_argument('--num_gpus', type=int, default=1, help='The number of GPUs.')
-    parser.add_argument('--epochs', type=int, default=100, help='The number of epochs for the training.')
+    parser.add_argument('--epochs', type=int, default=200, help='The number of epochs for the training.')
     parser.add_argument('--task', type=str, default='upstream', 
                         help='The name of the task, can be "upstream" or "downstream"')
     parser.add_argument('--exp_id', type=str, default='', 
@@ -115,7 +115,7 @@ def get_args(stdin, verbose=False):
             'cifar10': 4,
             'cifar10_36': 4,
             'cifar10_226': 32,
-            'cifar10_224': 32,
+            'cifar10_224': 2048,
             'cifar100': 4,
             'cifar100_224': 32,
             'tiny_imagenet': 8,
