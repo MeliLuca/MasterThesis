@@ -115,7 +115,7 @@ def get_args(stdin, verbose=False):
             'cifar10': 4,
             'cifar10_36': 4,
             'cifar10_226': 32,
-            'cifar10_224': 32,
+            'cifar10_224': 4194304,
             'cifar100': 4,
             'cifar100_224': 32,
             'tiny_imagenet': 8,
