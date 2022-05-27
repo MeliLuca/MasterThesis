@@ -63,6 +63,7 @@ couple of patches there is a spatial relation (and its symmetrical).
 # Imports
 ##################################################
 
+from importlib.resources import path
 import torch
 import numpy as np
 import math
@@ -148,8 +149,10 @@ def create_patch_matrix(num_patches):
 
 def create_connectivity_matrix(patches):
     patch_flat = patches.reshape(-1)
+    print(f'flatted patches {patch_flat}')
     num_patches = len(patch_flat)
     labels_matrix = create_label_matrix(num_patches)
+    print(f'labels matrix {labels_matrix.shape}')
 
     side = int(math.sqrt(num_patches))
     conn_matrix = - 1 * np.ones([num_patches, num_patches]).astype(labels_matrix.dtype)
@@ -164,6 +167,7 @@ def create_connectivity_matrix(patches):
 
     conn_matrix = conn_matrix.T
     conn_matrix = conn_matrix[patch_flat, :][:, patch_flat]
+    print(f'connection matrix shape {conn_matrix.shape}')
     return conn_matrix
 
 def create_dist_matrix(patches, norm=2, vmin=-1, vmax=1):
@@ -231,6 +235,7 @@ class SSLSignal():
             side = int(np.sqrt(num_patches))
             patches_init = torch.arange(num_patches).reshape(side, side).numpy()
             if self.use_relations:
+                print(f'patches_init {patches_init.shape}')
                 self.conn_matrix = create_connectivity_matrix(patches_init)
                 self.conn_matrix = torch.from_numpy(self.conn_matrix).to(torch.int64)
             if self.use_distances:
