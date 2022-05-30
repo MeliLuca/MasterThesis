@@ -77,6 +77,7 @@ class ResNetModule(pl.LightningModule):
         labels = batch['labels']
         loss=0
         preds = self.model(imgs)
+        print('#### START TO COMPUTE RELATIONS')
         if self.args.use_relations :
             target = batch['relations']
             rel_preds = self.rel_layer(preds)
@@ -85,6 +86,7 @@ class ResNetModule(pl.LightningModule):
             self.log(f'acc_rel', acc_rel, prog_bar=True)
             self.log(f'loss_rel', loss_rel.item())
             loss += loss_rel.item()
+            print('### START TO COMPUTE THE CLASSIFICATION ')
             preds = self.class_layer(preds)
             loss_pred = self.loss_module(preds, labels)
 
