@@ -69,9 +69,6 @@ class ResNetModule(pl.LightningModule):
         else:
             raise Exception(f'Error. Optimizer "{self.args.optimizer}" not supported.')
         self.optimizer = optimizer
-        if self.args.backbone == 'cifar10_model':
-            scheduler = torch.optim.lr_scheduler.ConstantLR(self.optimizer, factor=0.1, total_iters=40)
-            return ([optimizer], [scheduler])
         return optimizer 
 
     def training_step(self, batch, batch_idx):
