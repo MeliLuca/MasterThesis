@@ -42,7 +42,7 @@ class ResNetModule(pl.LightningModule):
             # self.model = resnet.ResNet50(use_relations=args.use_relations)
             self.model = torchvision.models.resnet50(pretrained = self.args.pretrained)
         if self.args.use_relations :
-            self.rel_layer = MultiHeadAttention.MultiHeadAttentionScores(81,9)
+            self.rel_layer = MultiHeadAttention.MultiHeadAttentionScores(64,9)
             self.class_layer = torch.nn.Sequential(
                 torch.nn.Sequential((list(self.model.children())[-2]), 
                 nn.Flatten(1), 
@@ -103,7 +103,6 @@ class ResNetModule(pl.LightningModule):
         imgs = batch['images']
         labels = batch['labels']
         preds = self.model(imgs)
-        print(preds.shape)
         print('#### START TO COMPUTE CLASSIFICATION')
         if self.args.use_relations :
             preds = self.class_layer(preds)
