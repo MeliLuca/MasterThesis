@@ -82,7 +82,6 @@ class ResNetModule(pl.LightningModule):
         preds = self.model(imgs)
         if self.args.use_relations :
             target = batch['relations']
-            print(f'target shape {target.shape}')
             rel_preds = self.rel_layer(preds)
             loss_rel = cross_entropy(rel_preds, target)
             acc_rel = accuracy(rel_preds, target)
@@ -103,7 +102,6 @@ class ResNetModule(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         imgs = batch['images']
-        print(f'input shape is {imgs.shape}')
         labels = batch['labels']
         preds = self.model(imgs)
         if self.args.use_relations :
