@@ -86,12 +86,18 @@ class ResNetModule(pl.LightningModule):
             self.log(f'loss_rel', loss_rel.item())
             loss += loss_rel.item()
             preds = self.class_layer(preds)
+            print(f'    loss_rel : {loss_rel} - acc_rel - {acc_rel}')
 
         loss += self.loss_module(preds, labels)
         acc = accuracy(preds, labels)
         # Logs the accuracy per epoch to tensorboard (weighted average over batches)
         self.log("train_acc", acc)
         self.log("train_loss", loss)
+        print(f'epoch : {self.current_epoch} - train_loss : {loss} - train_acc - {acc}')
+        if self.args.use_relations:
+            print(f'    loss_rel : {loss_rel} - acc_rel - {acc_rel}')
+        print('#########')
+
         return loss  # Return tensor to call ".backward" on
 
     def validation_step(self, batch, batch_idx):
@@ -105,6 +111,7 @@ class ResNetModule(pl.LightningModule):
         # By default logs it per epoch (weighted average over batches)
         self.log("val_loss", loss)
         self.log("val_acc", acc)
+        print(f'============>  VAL_loss : {loss} - VAL_acc - {acc}')
 
 
     def test_step(self, batch, batch_idx):
