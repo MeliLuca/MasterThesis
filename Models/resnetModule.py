@@ -45,7 +45,7 @@ class ResNetModule(pl.LightningModule):
             self.rel_layer = MultiHeadAttention.MultiHeadAttentionScores(81,9)
             self.class_layer = torch.nn.Sequential(
                 torch.nn.Sequential((list(self.model.children())[-2]), 
-                Flatten(), 
+                nn.Flatten(1), 
                 (list(self.model.children())[-1]))
             )
             self.model = torch.nn.Sequential(*(list(self.model.children())[:-2]))
