@@ -229,7 +229,6 @@ class SSLSignal():
             self.abs_position_matrix = None
 
     def __call__(self, patches):
-        print(f'pathces in input  {patches.shape}')
         patch_flat = patches.reshape(-1)
         if not self.matrices_initialized:
             num_patches = patch_flat.shape[0]
