@@ -11,7 +11,6 @@ from matplotlib import cm
 import numpy as np
 import torchvision
 from PIL import Image
-from datasets.encode_locations import create_connectivity_matrix
 from Layers import MultiHeadAttention
 from Models import resnet_cifar10, resnet
 
@@ -38,12 +37,12 @@ class ResNetModule(pl.LightningModule):
         self.args = args
         # Create model
         if self.args.backbone == 'cifar10_model':
-            self.model = resnet_cifar10.resnet56(use_relations=args.use_relations)
+            self.model = resnet_cifar10.resnet56()
         else :
             # self.model = resnet.ResNet50(use_relations=args.use_relations)
             self.model = torchvision.models.resnet50(pretrained = self.args.pretrained)
         if self.args.use_relations :
-            self.rel_layer = MultiHeadAttention.MultiHeadAttentionScores(49,9)
+            self.rel_layer = MultiHeadAttention.MultiHeadAttentionScores(81,9)
             self.class_layer = torch.nn.Sequential(
                 torch.nn.Sequential((list(self.model.children())[-2]), 
                 Flatten(), 
@@ -82,8 +81,8 @@ class ResNetModule(pl.LightningModule):
         loss=0
         preds = self.model(imgs)
         if self.args.use_relations :
-            print(f' pred shape is {preds.shape[1]}')
-            target = create_connectivity_matrix(preds.shape[1])
+            target = batch['relations']
+            print(f'target shape {target.shape}')
             rel_preds = self.rel_layer(preds)
             loss_rel = cross_entropy(rel_preds, target)
             acc_rel = accuracy(rel_preds, target)
