@@ -103,6 +103,7 @@ class ResNetModule(pl.LightningModule):
         imgs = batch['images']
         labels = batch['labels']
         preds = self.model(imgs)
+        print(preds.shape)
         print('#### START TO COMPUTE CLASSIFICATION')
         if self.args.use_relations :
             preds = self.class_layer(preds)
