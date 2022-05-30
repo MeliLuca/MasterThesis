@@ -103,8 +103,10 @@ class ResNetModule(pl.LightningModule):
         imgs = batch['images']
         labels = batch['labels']
         preds = self.model(imgs)
+        print('#### START TO COMPUTE CLASSIFICATION')
         if self.args.use_relations :
             preds = self.class_layer(preds)
+            print('### END OF CLASSIFICATION ')
         loss = self.loss_module(preds, labels)
         acc = accuracy(preds, labels)
         # By default logs it per epoch (weighted average over batches)
