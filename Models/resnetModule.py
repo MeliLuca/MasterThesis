@@ -77,7 +77,6 @@ class ResNetModule(pl.LightningModule):
         labels = batch['labels']
         loss=0
         preds = self.model(imgs)
-        print('#### START TO COMPUTE RELATIONS')
         if self.args.use_relations :
             target = batch['relations']
             rel_preds = self.rel_layer(preds)
@@ -86,16 +85,12 @@ class ResNetModule(pl.LightningModule):
             self.log(f'acc_rel', acc_rel, prog_bar=True)
             self.log(f'loss_rel', loss_rel.item())
             loss += loss_rel.item()
-            print('### START TO COMPUTE THE CLASSIFICATION ')
             preds = self.class_layer(preds)
-            loss_pred = self.loss_module(preds, labels)
 
-            loss += loss_pred.item()
-        else:
-            loss += self.loss_module(preds, labels)
-            acc = accuracy(preds, labels)
+        loss += self.loss_module(preds, labels)
+        acc = accuracy(preds, labels)
         # Logs the accuracy per epoch to tensorboard (weighted average over batches)
-        self.log("train_acc", acc,)
+        self.log("train_acc", acc)
         self.log("train_loss", loss)
         return loss  # Return tensor to call ".backward" on
 
@@ -103,10 +98,8 @@ class ResNetModule(pl.LightningModule):
         imgs = batch['images']
         labels = batch['labels']
         preds = self.model(imgs)
-        print('#### START TO COMPUTE CLASSIFICATION')
         if self.args.use_relations :
             preds = self.class_layer(preds)
-            print('### END OF CLASSIFICATION ')
         loss = self.loss_module(preds, labels)
         acc = accuracy(preds, labels)
         # By default logs it per epoch (weighted average over batches)
