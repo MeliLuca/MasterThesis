@@ -35,6 +35,8 @@ class ResNetModule(pl.LightningModule):
         # Exports the hyperparameters to a YAML file, and create "self.hparams" namespace
         self.save_hyperparameters()
         self.args = args
+        self.avg_loss = []
+        self.avg_acc = []
         # Create model
         if self.args.backbone == 'cifar10_model':
             self.model = resnet_cifar10.resnet56()
@@ -42,6 +44,8 @@ class ResNetModule(pl.LightningModule):
             # self.model = resnet.ResNet50(use_relations=args.use_relations)
             self.model = torchvision.models.resnet50(pretrained = self.args.pretrained)
         if self.args.use_relations :
+            self.avg_loss_rel = []
+            self.avg_acc_rel = []
             self.rel_layer = MultiHeadAttention.MultiHeadAttentionScores(64,9)
             self.class_layer = torch.nn.Sequential(
                 torch.nn.Sequential((list(self.model.children())[-2]), 
@@ -88,19 +92,22 @@ class ResNetModule(pl.LightningModule):
             acc_rel = accuracy(rel_preds, target)
             self.log(f'acc_rel', acc_rel, prog_bar=True)
             self.log(f'loss_rel', loss_rel.item())
+
+            ## print metrics
+            self.avg_loss_rel += [loss_rel]
+            self.avg_acc_rel += [acc_rel]
+
             loss += loss_rel.item()
             preds = self.class_layer(preds)
-            print(f'    loss_rel : {loss_rel} - acc_rel - {acc_rel}')
 
         loss += self.loss_module(preds, labels)
         acc = accuracy(preds, labels)
         # Logs the accuracy per epoch to tensorboard (weighted average over batches)
         self.log("train_acc", acc)
         self.log("train_loss", loss)
-        print(f'epoch : {self.current_epoch} - train_loss : {loss} - train_acc - {acc}')
-        if self.args.use_relations:
-            print(f'    loss_rel : {loss_rel} - acc_rel - {acc_rel}')
-        print('#########')
+        
+        self.avg_loss += [loss]
+        self.avg_acc += [acc]
 
         return loss  # Return tensor to call ".backward" on
 
@@ -115,7 +122,6 @@ class ResNetModule(pl.LightningModule):
         # By default logs it per epoch (weighted average over batches)
         self.log("val_loss", loss)
         self.log("val_acc", acc)
-        print(f'============>  VAL_loss : {loss} - VAL_acc - {acc}')
 
 
     def test_step(self, batch, batch_idx):
@@ -129,6 +135,11 @@ class ResNetModule(pl.LightningModule):
         # By default logs it per epoch (weighted average over batches), and returns it afterwards
         self.log("test_loss", loss)
         self.log("test_acc", acc)
+    
+    # def training_epoch_end(self):
+    #     loss = self.avg_loss.loss.mean()
+        
+    #     result.log('train_loss', avg_loss, on_epoch=True, prog_bar=True)
 
     def on_load_checkpoint(self, checkpoint: dict) -> None:
         state_dict = checkpoint["state_dict"]

@@ -23,7 +23,7 @@ def get_args(stdin, verbose=False):
                         help='The name of the task, can be "upstream" or "downstream"')
     parser.add_argument('--exp_id', type=str, default='', 
                         help='Experiment ID (like "u1").')
-    parser.add_argument('--enable_progress_bar', type=bool, default=False, help='Show the progress bar')
+    parser.add_argument('--enable_progress_bar', type=bool, default=True, help='Show the progress bar')
 
     # Datasets params
     parser.add_argument('--dataset', type=str, default='cifar10', help='Name of the dataset.')
