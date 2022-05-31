@@ -47,9 +47,7 @@ class ResNetModule(pl.LightningModule):
             self.avg_loss_rel = []
             self.avg_acc_rel = []
             self.rel_layer = MultiHeadAttention.MultiHeadAttentionScores(64,9)
-            self.class_layer = torch.nn.Sequential(
-                (list(self.model.children())[-1])
-            )
+            self.class_layer = torch.nn.Sequential(*(list(self.model.children())[-1]))
             self.model = torch.nn.Sequential(*(list(self.model.children())[:-1]))
         # Create loss module
         self.loss_module = nn.CrossEntropyLoss()
@@ -169,6 +167,7 @@ class ResNetModule(pl.LightningModule):
             checkpoint.pop("optimizer_states", None)
 
 def get_model(args):
+    torch.backends.cudnn.deterministic = True
     model_args = {
         'args': args,
         # 'num_classes': args.num_classes,
