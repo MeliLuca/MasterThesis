@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
     # Parse input arguments
     args = get_args(sys.stdin, verbose=True)
-    torch.use_deterministic_algorithms(mode=False)
+    torch.use_deterministic_algorithms(mode=False,warn_only=True)
     # Set random seed
     pl.seed_everything(args.seed)
 
