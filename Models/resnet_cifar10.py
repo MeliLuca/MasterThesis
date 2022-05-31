@@ -21,7 +21,6 @@ Reference:
 If you use this implementation in you work, please don't forget to mention the
 author, Yerlan Idelbayev.
 '''
-from statistics import mode
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -106,9 +105,11 @@ class ResNet(nn.Module):
         out = self.layer1(out)
         out = self.layer2(out)
         out = self.layer3(out)
-        print(f'out size is {out.size()[3]}')
+        print(f'result 3 {out.shape}')
         out = F.avg_pool2d(out, out.size()[3])
+        print(f'result avg_pool {out.shape}')
         out = out.view(out.size(0), -1)
+        print(f'result view {out.shape}')
         out = self.linear(out)
         return out
 

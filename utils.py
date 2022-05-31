@@ -9,7 +9,6 @@ import pytorch_lightning as pl
 ##################################################
 
 import pytorch_lightning as pl
-from pytorch_lightning.callbacks import LearningRateMonitor
 import os
 import math
 import numpy as np
@@ -113,11 +112,9 @@ def get_callbacks(args):
         mode=args.metric_maxmin,
     )
     model_checkpoint_clbk.CHECKPOINT_NAME_LAST = '{epoch}-{step}'
-    lr_monitor = LearningRateMonitor(logging_interval='epoch')
     callbacks = [
         model_checkpoint_clbk,
         # DecayLR(lr_init=args.lr),
-        lr_monitor,
     ]
     return callbacks
 

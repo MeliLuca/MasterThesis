@@ -48,10 +48,9 @@ class ResNetModule(pl.LightningModule):
             self.avg_acc_rel = []
             self.rel_layer = MultiHeadAttention.MultiHeadAttentionScores(64,9)
             self.class_layer = torch.nn.Sequential(
-                nn.Flatten(1), 
                 (list(self.model.children())[-1])
             )
-            self.model = torch.nn.Sequential(*(list(self.model.children())[:-2]))
+            self.model = torch.nn.Sequential(*(list(self.model.children())[:-1]))
         # Create loss module
         self.loss_module = nn.CrossEntropyLoss()
 
@@ -98,6 +97,7 @@ class ResNetModule(pl.LightningModule):
 
             loss += loss_rel.item()
             preds = F.avg_pool2d(preds, preds.size()[3])
+            preds = preds.view(preds.size(0), -1)
             preds = self.class_layer(preds)
 
         loss += self.loss_module(preds, labels)
@@ -120,9 +120,8 @@ class ResNetModule(pl.LightningModule):
         print(f'pred shape is {preds.shape}')
         print(f'Am i use relations {self.args.use_relations}')
         if self.args.use_relations :
-            print('entra nel if di use relatioins')
-            print(preds.shape)
             preds = F.avg_pool2d(preds, preds.size()[3])
+            preds = preds.view(preds.size(0), -1)
             preds = self.class_layer(preds)
             print(preds.shape)
         loss = self.loss_module(preds, labels)
