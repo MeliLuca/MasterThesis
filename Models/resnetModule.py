@@ -44,14 +44,12 @@ class ResNetModule(pl.LightningModule):
             # self.model = resnet.ResNet50(use_relations=args.use_relations)
             self.model = torchvision.models.resnet50(pretrained = self.args.pretrained)
         if self.args.use_relations :
-            print('RELATIONS TRUEEEEEEE')
             self.avg_loss_rel = []
             self.avg_acc_rel = []
             self.rel_layer = MultiHeadAttention.MultiHeadAttentionScores(64,9)
             self.class_layer = torch.nn.Sequential(
-                torch.nn.Sequential((list(self.model.children())[-2]), 
                 nn.Flatten(1), 
-                (list(self.model.children())[-1]))
+                (list(self.model.children())[-1])
             )
             self.model = torch.nn.Sequential(*(list(self.model.children())[:-2]))
         # Create loss module
@@ -99,6 +97,7 @@ class ResNetModule(pl.LightningModule):
             self.avg_acc_rel += [acc_rel]
 
             loss += loss_rel.item()
+            preds = F.avg_pool2d(preds, preds.size()[3])
             preds = self.class_layer(preds)
 
         loss += self.loss_module(preds, labels)
@@ -123,6 +122,7 @@ class ResNetModule(pl.LightningModule):
         if self.args.use_relations :
             print('entra nel if di use relatioins')
             print(preds.shape)
+            preds = F.avg_pool2d(preds, preds.size()[3])
             preds = self.class_layer(preds)
             print(preds.shape)
         loss = self.loss_module(preds, labels)
@@ -137,6 +137,7 @@ class ResNetModule(pl.LightningModule):
         labels = batch['labels']
         preds = self.model(imgs)
         if self.args.use_relations :
+            preds = F.avg_pool2d(preds, preds.size()[3])
             preds = self.class_layer(preds)
         loss = self.loss_module(preds, labels)
         acc = accuracy(preds, labels)
