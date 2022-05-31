@@ -2,10 +2,7 @@
 ### job name
 #SBATCH --job-name=resnetWithAttention
 ### Redirezione dello standard output e standard error del programma
-#SBATCH --error=outputs/resnetOfficial_SGD_WD_REL.err
-#SBATCH --output=outputs/resnetOfficial_SGD_WD_REL.out
 ### Scelta della coda "testing" per tesisti
-#SBATCH --partition=testing
 ### Numero di host (nodes) occupati dal Job e numero di processi da allocare per nodo (ppn)
 #SBATCH --ntasks=1
 ### Memoria che ci si aspetta che il programma utilizzi
