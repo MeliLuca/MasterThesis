@@ -7,6 +7,7 @@ import pytorch_lightning as pl
 import logging
 import os
 import subprocess
+import torch
 
 # Custom
 from config import get_args
@@ -81,7 +82,7 @@ if __name__ == '__main__':
 
     # Parse input arguments
     args = get_args(sys.stdin, verbose=True)
-
+    torch.use_deterministic_algorithms(warn_only=True)
     # Set random seed
     pl.seed_everything(args.seed)
 
