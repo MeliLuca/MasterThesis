@@ -44,6 +44,7 @@ class ResNetModule(pl.LightningModule):
             # self.model = resnet.ResNet50(use_relations=args.use_relations)
             self.model = torchvision.models.resnet50(pretrained = self.args.pretrained)
         if self.args.use_relations :
+            print('RELATIONS TRUEEEEEEE')
             self.avg_loss_rel = []
             self.avg_acc_rel = []
             self.rel_layer = MultiHeadAttention.MultiHeadAttentionScores(64,9)
@@ -115,8 +116,15 @@ class ResNetModule(pl.LightningModule):
         imgs = batch['images']
         labels = batch['labels']
         preds = self.model(imgs)
+        print('#### PROOOBLEEMIIIII')
+        print(f'labels shape is {labels.shape}')
+        print(f'pred shape is {preds.shape}')
+        print(f'Am i use relations {self.args.use_relations}')
         if self.args.use_relations :
+            print('entra nel if di use relatioins')
+            print(preds.shape)
             preds = self.class_layer(preds)
+            print(preds.shape)
         loss = self.loss_module(preds, labels)
         acc = accuracy(preds, labels)
         # By default logs it per epoch (weighted average over batches)
