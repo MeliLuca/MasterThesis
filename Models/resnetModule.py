@@ -168,6 +168,7 @@ class ResNetModule(pl.LightningModule):
 
 def get_model(args):
     torch.backends.cudnn.deterministic = True
+    torch.set_deterministic_debug_mode()
     model_args = {
         'args': args,
         # 'num_classes': args.num_classes,
