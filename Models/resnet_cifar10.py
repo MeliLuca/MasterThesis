@@ -48,9 +48,9 @@ class Final_layers(nn.Module):
     def __init__(self):
         super().__init__()
     def forward(self,x):
-        # torch.use_deterministic_algorithms(False)
+        torch.use_deterministic_algorithms(False)
         x = F.avg_pool2d(x, x.size()[3])
-        # torch.use_deterministic_algorithms(True)
+        torch.use_deterministic_algorithms(True)
         x = x.view(x.size(0), -1)
         return x
 
