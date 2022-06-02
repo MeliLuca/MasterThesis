@@ -33,6 +33,7 @@ class ResNetModule(pl.LightningModule):
         self.avg_acc = []
         # Create model
         if self.args.backbone == 'cifar10_model':
+            print('take cifar 10 official model ')
             self.model = resnet_cifar10.resnet56()
         else :
             # self.model = resnet.ResNet50(use_relations=args.use_relations)

@@ -52,6 +52,7 @@ class Final_layers(nn.Module):
         x = F.avg_pool2d(x, x.size()[3])
         # torch.use_deterministic_algorithms(True)
         x = x.view(x.size(0), -1)
+        return x
 
 class BasicBlock(nn.Module):
     expansion = 1
