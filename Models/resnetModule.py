@@ -1,5 +1,6 @@
 from cProfile import label
 from cgitb import reset
+from turtle import forward
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
@@ -14,13 +15,6 @@ from PIL import Image
 from Layers import MultiHeadAttention
 from Models import resnet_cifar10, resnet
 
-class Flatten(nn.Module):
-    def __init__(self):
-        super(Flatten, self).__init__()
-        
-    def forward(self, x):
-        x = x.view(x.size(0), -1)
-        return x
 
 class ResNetModule(pl.LightningModule):
     def __init__(self, args):
@@ -47,8 +41,9 @@ class ResNetModule(pl.LightningModule):
             self.avg_loss_rel = []
             self.avg_acc_rel = []
             self.rel_layer = MultiHeadAttention.MultiHeadAttentionScores(64,9)
-            self.class_layer = torch.nn.Sequential((list(self.model.children())[-1]))
-            self.model = torch.nn.Sequential(*(list(self.model.children())[:-1]))
+            self.class_layer = torch.nn.Sequential(*(list(self.model.children())[-2:]))
+            print(f' stampo calss layer {self.class_layer.state_dict}')
+            self.model = torch.nn.Sequential(*(list(self.model.children())[:-2]))
         # Create loss module
         self.loss_module = nn.CrossEntropyLoss()
 
@@ -94,8 +89,7 @@ class ResNetModule(pl.LightningModule):
             self.avg_acc_rel += [acc_rel]
 
             loss += loss_rel.item()
-            preds = F.avg_pool2d(preds, preds.size()[3])
-            preds = preds.view(preds.size(0), -1)
+            
             preds = self.class_layer(preds)
 
         loss += self.loss_module(preds, labels)
@@ -118,8 +112,6 @@ class ResNetModule(pl.LightningModule):
         print(f'pred shape is {preds.shape}')
         print(f'Am i use relations {self.args.use_relations}')
         if self.args.use_relations :
-            preds = F.avg_pool2d(preds, preds.size()[3])
-            preds = preds.view(preds.size(0), -1)
             preds = self.class_layer(preds)
             print(preds.shape)
         loss = self.loss_module(preds, labels)
@@ -167,8 +159,6 @@ class ResNetModule(pl.LightningModule):
             checkpoint.pop("optimizer_states", None)
 
 def get_model(args):
-    torch.backends.cudnn.deterministic = True
-    torch.set_deterministic_debug_mode()
     model_args = {
         'args': args,
         # 'num_classes': args.num_classes,

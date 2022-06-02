@@ -44,6 +44,14 @@ class LambdaLayer(nn.Module):
     def forward(self, x):
         return self.lambd(x)
 
+class Final_layers(nn.Module):
+    def __init__(self):
+        super().__init__()
+    def forward(self,x):
+        # torch.use_deterministic_algorithms(False)
+        x = F.avg_pool2d(x, x.size()[3])
+        # torch.use_deterministic_algorithms(True)
+        x = x.view(x.size(0), -1)
 
 class BasicBlock(nn.Module):
     expansion = 1
@@ -87,6 +95,7 @@ class ResNet(nn.Module):
         self.layer1 = self._make_layer(block, 16, num_blocks[0], stride=1)
         self.layer2 = self._make_layer(block, 32, num_blocks[1], stride=2)
         self.layer3 = self._make_layer(block, 64, num_blocks[2], stride=2)
+        self.avg_flat = Final_layers()
         self.linear = nn.Linear(64, num_classes)
 
         self.apply(_weights_init)
