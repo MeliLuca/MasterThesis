@@ -5,12 +5,16 @@
     "version": "0.2.0",
     "configurations": [
 
+
+
+
+    
         {
-            "name": "Python: File corrente",
+            "name": "main py",
             "type": "python",
-            "args": ["--dataset=cifar10", "--num_gpus=0", "--use_relations"],
+            "args": ["--dataset=cifar10", "--num_gpus=0", "--use_relations", "--backbone=cifar10_model" ,"--batch_size=1"],
             "request": "launch",
-            "program": "${file}",
+            "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
             "justMyCode": true
         }
