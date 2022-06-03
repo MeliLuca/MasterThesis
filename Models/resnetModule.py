@@ -72,12 +72,17 @@ class ResNetModule(pl.LightningModule):
         # "batch" is the output of the training data loader.
         imgs = batch['images']
         labels = batch['labels']
-        loss=0
+        loss=0.0
+        # print(f'img {imgs.shape}')
         preds = self.model(imgs)
         if self.args.use_relations :
             target = batch['relations']
             rel_preds = self.rel_layer(preds)
-            loss_rel = cross_entropy(rel_preds, target)
+            # print(f' targrert {target.shape}')
+            # print(rel_preds.shape)
+            torch.use_deterministic_algorithms(False)
+            loss_rel = F.cross_entropy(rel_preds, target)
+            torch.use_deterministic_algorithms(True)
             acc_rel = accuracy(rel_preds, target)
             self.log(f'acc_rel', acc_rel, prog_bar=True)
             self.log(f'loss_rel', loss_rel.item())
@@ -86,7 +91,7 @@ class ResNetModule(pl.LightningModule):
             self.avg_loss_rel += [loss_rel]
             self.avg_acc_rel += [acc_rel]
 
-            loss += loss_rel.item()
+            loss += loss_rel
             
             preds = self.class_layer(preds)
 
@@ -105,13 +110,13 @@ class ResNetModule(pl.LightningModule):
         imgs = batch['images']
         labels = batch['labels']
         preds = self.model(imgs)
-        print('#### PROOOBLEEMIIIII')
-        print(f'labels shape is {labels.shape}')
-        print(f'pred shape is {preds.shape}')
-        print(f'Am i use relations {self.args.use_relations}')
+        # print('#### PROOOBLEEMIIIII')
+        # print(f'labels shape is {labels.shape}')
+        # print(f'pred shape is {preds.shape}')
+        # print(f'Am i use relations {self.args.use_relations}')
         if self.args.use_relations :
             preds = self.class_layer(preds)
-            print(preds.shape)
+            # print(preds.shape)
         loss = self.loss_module(preds, labels)
         acc = accuracy(preds, labels)
         # By default logs it per epoch (weighted average over batches)
