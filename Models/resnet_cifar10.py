@@ -48,9 +48,7 @@ class Final_layers(nn.Module):
     def __init__(self):
         super().__init__()
     def forward(self,x):
-        torch.use_deterministic_algorithms(False)
         x = F.avg_pool2d(x, x.size()[3])
-        torch.use_deterministic_algorithms(True)
         x = x.view(x.size(0), -1)
         return x
 
@@ -115,12 +113,7 @@ class ResNet(nn.Module):
         out = self.layer1(out)
         out = self.layer2(out)
         out = self.layer3(out)
-        print(f'result 3 {out.shape}')
-        out = F.avg_pool2d(out, out.size()[3])
-        print(f'result avg_pool {out.shape}')
-        out = out.view(out.size(0), -1)
-        print(f'result view {out.shape}')
-        out = self.linear(out)
+        
         return out
 
 
