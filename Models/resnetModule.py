@@ -68,7 +68,7 @@ class ResNetModule(pl.LightningModule):
 
         return optimizer 
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch, batch_idx, part='train'):
         # "batch" is the output of the training data loader.
         imgs = batch['images']
         labels = batch['labels']
@@ -104,20 +104,22 @@ class ResNetModule(pl.LightningModule):
         return loss  # Return tensor to call ".backward" on
 
     def validation_step(self, batch, batch_idx):
-        imgs = batch['images']
-        labels = batch['labels']
-        preds = self.model(imgs)
-        # print(f'labels shape is {labels.shape}')
-        # print(f'pred shape is {preds.shape}')
-        # print(f'Am i use relations {self.args.use_relations}')
-        if self.args.use_relations :
-            preds = self.class_layer(preds)
-            # print(preds.shape)
-        loss = self.loss_module(preds, labels)
-        acc = accuracy(preds, labels)
-        # By default logs it per epoch (weighted average over batches)
-        self.log("val_loss", loss)
-        self.log("val_acc", acc)
+        return self.training_step(batch, batch_idx, part='val')
+
+        # imgs = batch['images']
+        # labels = batch['labels']
+        # preds = self.model(imgs)
+        # # print(f'labels shape is {labels.shape}')
+        # # print(f'pred shape is {preds.shape}')
+        # # print(f'Am i use relations {self.args.use_relations}')
+        # if self.args.use_relations :
+        #     preds = self.class_layer(preds)
+        #     # print(preds.shape)
+        # loss = self.loss_module(preds, labels)
+        # acc = accuracy(preds, labels)
+        # # By default logs it per epoch (weighted average over batches)
+        # self.log("val_loss", loss)
+        # self.log("val_acc", acc)
 
 
     def test_step(self, batch, batch_idx):
