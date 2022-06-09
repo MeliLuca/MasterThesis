@@ -11,7 +11,7 @@
 #SBATCH --time=500:00:00
 ### Richiesta della percentuale di GPU
 #SBATCH --gres=gpu:1
-#SBATCH --cpus-per-task=32
+#SBATCH --cpus-per-task=4
 
 ### Alcuni comandi di shell che stampano lo stato
 ### del sistema prima dell'esecuzione
