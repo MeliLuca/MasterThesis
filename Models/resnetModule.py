@@ -94,12 +94,12 @@ class ResNetModule(pl.LightningModule):
             loss += loss_rel
             
             preds = self.class_layer(preds)
-
-        loss += self.loss_module(preds, labels)
-        acc = accuracy(preds, labels)
-        # Logs the accuracy per epoch to tensorboard (weighted average over batches)
-        self.log("train_acc", acc)
-        self.log("train_loss", loss)
+        if self.args.mode == 'upstream':
+            loss += self.loss_module(preds, labels)
+            acc = accuracy(preds, labels)
+            # Logs the accuracy per epoch to tensorboard (weighted average over batches)
+            self.log("train_acc", acc)
+            self.log("train_loss", loss)
         
         self.avg_loss += [loss]
         self.avg_acc += [acc]

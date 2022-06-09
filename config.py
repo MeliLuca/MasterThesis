@@ -103,7 +103,7 @@ def get_args(stdin, verbose=False):
     }
     args.num_classes = num_classes[args.dataset]
     if args.task == 'downstream':
-        args.metric_monitor = 'val_acc_clf'
+        args.metric_monitor = 'val_acc_rel'
         args.metric_maxmin = 'max'
     else:
         args.metric_monitor = 'val_loss'
