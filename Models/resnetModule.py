@@ -84,8 +84,8 @@ class ResNetModule(pl.LightningModule):
             loss_rel = F.cross_entropy(rel_preds, target)
             torch.use_deterministic_algorithms(True)
             acc_rel = accuracy(rel_preds, target)
-            self.log(f'acc_rel', acc_rel, prog_bar=True)
-            self.log(f'loss_rel', loss_rel.item())
+            self.log(f'{part}_acc_rel', acc_rel, prog_bar=True)
+            self.log(f'{part}_loss_rel', loss_rel.item())
 
             ## print metrics
             self.avg_loss_rel += [loss_rel]
@@ -98,8 +98,8 @@ class ResNetModule(pl.LightningModule):
             loss += self.loss_module(preds, labels)
             acc = accuracy(preds, labels)
             # Logs the accuracy per epoch to tensorboard (weighted average over batches)
-            self.log("train_acc", acc)
-            self.log("train_loss", loss)
+            self.log(f"{part}_acc", acc)
+            self.log(f"{part}_loss", loss)
 
         return loss  # Return tensor to call ".backward" on
 
