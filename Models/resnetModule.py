@@ -100,9 +100,6 @@ class ResNetModule(pl.LightningModule):
             # Logs the accuracy per epoch to tensorboard (weighted average over batches)
             self.log("train_acc", acc)
             self.log("train_loss", loss)
-        
-        self.avg_loss += [loss]
-        self.avg_acc += [acc]
 
         return loss  # Return tensor to call ".backward" on
 
