@@ -37,5 +37,5 @@ which nvcc
 ### Without singularity...
 source $HOME/miniconda3/etc/profile.d/conda.sh
 conda activate new_env
-python3 $HOME/storage/MasterThesis/main.py --epochs=190 --stats_path=resnetOfficialNet_SGD_WD --dataset=cifar10 --batch_size=256 --optimizer=sgd --weight_decay=0.0001 --lr=0.1 --backbone=cifar10_model --mode=upstream
+python3 $HOME/storage/MasterThesis/main.py --epochs=190 --stats_path=resnetOfficialNet_SGD_WD --dataset=cifar10 --batch_size=256 --optimizer=sgd --weight_decay=0.0001 --lr=0.1 --backbone=cifar10_model --logger=wandb
 ## added more layer that usual !!!
