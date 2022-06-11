@@ -127,6 +127,33 @@ def get_logger(args):
         logger = pl.loggers.tensorboard.TensorBoardLogger(
             save_dir=save_dir,
         )
+    elif logger_kind == 'wandb':
+        task_str = []
+        # if args.use_supervision:
+        #     task_str += ['clf']
+        if args.use_relations:
+            task_str += ['rel']
+        # if args.use_dist:
+        #     task_str += ['dist']
+        # if args.use_angle:
+        #     task_str += ['angle']
+        # if args.use_abs_positions:
+        #     task_str += ['abs_pos']
+        name = [
+            str(args.exp_id), args.dataset, '-'.join(task_str), 
+            '-'.join([str(args.backbone), str(args.model_size), str(args.patch_size), str(args.img_height)])
+        ]
+        # if len(args.attn_mask):
+        #     name += [f'attn_mask-{args.attn_mask}']
+        # if args.add_clf_to_patches:
+        #     name += ['add_clf_to_patches']
+        # if args.mega_patches:
+        #     name += [f'mega_patches_{args.side_megapatches}']
+        logger = pl.loggers.WandbLogger(
+            save_dir=os.path.join(os.getcwd(), 'tmp'),
+            name='/'.join(name),
+            project='master_thesis',
+        )
     else:
         raise Exception(f'Error. Logger "{logger_kind}" is not supported.')
     return logger

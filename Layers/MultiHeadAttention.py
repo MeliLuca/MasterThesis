@@ -79,10 +79,8 @@ class MultiHeadAttentionScores(nn.Module):
         self.heads = nn.ModuleList([
             HeadScores(h_dim, h_dim // num_heads) for _ in range(num_heads)
         ])
-        ## Da modificare assolutamente !!!!!
 
     def forward(self, input, k=None, v=None, mask=None):
-    
         B, num_patches = input.shape[0:2]
         q= input.reshape(B, num_patches, -1)
         x = [head(q, k, v, mask=mask) for head in self.heads]

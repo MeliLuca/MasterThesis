@@ -80,6 +80,7 @@ def get_args(stdin, verbose=False):
     parser.add_argument('--proj_dropout', type=float, default=0.0, help='Dropout rate of linear proj.')
     parser.add_argument('--weight_decay', type=float, default=0.0, help='Weight decay of the optimizer.')
     parser.add_argument('--pretrained', type=str, default=False, help='Weight decay of the optimizer.')
+    parser.add_argument('--emb_dim', type=str, default=64, help='Embedded dim for attention layer.')
 
 
     # Parse args
@@ -112,15 +113,15 @@ def get_args(stdin, verbose=False):
     # Patch size
     if args.patch_size == -1:
         patch_size = {
-            'cifar10': 4,
+            'cifar10': 64,
             'cifar10_36': 4,
-            'cifar10_226': 2025,
-            'cifar10_224': 2025,
+            'cifar10_226': 64,
+            'cifar10_224': 49,
             'cifar100': 4,
             'cifar100_224': 32,
             'tiny_imagenet': 8,
             'tiny_imagenet_224': 32,
-            'imagenet': 32,
+            'imagenet': 49,
             'caltech256': 32, 
             'flower102': 32,
             'oxford_pet': 32,
