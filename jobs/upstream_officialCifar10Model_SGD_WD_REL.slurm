@@ -1,6 +1,6 @@
 #!/bin/sh 
 ### job name
-#SBATCH --job-name=resnetWithAttention
+#SBATCH --job-name=upstream
 ### Redirezione dello standard output e standard error del programma
 ### Scelta della coda "testing" per tesisti
 ### Numero di host (nodes) occupati dal Job e numero di processi da allocare per nodo (ppn)
