@@ -71,8 +71,6 @@ class ResNetModule(pl.LightningModule):
         imgs = batch['images']
         labels = batch['labels']
         loss=0.0
-        print(f'img {imgs.shape}')
-        print(f'lable {labels.shape}')
         preds = self.model(imgs)
         if self.args.use_relations :
             target = batch['relations']
@@ -94,7 +92,6 @@ class ResNetModule(pl.LightningModule):
         
             preds = self.class_layer(preds)
         if self.args.task == 'upstream':
-            print(f'preds {preds.shape}')
             loss += self.loss_module(preds, labels)
             acc = accuracy(preds, labels)
             # Logs the accuracy per epoch to tensorboard (weighted average over batches)
