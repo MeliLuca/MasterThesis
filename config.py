@@ -113,7 +113,7 @@ def get_args(stdin, verbose=False):
     # Patch size
     if args.patch_size == -1:
         patch_size = {
-            'cifar10': 64,
+            'cifar10': 4,
             'cifar10_36': 4,
             'cifar10_226': 64,
             'cifar10_224': 49,
