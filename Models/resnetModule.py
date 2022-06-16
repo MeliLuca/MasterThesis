@@ -36,7 +36,7 @@ class ResNetModule(pl.LightningModule):
             # self.model = resnet.ResNet50(use_relations=args.use_relations)
             self.model = torchvision.models.resnet50(pretrained = self.args.pretrained)
         if self.args.use_relations :
-            self.rel_layer = MultiHeadAttention.MultiHeadAttentionScores(self.args.emb_dim,9)
+            self.rel_layer = MultiHeadAttention.MultiHeadAttentionScores(64,9)
             self.class_layer = torch.nn.Sequential(*(list(self.model.children())[-2:]))
             print(f' stampo calss layer {self.class_layer.state_dict}')
             self.model = torch.nn.Sequential(*(list(self.model.children())[:-2]))

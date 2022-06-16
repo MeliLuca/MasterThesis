@@ -48,11 +48,13 @@ class HeadScores(nn.Module):
         self.k_lin = nn.Linear(h_dim, head_out_dim, bias=False)
         self.v_lin = nn.Linear(h_dim, head_out_dim, bias=False)
         # print(f'dim head e out is {h_dim}, {head_out_dim}')
+        
     def forward(self, q, k=None, v=None, mask=None):
         if k is None:
             k = q
         if v is None:
             v = k
+        q= torch.transpose(q, 1,2)
         q = self.q_lin(q)
         # print(f'q shape after linearization is {q.shape}')
         k = self.k_lin(k)
