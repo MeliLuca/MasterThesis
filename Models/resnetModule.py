@@ -87,7 +87,7 @@ class ResNetModule(pl.LightningModule):
             loss += loss_rel
             preds = self.class_layer(preds)
         
-        if self.args.use_angle:
+        if self.args.use_angles:
             angle_pred = self.angle_layer(preds)
             y_angle = batch['angles'].unsqueeze(1) # [B, 1, N_PATCH, N_PATCH]
             loss_angle = F.mse_loss(angle_pred, y_angle)
