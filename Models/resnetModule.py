@@ -39,6 +39,10 @@ class ResNetModule(pl.LightningModule):
             self.rel_layer = MultiHeadAttention.MultiHeadAttentionScores(64,9)
             self.class_layer = torch.nn.Sequential(*(list(self.backbone.children())[-2:]))
             self.backbone = torch.nn.Sequential(*(list(self.backbone.children())[:-2]))
+        if self.args.use_angles :
+            self.angle_layer = MultiHeadAttention.MultiHeadAttentionScores(64,9)
+            self.class_layer = torch.nn.Sequential(*(list(self.backbone.children())[-2:]))
+            self.backbone = torch.nn.Sequential(*(list(self.backbone.children())[:-2]))
         # Create loss module
         self.loss_module = nn.CrossEntropyLoss()
 
@@ -83,7 +87,7 @@ class ResNetModule(pl.LightningModule):
             loss += loss_rel
             preds = self.class_layer(preds)
         
-        if self.use_angles:
+        if self.args.use_angles:
             angle_pred = self.angle_layer(preds)
             y_angle = batch['angles'].unsqueeze(1) # [B, 1, N_PATCH, N_PATCH]
             loss_angle = F.mse_loss(angle_pred, y_angle)
