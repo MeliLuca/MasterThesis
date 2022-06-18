@@ -145,10 +145,10 @@ class ResNetModule(pl.LightningModule):
 def get_model(args):
     model_args = {
         'args': args,
-        'num_classes': args.num_classes,
-        'num_rel_classes': args.num_rel_classes,
-        'use_relations': args.use_relations,
-        'use_supervision': args.use_supervision,
+        # 'num_classes': args.num_classes,
+        # 'num_rel_classes': args.num_rel_classes,
+        # 'use_relations': args.use_relations,
+        # 'use_supervision': args.use_supervision,
         # 'dropout': args.dropout,
         # 'freeze_fet_enc': args.freeze_fet_enc,
         # 'proj_dropout': args.proj_dropout,
