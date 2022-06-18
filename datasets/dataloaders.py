@@ -235,7 +235,7 @@ def get_datasets(args, transform='default', target_transform='default', patch_tr
             'side_megapatches': args.side_megapatches,
             'use_relations': args.use_relations,
             'use_distances': args.use_dist,
-            'use_angles': args.use_angle,
+            'use_angles': args.use_angles,
             'use_abs_positions': args.use_abs_positions,
         }
         dss = {
@@ -255,7 +255,7 @@ def get_datasets(args, transform='default', target_transform='default', patch_tr
             'patch_size': args.patch_size,
             'use_relations': args.use_relations,
             'use_distances': args.use_dist,
-            'use_angles': args.use_angle,
+            'use_angles': args.use_angles,
             'use_abs_positions': args.use_abs_positions,
         }
         dss = {

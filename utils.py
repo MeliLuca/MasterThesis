@@ -135,7 +135,7 @@ def get_logger(args):
             task_str += ['rel']
         # if args.use_dist:
         #     task_str += ['dist']
-        # if args.use_angle:
+        # if args.use_angles:
         #     task_str += ['angle']
         # if args.use_abs_positions:
         #     task_str += ['abs_pos']
