@@ -36,7 +36,7 @@ args: !!python/object:argparse.Namespace
   stats_path: small_res_cifar10
   task: upstream
   use_abs_positions: false
-  use_angle: false
+  use_angles: false
   use_dist: false
   use_positional_embeddings: false
   use_relations: false

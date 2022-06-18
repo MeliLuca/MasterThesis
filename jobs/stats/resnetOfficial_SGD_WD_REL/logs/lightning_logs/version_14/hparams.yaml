@@ -38,7 +38,7 @@ args: !!python/object:argparse.Namespace
   stats_path: resnetOfficial_SGD_WD_REL
   task: upstream
   use_abs_positions: false
-  use_angle: false
+  use_angles: false
   use_attention: false
   use_dist: false
   use_positional_embeddings: false
