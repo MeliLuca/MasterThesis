@@ -38,7 +38,6 @@ class ResNetModule(pl.LightningModule):
         if self.args.use_relations :
             self.rel_layer = MultiHeadAttention.MultiHeadAttentionScores(64,9)
             self.class_layer = torch.nn.Sequential(*(list(self.model.children())[-2:]))
-            print(f' stampo calss layer {self.class_layer.state_dict}')
             self.model = torch.nn.Sequential(*(list(self.model.children())[:-2]))
         # Create loss module
         self.loss_module = nn.CrossEntropyLoss()
@@ -90,8 +89,8 @@ class ResNetModule(pl.LightningModule):
 
             loss += loss_rel
         
-        if self.args.task == 'downstream':
             preds = self.class_layer(preds)
+        if self.args.task == 'downstream':
             loss += self.loss_module(preds, labels)
             acc = accuracy(preds, labels)
             # Logs the accuracy per epoch to tensorboard (weighted average over batches)
