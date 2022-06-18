@@ -34,7 +34,7 @@ class ResNetModule(pl.LightningModule):
             self.model = resnet_cifar10.resnet56()
         else :
             # self.model = resnet.ResNet50(use_relations=args.use_relations)
-            self.model = torchvision.models.resnet50(pretrained = self.args.pretrained)
+            self.model = torchvision.models.resnet50()
         if self.args.use_relations :
             self.rel_layer = MultiHeadAttention.MultiHeadAttentionScores(64,9)
             self.class_layer = torch.nn.Sequential(*(list(self.model.children())[-2:]))
@@ -60,9 +60,9 @@ class ResNetModule(pl.LightningModule):
         else:
             raise Exception(f'Error. Optimizer "{self.args.optimizer}" not supported.')
         self.optimizer = optimizer
-        if self.args.backbone == 'cifar10_model':
-            scheduler = torch.optim.lr_scheduler.ConstantLR(self.optimizer, factor=0.1, total_iters=40)
-            return ([optimizer], [scheduler])
+        # if self.args.backbone == 'cifar10_model':
+        #     scheduler = torch.optim.lr_scheduler.ConstantLR(self.optimizer, factor=0.1, total_iters=40)
+        #     return ([optimizer], [scheduler])
 
         return optimizer 
 
@@ -90,33 +90,21 @@ class ResNetModule(pl.LightningModule):
 
             loss += loss_rel
         
+        if self.args.task == 'downstream':
             preds = self.class_layer(preds)
-        if self.args.task == 'upstream':
             loss += self.loss_module(preds, labels)
             acc = accuracy(preds, labels)
             # Logs the accuracy per epoch to tensorboard (weighted average over batches)
             self.log(f"{part}_acc", acc)
             self.log(f"{part}_loss", loss)
+        
+        if part == 'train':
+            self.log('lr', self.optimizer.param_groups[0]['lr'])
 
         return loss  # Return tensor to call ".backward" on
 
     def validation_step(self, batch, batch_idx):
         return self.training_step(batch, batch_idx, part='val')
-
-        # imgs = batch['images']
-        # labels = batch['labels']
-        # preds = self.model(imgs)
-        # # print(f'labels shape is {labels.shape}')
-        # # print(f'pred shape is {preds.shape}')
-        # # print(f'Am i use relations {self.args.use_relations}')
-        # if self.args.use_relations :
-        #     preds = self.class_layer(preds)
-        #     # print(preds.shape)
-        # loss = self.loss_module(preds, labels)
-        # acc = accuracy(preds, labels)
-        # # By default logs it per epoch (weighted average over batches)
-        # self.log("val_loss", loss)
-        # self.log("val_acc", acc)
 
 
     def test_step(self, batch, batch_idx):
@@ -134,11 +122,6 @@ class ResNetModule(pl.LightningModule):
         # By default logs it per epoch (weighted average over batches), and returns it afterwards
         self.log("test_loss", loss)
         self.log("test_acc", acc)
-    
-    # def training_epoch_end(self):
-    #     loss = self.avg_loss.loss.mean()
-        
-    #     result.log('train_loss', avg_loss, on_epoch=True, prog_bar=True)
 
     def on_load_checkpoint(self, checkpoint: dict) -> None:
         state_dict = checkpoint["state_dict"]
@@ -162,10 +145,10 @@ class ResNetModule(pl.LightningModule):
 def get_model(args):
     model_args = {
         'args': args,
-        # 'num_classes': args.num_classes,
-        # 'num_rel_classes': args.num_rel_classes,
-        # 'use_relations': args.use_relations,
-        # 'use_supervision': args.use_supervision,
+        'num_classes': args.num_classes,
+        'num_rel_classes': args.num_rel_classes,
+        'use_relations': args.use_relations,
+        'use_supervision': args.use_supervision,
         # 'dropout': args.dropout,
         # 'freeze_fet_enc': args.freeze_fet_enc,
         # 'proj_dropout': args.proj_dropout,
