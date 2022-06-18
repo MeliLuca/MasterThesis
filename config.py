@@ -19,7 +19,7 @@ def get_args(stdin, verbose=False):
     parser.add_argument('--mode', type=str, default='train', help='The mode of the program, can "train" or "validate"')
     parser.add_argument('--num_gpus', type=int, default=1, help='The number of GPUs.')
     parser.add_argument('--epochs', type=int, default=190, help='The number of epochs for the training.')
-    parser.add_argument('--task', type=str, default='upstream', 
+    parser.add_argument('--task', type=str, default='downstream', 
                         help='The name of the task, can be "upstream" or "downstream"')
     parser.add_argument('--exp_id', type=str, default='', 
                         help='Experiment ID (like "u1").')
