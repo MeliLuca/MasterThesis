@@ -31,20 +31,20 @@ class ResNetModule(pl.LightningModule):
         # Create model
         if self.args.backbone == 'cifar10_model':
             print('take cifar 10 official model ')
-            self.model = resnet_cifar10.resnet56()
+            self.backbone = resnet_cifar10.resnet56()
         else :
             # self.model = resnet.ResNet50(use_relations=args.use_relations)
-            self.model = torchvision.models.resnet50()
+            self.backbone = torchvision.models.resnet50()
         if self.args.use_relations :
             self.rel_layer = MultiHeadAttention.MultiHeadAttentionScores(64,9)
-            self.class_layer = torch.nn.Sequential(*(list(self.model.children())[-2:]))
-            self.model = torch.nn.Sequential(*(list(self.model.children())[:-2]))
+            self.class_layer = torch.nn.Sequential(*(list(self.backbone.children())[-2:]))
+            self.backbone = torch.nn.Sequential(*(list(self.backbone.children())[:-2]))
         # Create loss module
         self.loss_module = nn.CrossEntropyLoss()
 
     def forward(self, imgs):
         # Forward function that is run when visualizing the graph
-        return self.model(imgs)
+        return self.backbone(imgs)
 
     def configure_optimizers(self):
         """
@@ -70,26 +70,30 @@ class ResNetModule(pl.LightningModule):
         imgs = batch['images']
         labels = batch['labels']
         loss=0.0
-        preds = self.model(imgs)
+        preds = self.backbone(imgs)
         if self.args.use_relations :
             target = batch['relations']
             rel_preds = self.rel_layer(preds)
-            # print(f' targrert {target.shape}')
-            # print(rel_preds.shape)
             torch.use_deterministic_algorithms(False)
             loss_rel = F.cross_entropy(rel_preds, target)
             torch.use_deterministic_algorithms(True)
             acc_rel = accuracy(rel_preds, target)
             self.log(f'{part}_acc_rel', acc_rel, prog_bar=True)
             self.log(f'{part}_loss_rel', loss_rel.item())
-
-            ## print metrics
-            self.avg_loss_rel += [loss_rel]
-            self.avg_acc_rel += [acc_rel]
-
             loss += loss_rel
-        
             preds = self.class_layer(preds)
+        
+        if self.use_angles:
+            angle_pred = self.angle_layer(preds)
+            y_angle = batch['angles'].unsqueeze(1) # [B, 1, N_PATCH, N_PATCH]
+            loss_angle = F.mse_loss(angle_pred, y_angle)
+            loss += loss_angle
+            self.log(f'{part}_loss_angle', loss_angle)
+            acc_angle = accuracy(angle_pred, y_angle)
+            self.log(f'{part}_acc_angle', acc_angle, prog_bar=True)
+            preds = self.class_layer(preds)
+
+
         if self.args.task == 'downstream':
             loss += self.loss_module(preds, labels)
             acc = accuracy(preds, labels)
@@ -109,7 +113,7 @@ class ResNetModule(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         imgs = batch['images']
         labels = batch['labels']
-        preds = self.model(imgs)
+        preds = self.backbone(imgs)
         # print(f'labels shape is {labels.shape}')
         # print(f'pred shape is {preds.shape}')
         # print(f'Am i use relations {self.args.use_relations}')
