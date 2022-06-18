@@ -53,7 +53,7 @@ def get_args(stdin, verbose=False):
                         help='Learn patches spatial relations.')
     parser.add_argument('--use_supervision', dest='use_supervision', action='store_true', help='Learn image classes.')
     parser.add_argument('--use_distances', dest='use_dist', action='store_true', help='Learn patch distances.')
-    parser.add_argument('--use_angles', dest='use_angles', action='store_true', help='Learn patch angles.')
+    parser.add_argument('--use_angles', dest='use_angle', action='store_true', help='Learn patch angles.')
     parser.add_argument('--use_abs_positions', dest='use_abs_positions', action='store_true', 
                         help='Learn absolute positions of patches.')
     parser.add_argument('--use_attention', dest='use_attention', action='store_true', help='learn with torch standard attention layer')
