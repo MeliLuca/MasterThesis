@@ -114,6 +114,7 @@ class ResNet(nn.Module):
         out = self.layer2(out)
         out = self.layer3(out)
         out = self.avg_flat(out)
+        out = self.linear(out)
         return out
 
 
