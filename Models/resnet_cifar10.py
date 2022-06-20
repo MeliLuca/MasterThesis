@@ -88,14 +88,15 @@ class ResNet(nn.Module):
     def __init__(self, block, num_blocks, num_classes=10):
         super(ResNet, self).__init__()
         self.in_planes = 16
-
+        self.relu = nn.ReLU(inplace=True) ## aggiunto layer per utilizzo relcnn
         self.conv1 = nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(16)
         self.layer1 = self._make_layer(block, 16, num_blocks[0], stride=1)
         self.layer2 = self._make_layer(block, 32, num_blocks[1], stride=2)
         self.layer3 = self._make_layer(block, 64, num_blocks[2], stride=2)
         self.avg_flat = Final_layers()
-        self.linear = nn.Linear(64, num_classes)
+        self.fc = nn.Linear(64, num_classes)
+        self.embed_dim = 64 * block.expansion
 
         self.apply(_weights_init)
 
@@ -114,7 +115,7 @@ class ResNet(nn.Module):
         out = self.layer2(out)
         out = self.layer3(out)
         out = self.avg_flat(out)
-        out = self.linear(out)
+        out = self.fc(out)
         return out
 
 

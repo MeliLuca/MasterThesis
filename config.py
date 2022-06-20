@@ -104,7 +104,7 @@ def get_args(stdin, verbose=False):
     }
     args.num_classes = num_classes[args.dataset]
     if args.task == 'downstream':
-        args.metric_monitor = 'val_loss'
+        args.metric_monitor = 'val_acc_clf'
         args.metric_maxmin = 'max'
     else:
         args.metric_monitor = 'val_loss'
@@ -115,13 +115,13 @@ def get_args(stdin, verbose=False):
         patch_size = {
             'cifar10': 4,
             'cifar10_36': 4,
-            'cifar10_226': 64,
-            'cifar10_224': 49,
+            'cifar10_226': 64, ## 34
+            'cifar10_224': 32,
             'cifar100': 4,
             'cifar100_224': 32,
             'tiny_imagenet': 8,
             'tiny_imagenet_224': 32,
-            'imagenet': 49,
+            'imagenet': 32,
             'caltech256': 32, 
             'flower102': 32,
             'oxford_pet': 32,
