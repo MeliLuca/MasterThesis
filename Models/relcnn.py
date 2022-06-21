@@ -111,7 +111,9 @@ class RelCNN(pl.LightningModule):
 
         if self.use_supervision:
             y_cls = batch['labels'] # [B]
+            torch.use_deterministic_algorithms(False)
             loss_clf = F.cross_entropy(logits['clf'], y_cls)
+            torch.use_deterministic_algorithms(True)
             loss += loss_clf
             acc_cls = accuracy(logits['clf'], y_cls)
             self.log(f'{part}_acc_clf', acc_cls, prog_bar=True)
