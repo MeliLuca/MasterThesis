@@ -38,6 +38,8 @@ class RelCNN(pl.LightningModule):
             #self.rel_head = nn.Conv2d(self.backbone.layer1[0].expansion * 512, 
             #                          self.num_rel_classes, kernel_size=1)
             self.rel_head = MultiHeadAttentionScores(list(self.backbone.children())[-1].in_features, num_rel_classes)
+        if self.use_angles:
+            self.angle_head = MultiHeadAttentionScores(list(self.backbone.children())[-1].in_features, 1)
 
     def forward_feat(self, x):
         """
@@ -59,29 +61,35 @@ class RelCNN(pl.LightningModule):
     def forward_feat_with_rel(self, x):
         x = self.forward_feat(x)
         B, C, H, W = x.shape
-        x_rel = torch.flatten(x, 2).transpose(1, 2)
-        x_rel = self.rel_head(x_rel)
-        x_rel = x_rel.transpose(1, 2).reshape(B, self.num_rel_classes, H * H, W * W)
+        out={}
+        x_att = torch.flatten(x, 2).transpose(1, 2)
+        if self.use_relations:
+            x_rel = self.rel_head(x_att)
+            out['rel'] = x_rel.transpose(1, 2).reshape(B, self.num_rel_classes, H * H, W * W)
+
+        if self.use_angles:
+            x_angle = self.angle_head(x_att)
+            out['angle'] = x_angle.transpose(1, 2).reshape(B, self.num_rel_classes, H * H, W * W)
 
         if self.args.backbone == 'cifar10_model':
             x_clf= self.backbone.avg_flat(x)
+
         else :
             x_clf = self.backbone.avgpool(x)
             x_clf = torch.flatten(x_clf, 1)
-        x_clf = self.backbone.fc(x_clf)
-        return x_clf, x_rel
+        out['clf'] = self.backbone.fc(x_clf)
+        return out
 
     def forward(self, x):
         out = {}
-        if self.use_relations:
-            x, x_rel = self.forward_feat_with_rel(x)
-            out['rel'] = x_rel
+        if self.use_relations or self.use_angles:
+            out = self.forward_feat_with_rel(x)
         else:
             x = self.forward_feat(x)
             x = self.backbone.avgpool(x)
             x = torch.flatten(x, 1)
             x = self.backbone.fc(x)
-        out['clf'] = x
+            out['clf'] = x
         return out
 
     def configure_optimizers(self):
@@ -127,6 +135,14 @@ class RelCNN(pl.LightningModule):
             acc_rel = accuracy(logits['rel'], y_rel)
             self.log(f'{part}_acc_rel', acc_rel, prog_bar=True)
             self.log(f'{part}_loss_rel', loss_rel)
+        
+        if self.args.use_angles:
+            y_angle = batch['angles'].unsqueeze(1) # [B, 1, N_PATCH, N_PATCH]
+            loss_angle = F.mse_loss(logits['angle'], y_angle)
+            loss += loss_angle
+            self.log(f'{part}_loss_angle', loss_angle)
+            acc_angle = accuracy(logits['angle'], y_angle)
+            self.log(f'{part}_acc_angle', acc_angle, prog_bar=True)
 
         # Log
         self.log(f'{part}_loss', loss)
@@ -169,6 +185,7 @@ def get_model(args):
         'num_classes': args.num_classes,
         'num_rel_classes': 9,
         'use_relations': args.use_relations,
+        'use_angles':args.use_angles,
         'use_supervision': args.use_supervision,
     }
     model = RelCNN(**model_args)
