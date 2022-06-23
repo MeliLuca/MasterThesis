@@ -26,6 +26,7 @@ class RelCNN(pl.LightningModule):
     def __init__(self, args, num_classes, *bargs, num_rel_classes=9, use_relations=False, 
                  use_supervision=True, use_angles=False, **bkwargs):
         super().__init__()
+        self.save_hyperparameters()
         self.args = args
         if self.args.backbone == 'cifar10_model':
             self.backbone = resnet_cifar10.__dict__['resnet56'](*bargs, **bkwargs)
