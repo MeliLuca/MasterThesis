@@ -133,7 +133,9 @@ class RelCNN(pl.LightningModule):
         if self.use_relations:
             y_rel = batch['relations'] # [B, N_PATCH, N_PATCH]
             # y_rel = create_connectivity_matrix(logits['rel'].shape[-1])
+            torch.use_deterministic_algorithms(False)
             loss_rel = F.cross_entropy(logits['rel'], y_rel)
+            torch.use_deterministic_algorithms(True)
             loss += loss_rel
             acc_rel = accuracy(logits['rel'], y_rel)
             self.log(f'{part}_acc_rel', acc_rel, prog_bar=True)
