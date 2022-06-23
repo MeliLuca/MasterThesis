@@ -72,10 +72,10 @@ class RelCNN(pl.LightningModule):
             out['angle'] = self.angle_head(x_att)
             # out['angle'] = x_angle.transpose(1, 2).reshape(B, self.num_rel_classes, H * H, W * W)
 
-        if self.args.backbone == 'cifar10_model':
+        if self.backbone == 'cifar10_model':
             x_clf= self.backbone.avg_flat(x)
 
-        if self.args.backbone != 'cifar10_model':
+        if self.backbone != 'cifar10_model':
             x_clf = self.backbone.avgpool(x)
             x_clf = torch.flatten(x_clf, 1)
         out['clf'] = self.backbone.fc(x_clf)
@@ -139,7 +139,7 @@ class RelCNN(pl.LightningModule):
             self.log(f'{part}_acc_rel', acc_rel, prog_bar=True)
             self.log(f'{part}_loss_rel', loss_rel)
         
-        if self.args.use_angles:
+        if self.use_angles:
             y_angle = batch['angles'].unsqueeze(1) # [B, 1, N_PATCH, N_PATCH]
             loss_angle = F.mse_loss(logits['angle'], y_angle)
             loss += loss_angle
