@@ -27,7 +27,7 @@ class RelCNN(pl.LightningModule):
                  use_supervision=True, use_angles=False, **bkwargs):
         super().__init__()
         self.args = args
-        if args.backbone == 'cifar10_model':
+        if self.args.backbone == 'cifar10_model':
             self.backbone = resnet_cifar10.__dict__['resnet56'](*bargs, **bkwargs)
         else : 
             self.backbone = models.__dict__[args.backbone](*bargs, **bkwargs)
@@ -72,10 +72,10 @@ class RelCNN(pl.LightningModule):
             out['angle'] = self.angle_head(x_att)
             # out['angle'] = x_angle.transpose(1, 2).reshape(B, self.num_rel_classes, H * H, W * W)
 
-        if self.backbone == 'cifar10_model':
+        if self.args.backbone == 'cifar10_model':
             x_clf= self.backbone.avg_flat(x)
 
-        if self.backbone != 'cifar10_model':
+        if self.args.backbone != 'cifar10_model':
             x_clf = self.backbone.avgpool(x)
             x_clf = torch.flatten(x_clf, 1)
         out['clf'] = self.backbone.fc(x_clf)
