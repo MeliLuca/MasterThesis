@@ -65,12 +65,12 @@ class RelCNN(pl.LightningModule):
         out={}
         x_att = torch.flatten(x, 2).transpose(1, 2)
         if self.use_relations:
-            x_rel = self.rel_head(x_att)
-            out['rel'] = x_rel.transpose(1, 2).reshape(B, self.num_rel_classes, H * H, W * W)
+            out['rel'] = self.rel_head(x_att)
+            # out['rel'] = x_rel.transpose(1, 2).reshape(B, self.num_rel_classes, H * H, W * W)
 
         if self.use_angles:
-            x_angle = self.angle_head(x_att)
-            out['angle'] = x_angle.transpose(1, 2).reshape(B, num_rel_classes, H * H, W * W)
+            out['angle'] = self.angle_head(x_att)
+            # out['angle'] = x_angle.transpose(1, 2).reshape(B, self.num_rel_classes, H * H, W * W)
 
         if self.args.backbone == 'cifar10_model':
             x_clf= self.backbone.avg_flat(x)

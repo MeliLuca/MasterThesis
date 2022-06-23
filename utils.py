@@ -108,7 +108,7 @@ def get_callbacks(args):
     model_checkpoint_clbk.CHECKPOINT_NAME_LAST = '{epoch}-{step}'
     callbacks = [
         model_checkpoint_clbk,
-        # DecayLR(lr_init=args.lr),
+        DecayLR(lr_init=args.lr),
     ]
     return callbacks
 
@@ -129,16 +129,16 @@ def get_logger(args):
         )
     elif logger_kind == 'wandb':
         task_str = []
-        # if args.use_supervision:
-        #     task_str += ['clf']
+        if args.use_supervision:
+            task_str += ['clf']
         if args.use_relations:
             task_str += ['rel']
-        # if args.use_dist:
-        #     task_str += ['dist']
-        # if args.use_angles:
-        #     task_str += ['angle']
-        # if args.use_abs_positions:
-        #     task_str += ['abs_pos']
+        if args.use_dist:
+            task_str += ['dist']
+        if args.use_angles:
+            task_str += ['angle']
+        if args.use_abs_positions:
+            task_str += ['abs_pos']
         name = [
             str(args.exp_id), args.dataset, '-'.join(task_str), 
             '-'.join([str(args.backbone), str(args.model_size), str(args.patch_size), str(args.img_height)])

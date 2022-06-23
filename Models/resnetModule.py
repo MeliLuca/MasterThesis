@@ -1,3 +1,4 @@
+from pyexpat import model
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
@@ -14,7 +15,8 @@ from Models import resnet_cifar10, resnet
 
 
 class ResNetModule(pl.LightningModule):
-    def __init__(self, args):
+    def __init__(self, args, num_classes,num_rel_classes=9, use_relations=False, 
+                 use_supervision=True, use_angles=False):
         """
         Inputs:
             model_name - Name of the model/CNN to run. Used for creating the model (see function below)
@@ -26,23 +28,24 @@ class ResNetModule(pl.LightningModule):
         # Exports the hyperparameters to a YAML file, and create "self.hparams" namespace
         self.save_hyperparameters()
         self.args = args
+        self.num_rel_classes = num_rel_classes
         self.avg_loss = []
         self.avg_acc = []
         # Create model
         if self.args.backbone == 'cifar10_model':
             print('take cifar 10 official model ')
-            self.backbone = resnet_cifar10.resnet56()
+            self.origin_backbone = resnet_cifar10.resnet56()
         else :
             # self.model = resnet.ResNet50(use_relations=args.use_relations)
-            self.backbone = torchvision.models.resnet50()
+            self.origin_backbone = torchvision.models.resnet50()
         if self.args.use_relations :
-            self.rel_layer = MultiHeadAttention.MultiHeadAttentionScores(64,9)
-            self.class_layer = torch.nn.Sequential(*(list(self.backbone.children())[-2:]))
-            self.backbone = torch.nn.Sequential(*(list(self.backbone.children())[:-2]))
+            self.rel_layer = MultiHeadAttention.MultiHeadAttentionScores(list(self.origin_backbone.children())[-1].in_features,num_rel_classes)
+            self.class_layer = torch.nn.Sequential(*(list(self.origin_backbone.children())[-2:]))
+            self.backbone = torch.nn.Sequential(*(list(self.origin_backbone.children())[:-2]))
         if self.args.use_angles :
-            self.angle_layer = MultiHeadAttention.MultiHeadAttentionScores(64,9)
-            self.class_layer = torch.nn.Sequential(*(list(self.backbone.children())[-2:]))
-            self.backbone = torch.nn.Sequential(*(list(self.backbone.children())[:-2]))
+            self.angle_layer = MultiHeadAttention.MultiHeadAttentionScores(list(self.origin_backbone.children())[-1].in_features,1)
+            self.class_layer = torch.nn.Sequential(*(list(self.origin_backbone.children())[-2:]))
+            self.backbone = torch.nn.Sequential(*(list(self.origin_backbone.children())[:-2]))
         # Create loss module
         self.loss_module = nn.CrossEntropyLoss()
 
@@ -74,7 +77,7 @@ class ResNetModule(pl.LightningModule):
         imgs = batch['images']
         labels = batch['labels']
         loss=0.0
-        preds = self.backbone(imgs)
+        preds = self.origin_backbone(imgs)
         if self.args.use_relations :
             target = batch['relations']
             rel_preds = torch.flatten(preds, 2).transpose(1, 2)
@@ -89,20 +92,24 @@ class ResNetModule(pl.LightningModule):
             preds = self.class_layer(preds)
         
         if self.args.use_angles:
-            print('enter to angle part')
             B, C, H, W = preds.shape
             angle_pred = torch.flatten(preds, 2).transpose(1, 2)
             angle_pred = self.angle_layer(angle_pred)
-            angle_pred = angle_pred.transpose(1, 2).reshape(B, self.args.num_rel_classes , H * H, W * W)
+            # angle_pred = angle_pred.transpose(1, 2).reshape(B, self.num_rel_classes, H * H, W * W)
 
             # angle_pred = self.angle_layer(preds)
-            y_angle = batch['angles'].unsqueeze(1) # [B, 1, N_PATCH, N_PATCH]
+            y_angle = batch['angles']# [B, 1, N_PATCH, N_PATCH]
             loss_angle = F.mse_loss(angle_pred, y_angle)
             loss += loss_angle
             self.log(f'{part}_loss_angle', loss_angle)
             acc_angle = accuracy(angle_pred, y_angle)
             self.log(f'{part}_acc_angle', acc_angle, prog_bar=True)
-            preds = self.class_layer(preds)
+            if self.args.backbone == 'cifar10_model':
+                preds = self.class_layer(preds)
+            else:
+                preds = self.origin_backbone.avgpool(preds)
+                preds = torch.flatten(preds, 1)
+                preds = self.origin_backbone.fc(preds)
 
 
         if self.args.task == 'downstream':
@@ -159,10 +166,11 @@ class ResNetModule(pl.LightningModule):
 def get_model(args):
     model_args = {
         'args': args,
-        # 'num_classes': args.num_classes,
-        # 'num_rel_classes': args.num_rel_classes,
-        # 'use_relations': args.use_relations,
-        # 'use_supervision': args.use_supervision,
+        'num_classes': args.num_classes,
+        'num_rel_classes': 9,
+        'use_relations': args.use_relations,
+        'use_supervision': args.use_supervision,
+        'use_angles':args.use_angles,
         # 'dropout': args.dropout,
         # 'freeze_fet_enc': args.freeze_fet_enc,
         # 'proj_dropout': args.proj_dropout,
