@@ -4,7 +4,6 @@
 
 
 ### Scelta della coda "testing" per tesisti
-# SBATCH --partition=testing
 
 ### Numero di host (nodes) occupati dal Job e numero di processi da allocare per nodo (ppn)
 # SBATCH --ntasks=1
