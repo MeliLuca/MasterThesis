@@ -40,7 +40,7 @@ def main(args):
     if args.backbone =='resnet-small':
         model = resnetSmall.get_model(args)
     if args.backbone =='cifar10_model':
-        model = resnetModule.get_model(args)
+        model = relcnn.get_model(args)
     else:
         model = relcnn.get_model(args)
     # elif args.backbone == 'simsiam':
