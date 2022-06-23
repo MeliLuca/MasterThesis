@@ -7,7 +7,7 @@ import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.optim import SGD, Adam
+from torch.optim import SGD, Adam, AdamW
 import torchvision.models as models
 import logging
 
@@ -24,7 +24,7 @@ from Models import resnet_cifar10
 
 class RelCNN(pl.LightningModule):
     def __init__(self, args, num_classes, *bargs, num_rel_classes=9, use_relations=False, 
-                 use_supervision=True, **bkwargs):
+                 use_supervision=True, use_angles=False, **bkwargs):
         super().__init__()
         self.args = args
         if args.backbone == 'cifar10_model':
@@ -32,6 +32,7 @@ class RelCNN(pl.LightningModule):
         else : 
             self.backbone = models.__dict__[args.backbone](*bargs, **bkwargs)
         self.use_relations = use_relations
+        self.use_angles = use_angles
         self.use_supervision = use_supervision
         self.num_rel_classes = num_rel_classes
         if self.use_relations:
@@ -69,12 +70,12 @@ class RelCNN(pl.LightningModule):
 
         if self.use_angles:
             x_angle = self.angle_head(x_att)
-            out['angle'] = x_angle.transpose(1, 2).reshape(B, self.num_rel_classes, H * H, W * W)
+            out['angle'] = x_angle.transpose(1, 2).reshape(B, num_rel_classes, H * H, W * W)
 
         if self.args.backbone == 'cifar10_model':
             x_clf= self.backbone.avg_flat(x)
 
-        else :
+        if self.args.backbone != 'cifar10_model':
             x_clf = self.backbone.avgpool(x)
             x_clf = torch.flatten(x_clf, 1)
         out['clf'] = self.backbone.fc(x_clf)
@@ -99,7 +100,9 @@ class RelCNN(pl.LightningModule):
         if self.args.optimizer == 'adam':                                                                               
             optimizer = Adam(self.parameters(), self.args.lr)                                                           
         elif self.args.optimizer == 'sgd':                                                                              
-            optimizer = SGD(self.parameters(), self.args.lr, momentum=0.9, weight_decay=5e-5)                           
+            optimizer = SGD(self.parameters(), self.args.lr, momentum=0.9, weight_decay=5e-5)
+        elif self.args.optimizer == 'adamw':
+            optimizer = AdamW(self.parameters(), self.args.lr, weight_decay=self.args.weight_decay)                           
         else:                                                                                                           
             raise Exception(f'Error. Optimizer "{self.args.optimizer}" not supported.')                                 
         self.optimizer = optimizer                                                                                      

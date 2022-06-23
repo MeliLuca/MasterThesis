@@ -4,12 +4,9 @@ Reference:
 [1] Kaiming He, Xiangyu Zhang, Shaoqing Ren, Jian Sun
     Deep Residual Learning for Image Recognition. arXiv:1512.03385
 '''
-from urllib.parse import uses_relative
-from matplotlib import use
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from Layers import MultiHeadAttention
 
 
 class BasicBlock(nn.Module):
@@ -72,25 +69,25 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, block, num_blocks, num_classes=10, use_relations=False):
+    def __init__(self, block, num_blocks, num_classes=10, small_images=False):
         super(ResNet, self).__init__()
         self.in_planes = 64
-        self.use_relations = use_relations
-        # if self.small_images:
-        #     self.conv1 = nn.Conv2d(3, 64, kernel_size=3,
-        #                            stride=1, padding=1, bias=False)
-        # else:
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, 
-                                stride=2, padding=3, bias=False)
-        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        self.small_images = small_images
+
+        if self.small_images:
+            self.conv1 = nn.Conv2d(3, 64, kernel_size=3,
+                                   stride=1, padding=1, bias=False)
+        else:
+            self.conv1 = nn.Conv2d(3, 64, kernel_size=7, 
+                                   stride=2, padding=3, bias=False)
+            self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         self.bn1 = nn.BatchNorm2d(64)
         self.layer1 = self._make_layer(block, 64, num_blocks[0], stride=1)
         self.layer2 = self._make_layer(block, 128, num_blocks[1], stride=2)
         self.layer3 = self._make_layer(block, 256, num_blocks[2], stride=2)
         self.layer4 = self._make_layer(block, 512, num_blocks[3], stride=2)
-        self.linear = nn.Linear(512*block.expansion, num_classes)
-        if self.use_relations :
-            self.rel = MultiHeadAttention.MultiHeadAttentionScores(64,9)
+        #self.linear = nn.Linear(512*block.expansion, num_classes)
+        self.embed_dim = 512 * block.expansion
 
     def _make_layer(self, block, planes, num_blocks, stride):
         strides = [stride] + [1]*(num_blocks-1)
@@ -103,18 +100,16 @@ class ResNet(nn.Module):
     def forward(self, x, mask=None):
         out = {}
         x = F.relu(self.bn1(self.conv1(x)))
-        # if not self.small_images:
-        #     x = self.maxpool(x)
+        if not self.small_images:
+            x = self.maxpool(x)
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
-        if self.use_relations:
-            x_rel = self.rel(x)
         x = F.avg_pool2d(x, 4)
         x = x.view(x.size(0), -1)
-        out['class_pred'] = self.linear(out)
-        out['rel_pred'] = x_rel
+        #out = self.linear(out)
+        out['z'] = x
         return out
 
 

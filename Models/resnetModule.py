@@ -77,7 +77,8 @@ class ResNetModule(pl.LightningModule):
         preds = self.backbone(imgs)
         if self.args.use_relations :
             target = batch['relations']
-            rel_preds = self.rel_layer(preds)
+            rel_preds = torch.flatten(preds, 2).transpose(1, 2)
+            rel_preds = self.rel_layer(rel_preds)
             torch.use_deterministic_algorithms(False)
             loss_rel = F.cross_entropy(rel_preds, target)
             torch.use_deterministic_algorithms(True)
@@ -88,11 +89,11 @@ class ResNetModule(pl.LightningModule):
             preds = self.class_layer(preds)
         
         if self.args.use_angles:
-            print('ennter to angle part')
+            print('enter to angle part')
             B, C, H, W = preds.shape
             angle_pred = torch.flatten(preds, 2).transpose(1, 2)
             angle_pred = self.angle_layer(angle_pred)
-            angle_pred = angle_pred.transpose(1, 2).reshape(B, 9 , H * H, W * W)
+            angle_pred = angle_pred.transpose(1, 2).reshape(B, self.args.num_rel_classes , H * H, W * W)
 
             # angle_pred = self.angle_layer(preds)
             y_angle = batch['angles'].unsqueeze(1) # [B, 1, N_PATCH, N_PATCH]
