@@ -36,5 +36,5 @@ which nvcc
 source $HOME/miniconda3/etc/profile.d/conda.sh
 conda activate new_env
 export WANDB_API_KEY=1c9bad0d162960a36cc8fecc456d0dc024cb834c
-python3 $HOME/storage/MasterThesis/main.py --epochs=190 --stats_path=resnet50_flower_SGD_WD_DecayLR --dataset flower102 --batch_size=64 --optimizer=sgd --weight_decay=0.0001 --lr=0.1 --backbone resnet50 --use_supervision
+python3 $HOME/storage/MasterThesis/main.py --epochs=190 --logger wandb --stats_path=resnet50_flower_SGD_WD_DecayLR_wandb --dataset flower102 --batch_size=64 --optimizer=sgd --weight_decay=0.0001 --lr=0.1 --backbone resnet50 --use_supervision
 ## added more layer that usual !!!
