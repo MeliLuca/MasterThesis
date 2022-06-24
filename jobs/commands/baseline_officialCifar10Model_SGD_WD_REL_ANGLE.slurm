@@ -26,4 +26,4 @@ which nvcc
 ### Without singularity...
 source $HOME/miniconda3/etc/profile.d/conda.sh
 conda activate new_env
-python3 $HOME/storage/MasterThesis/main.py --stats_path=resnetOfficial_SGD_WD_REL_ANGLE --dataset=cifar10 --batch_size=256 --optimizer=sgd --weight_decay=0.0001 --lr=0.1 --backbone=cifar10_model --use_supervision --use_relations --use_angles --logger=csv
+python3 $HOME/storage/MasterThesis/main.py --stats_path= ../stats/resnetOfficial_SGD_WD_REL_ANGLE --dataset=cifar10 --batch_size=256 --optimizer=sgd --weight_decay=0.0001 --lr=0.1 --backbone=cifar10_model --use_supervision --use_relations --use_angles --logger=csv

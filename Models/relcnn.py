@@ -10,6 +10,10 @@ import torch.nn.functional as F
 from torch.optim import SGD, Adam, AdamW
 import torchvision.models as models
 import logging
+import wandb
+from torchvision.utils import make_grid
+from sklearn.decomposition import PCA
+
 
 # Custom
 from Layers.MultiHeadAttention import MultiHeadAttentionScores
@@ -149,6 +153,18 @@ class RelCNN(pl.LightningModule):
             self.log(f'{part}_loss_angle', loss_angle)
             acc_angle = accuracy(logits['angle'], y_angle)
             self.log(f'{part}_acc_angle', acc_angle, prog_bar=True)
+        
+        if batch_idx == 0 and self.args.backbone in ['vit', 'simsiam']:
+            kernel = list(self.backbone.patch_embed.parameters())[0].detach().cpu().numpy()
+            D, C, PS, PS = kernel.shape
+            pca = PCA(n_components=28)
+            rgb_filt = pca.fit_transform(kernel.reshape(D, -1).T).T.reshape(-1, C, PS, PS)
+            rgb_filt = (rgb_filt - rgb_filt.min()) / (rgb_filt.max() - rgb_filt.min())
+            rgb_filt = torch.tensor(rgb_filt)
+            rgb_filt = make_grid(rgb_filt, nrow=7, padding=1)
+            if self.args.logger == 'wandb':
+                self.logger.experiment.log({'rgb_emb_filters': [wandb.Image(rgb_filt)]})
+
 
         # Log
         self.log(f'{part}_loss', loss)
