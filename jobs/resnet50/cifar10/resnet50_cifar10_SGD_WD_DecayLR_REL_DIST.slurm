@@ -1,6 +1,6 @@
 #!/bin/sh
 ### job name
-#SBATCH --job-name=resnet_flower
+#SBATCH --job-name=REL+DIST
 
 
 ### Scelta della coda "testing" per tesisti
@@ -37,7 +37,7 @@ export WANDB_API_KEY=1c9bad0d162960a36cc8fecc456d0dc024cb834c
 python3 $HOME/storage/MasterThesis/main.py \
  --epochs 190 \
  --logger wandb \
- --stats_path ../stats/resnet50_cifar10_SGD_WD_DecayLR_ANGLE \
+ --stats_path /stats/resnet50_cifar10_SGD_WD_DecayLR_REL_DIST \
  --dataset cifar10 \
  --batch_size 256 \
  --optimizer sgd \
@@ -45,5 +45,6 @@ python3 $HOME/storage/MasterThesis/main.py \
  --lr 0.1 \
  --backbone cifar10_model \
  --use_supervision \
- --use_angles
+ --use_relations \
+ --use_distances
 ## added more layer that usual !!!
