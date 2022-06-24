@@ -133,7 +133,7 @@ def get_logger(args):
             task_str += ['clf']
         if args.use_relations:
             task_str += ['rel']
-        if args.use_dist:
+        if args.use_distances:
             task_str += ['dist']
         if args.use_angles:
             task_str += ['angle']
