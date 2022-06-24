@@ -92,8 +92,12 @@ class RelCNN(pl.LightningModule):
             out = self.forward_feat_with_rel(x)
         else:
             x = self.forward_feat(x)
-            x = self.backbone.avgpool(x)
-            x = torch.flatten(x, 1)
+            if self.args.backbone == 'cifar10_model':
+                x= self.backbone.avg_flat(x)
+            else:
+                x = self.backbone.avgpool(x)
+                x = torch.flatten(x, 1)
+
             x = self.backbone.fc(x)
             out['clf'] = x
         return out
