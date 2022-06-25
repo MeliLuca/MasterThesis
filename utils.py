@@ -143,15 +143,9 @@ def get_logger(args):
             task_str += ['abs_pos']
         exp_id = str(args.exp_id) if args.exp_id != '' else random.choices(string.ascii_uppercase + string.digits, k=4)
         name = [
-            exp_id, args.dataset, '-'.join(task_str), 
+            args.exp_id, args.dataset, '-'.join(task_str), 
             '-'.join([str(args.backbone), str(args.model_size), str(args.patch_size), str(args.img_height)])
         ]
-        # if len(args.attn_mask):
-        #     name += [f'attn_mask-{args.attn_mask}']
-        # if args.add_clf_to_patches:
-        #     name += ['add_clf_to_patches']
-        # if args.mega_patches:
-        #     name += [f'mega_patches_{args.side_megapatches}']
         logger = pl.loggers.WandbLogger(
             save_dir= save_dir,
             name='/'.join(name),
