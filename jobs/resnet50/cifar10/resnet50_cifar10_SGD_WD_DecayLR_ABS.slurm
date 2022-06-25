@@ -36,7 +36,7 @@ conda activate new_env
 export WANDB_API_KEY=1c9bad0d162960a36cc8fecc456d0dc024cb834c
 python3 $HOME/storage/MasterThesis/main.py \
  --epochs 190 \
- --logger wandb \
+ --logger csv \
  --stats_path resnet50_cifar10_SGD_WD_DecayLR_ABS \
  --dataset cifar10 \
  --batch_size 256 \
@@ -45,5 +45,5 @@ python3 $HOME/storage/MasterThesis/main.py \
  --lr 0.1 \
  --backbone cifar10_model \
  --use_supervision \
- --use_abs_positions
+ --use_abs_positions \
 ## added more layer that usual !!!
