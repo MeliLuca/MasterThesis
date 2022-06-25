@@ -28,7 +28,7 @@ from Models import resnet_cifar10
 
 class RelCNN(pl.LightningModule):
     def __init__(self, args, num_classes, *bargs, num_rel_classes=9, use_relations=False, 
-                 use_supervision=True, use_angles=False, **bkwargs):
+                 use_supervision=True, use_angles=False, use_distances=False, use_abs_positions=False, **bkwargs):
         super().__init__()
         self.save_hyperparameters()
         self.args = args
@@ -40,12 +40,19 @@ class RelCNN(pl.LightningModule):
         self.use_angles = use_angles
         self.use_supervision = use_supervision
         self.num_rel_classes = num_rel_classes
+        self.use_distances = use_distances
+        self.use_abs_positions = use_abs_positions
+
         if self.use_relations:
             #self.rel_head = nn.Conv2d(self.backbone.layer1[0].expansion * 512, 
             #                          self.num_rel_classes, kernel_size=1)
             self.rel_head = MultiHeadAttentionScores(list(self.backbone.children())[-1].in_features, num_rel_classes)
         if self.use_angles:
             self.angle_head = MultiHeadAttentionScores(list(self.backbone.children())[-1].in_features, 1)
+        if self.use_distances:
+            self.dist_head = MultiHeadAttentionScores(list(self.backbone.children())[-1].in_features, 1)
+        if self.use_abs_positions:
+            self.abs_pos_head = MultiHeadAttentionScores(list(self.backbone.children())[-1].in_features, 1)
 
     def forward_feat(self, x):
         """
@@ -64,42 +71,27 @@ class RelCNN(pl.LightningModule):
             x = self.backbone.layer4(x)
         return x
 
-    def forward_feat_with_rel(self, x):
+    # def self.forward_feat_with_rel(x):
+    def forward(self, x):
         x = self.forward_feat(x)
         B, C, H, W = x.shape
         out={}
         x_att = torch.flatten(x, 2).transpose(1, 2)
         if self.use_relations:
             out['rel'] = self.rel_head(x_att)
-            # out['rel'] = x_rel.transpose(1, 2).reshape(B, self.num_rel_classes, H * H, W * W)
-
         if self.use_angles:
             out['angle'] = self.angle_head(x_att)
-            # out['angle'] = x_angle.transpose(1, 2).reshape(B, self.num_rel_classes, H * H, W * W)
-
-        if self.args.backbone == 'cifar10_model':
-            x_clf= self.backbone.avg_flat(x)
-
-        if self.args.backbone != 'cifar10_model':
-            x_clf = self.backbone.avgpool(x)
-            x_clf = torch.flatten(x_clf, 1)
-        out['clf'] = self.backbone.fc(x_clf)
-        return out
-
-    def forward(self, x):
-        out = {}
-        if self.use_relations or self.use_angles:
-            out = self.forward_feat_with_rel(x)
-        else:
-            x = self.forward_feat(x)
+        if self.use_distances:
+            out['dist'] = self.dist_head(x_att)
+        if self.use_abs_positions:
+            out['abs_pos'] = self.abs_pos_head(x_att)
+        if self.use_supervision: 
             if self.args.backbone == 'cifar10_model':
-                x= self.backbone.avg_flat(x)
+                x_clf= self.backbone.avg_flat(x)
             else:
-                x = self.backbone.avgpool(x)
-                x = torch.flatten(x, 1)
-
-            x = self.backbone.fc(x)
-            out['clf'] = x
+                x_clf = self.backbone.avgpool(x)
+                x_clf = torch.flatten(x_clf, 1)
+            out['clf'] = self.backbone.fc(x_clf)
         return out
 
     def configure_optimizers(self):
@@ -157,6 +149,20 @@ class RelCNN(pl.LightningModule):
             self.log(f'{part}_loss_angle', loss_angle)
             acc_angle = accuracy(logits['angle'], y_angle)
             self.log(f'{part}_acc_angle', acc_angle, prog_bar=True)
+
+        if self.use_distances:
+            y_dist = batch['distances'].unsqueeze(1) # [B, 1, N_PATCH, N_PATCH]
+            loss_dist = F.mse_loss(logits['dist'], y_dist)
+            loss += loss_dist
+            self.log(f'{part}_loss_dist', loss_dist)
+        
+        if self.use_abs_positions:
+            y_abs_pos = batch['abs_positions'] # [B, N_PATCH]
+            loss_abs_pos = F.cross_entropy(logits['abs_pos'], y_abs_pos)
+            loss += loss_abs_pos
+            acc_abs_pos = accuracy(logits['abs_pos'], y_abs_pos)
+            self.log(f'{part}_acc_abs_pos', acc_abs_pos, prog_bar=True)
+            self.log(f'{part}_loss_abs_pos', loss_abs_pos)
         
         # if batch_idx == 0 and self.args.backbone in ['vit', 'simsiam']:
         #     kernel = list(self.backbone.patch_embed.parameters())[0].detach().cpu().numpy()
@@ -212,6 +218,8 @@ def get_model(args):
         'num_rel_classes': 9,
         'use_relations': args.use_relations,
         'use_angles':args.use_angles,
+        'use_distances':args.use_distances,
+        'use_abs_positions':args.use_abs_positions,
         'use_supervision': args.use_supervision,
     }
     model = RelCNN(**model_args)
