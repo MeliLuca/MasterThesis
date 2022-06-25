@@ -24,7 +24,6 @@ def get_args(stdin, verbose=False):
     parser.add_argument('--exp_id', type=str, default='', 
                         help='Experiment ID (like "u1").')
     parser.add_argument('--enable_progress_bar', type=bool, default=True, help='Show the progress bar')
-    parser.add_argument('--add_label', type=str, default='', help='add label to logger wandb to not have errors')
 
     # Datasets params
     parser.add_argument('--dataset', type=str, default='cifar10', help='Name of the dataset.')
@@ -82,6 +81,7 @@ def get_args(stdin, verbose=False):
     parser.add_argument('--weight_decay', type=float, default=0.0, help='Weight decay of the optimizer.')
     parser.add_argument('--pretrained', type=str, default=False, help='Weight decay of the optimizer.')
     parser.add_argument('--emb_dim', type=str, default=64, help='Embedded dim for attention layer.')
+    parser.add_argument('--decay_lr_sched', type=str, default='cosine', help='Strategy to schedule lr decay')
 
 
     # Parse args

@@ -80,6 +80,7 @@ def cos_anneal_warmup(e0, e1, t0, t1, e_w, e):
 class DecayLR(pl.Callback):
     def __init__(self, lr_init=3e-4, lr_end=1.25e-6, log_lr=False):
         super(DecayLR, self).__init__()
+        print('use cosine decay')
         self.lr_init = lr_init
         self.lr_end = lr_end
         self.log_lr = log_lr
@@ -108,10 +109,15 @@ def get_callbacks(args):
         mode=args.metric_maxmin,
     )
     model_checkpoint_clbk.CHECKPOINT_NAME_LAST = '{epoch}-{step}'
-    callbacks = [
-        model_checkpoint_clbk,
-        DecayLR(lr_init=args.lr),
-    ]
+    if args.decay_lr_sched == 'cosine' :
+        callbacks = [
+            model_checkpoint_clbk,
+            DecayLR(lr_init=args.lr),
+        ]
+    else :
+        callbacks = [
+            model_checkpoint_clbk,
+        ]
     return callbacks
 
 def get_logger(args):
