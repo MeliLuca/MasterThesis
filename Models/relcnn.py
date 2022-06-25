@@ -109,7 +109,7 @@ class RelCNN(pl.LightningModule):
         else:                                                                                                           
             raise Exception(f'Error. Optimizer "{self.args.optimizer}" not supported.')                                 
         self.optimizer = optimizer 
-        if self.args.decay_lr_sched == 'costant':
+        if self.args.decay_lr_sched == 'constant':
             scheduler = torch.optim.lr_scheduler.ConstantLR(self.optimizer, factor=0.1, total_iters=40)
             return ([optimizer], [scheduler])
                                                                                      
