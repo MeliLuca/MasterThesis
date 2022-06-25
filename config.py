@@ -79,7 +79,7 @@ def get_args(stdin, verbose=False):
     parser.add_argument('--drop_path_rate', type=float, default=0.0, help='Dropout path rate fo rht ViT.')
     parser.add_argument('--proj_dropout', type=float, default=0.0, help='Dropout rate of linear proj.')
     parser.add_argument('--weight_decay', type=float, default=0.0, help='Weight decay of the optimizer.')
-    parser.add_argument('--pretrained', type=str, default=False, help='Weight decay of the optimizer.')
+    parser.add_argument('--auto_scale_batch_size', type=str, default=False, help='Auto scale batch size.')
     parser.add_argument('--emb_dim', type=str, default=64, help='Embedded dim for attention layer.')
     parser.add_argument('--decay_lr_sched', type=str, default='cosine', help='Strategy to schedule lr decay')
 

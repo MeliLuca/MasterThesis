@@ -38,7 +38,7 @@ python3 $HOME/storage/MasterThesis/main.py \
  --logger wandb \
  --stats_path resnet50_cifar10_224_SGD_WD_DecayLR_DIST \
  --dataset cifar10_224 \
- --batch_size 64 \
+ --auto_scale_batch_size True \
  --optimizer sgd \
  --weight_decay 0.0001 \
  --lr 0.1 \
