@@ -14,7 +14,8 @@
                 "--batch_size=1",
                 "--optimizer=sgd",
                 "--use_supervision",
-                "--use_angles",
+                "--use_abs_positions",
+                "--use_relations"
             ],
             "request": "launch",
             "program": "${workspaceFolder}/main.py",
