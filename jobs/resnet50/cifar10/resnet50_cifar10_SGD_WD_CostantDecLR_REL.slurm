@@ -9,7 +9,6 @@
 # SBATCH --ntasks=1
 
 ### Memoria che ci si aspetta che il programma utilizzi
-# SBATCH --mem=50G
 
 ### Limite di tempo che vogliamo assegnare al nostro job (qui un'ora: HH:MM:SS)
 # SBATCH --time=500:00:00
