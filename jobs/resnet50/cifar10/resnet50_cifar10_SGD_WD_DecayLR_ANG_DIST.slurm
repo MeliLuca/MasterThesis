@@ -46,5 +46,5 @@ python3 $HOME/storage/MasterThesis/main.py \
  --backbone cifar10_model \
  --use_supervision \
  --use_angles \
- --use_distances
+ --use_distances 
 ## added more layer that usual !!!

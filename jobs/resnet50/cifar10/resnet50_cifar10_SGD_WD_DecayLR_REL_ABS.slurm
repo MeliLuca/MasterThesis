@@ -46,5 +46,6 @@ python3 $HOME/storage/MasterThesis/main.py \
  --backbone cifar10_model \
  --use_supervision \
  --use_relations \
- --use_abs_positions
+ --use_abs_positions \
+ --add_label v1
 ## added more layer that usual !!!
