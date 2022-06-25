@@ -150,7 +150,7 @@ def get_logger(args):
         # if args.mega_patches:
         #     name += [f'mega_patches_{args.side_megapatches}']
         logger = pl.loggers.WandbLogger(
-            save_dir=os.path.join(os.getcwd(), 'tmp'),
+            save_dir= save_dir,
             name='/'.join(name).join(args.add_label),
             project='master_thesis',
         )
