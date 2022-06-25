@@ -158,7 +158,9 @@ class RelCNN(pl.LightningModule):
         
         if self.use_abs_positions:
             y_abs_pos = batch['abs_positions'] # [B, N_PATCH]
+            torch.use_deterministic_algorithms(False)
             loss_abs_pos = F.cross_entropy(logits['abs_pos'], y_abs_pos)
+            torch.use_deterministic_algorithms(True)
             loss += loss_abs_pos
             acc_abs_pos = accuracy(logits['abs_pos'], y_abs_pos)
             self.log(f'{part}_acc_abs_pos', acc_abs_pos, prog_bar=True)
