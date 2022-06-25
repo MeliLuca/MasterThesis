@@ -11,6 +11,8 @@ import torch.nn.functional as F
 import tarfile
 import requests
 import logging
+import string
+import random
 import datetime
 from tqdm import tqdm
 
@@ -139,8 +141,9 @@ def get_logger(args):
             task_str += ['angle']
         if args.use_abs_positions:
             task_str += ['abs_pos']
+        exp_id = str(args.exp_id) if args.exp_id != '' else random.choices(string.ascii_uppercase + string.digits, k=4)
         name = [
-            str(args.exp_id), args.dataset, '-'.join(task_str), 
+            exp_id, args.dataset, '-'.join(task_str), 
             '-'.join([str(args.backbone), str(args.model_size), str(args.patch_size), str(args.img_height)])
         ]
         # if len(args.attn_mask):
@@ -151,7 +154,7 @@ def get_logger(args):
         #     name += [f'mega_patches_{args.side_megapatches}']
         logger = pl.loggers.WandbLogger(
             save_dir= save_dir,
-            name='/'.join(name).join('test_name'),
+            name='/'.join(name),
             project='master_thesis',
         )
     else:
