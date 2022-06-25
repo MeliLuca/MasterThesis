@@ -108,7 +108,11 @@ class RelCNN(pl.LightningModule):
             optimizer = AdamW(self.parameters(), self.args.lr, weight_decay=self.args.weight_decay)                           
         else:                                                                                                           
             raise Exception(f'Error. Optimizer "{self.args.optimizer}" not supported.')                                 
-        self.optimizer = optimizer                                                                                      
+        self.optimizer = optimizer 
+        if self.args.backbone == 'cifar10_model':
+            scheduler = torch.optim.lr_scheduler.ConstantLR(self.optimizer, factor=0.1, total_iters=40)
+            return ([optimizer], [scheduler])
+                                                                                     
         return optimizer 
 
     def training_step(self, batch, batch_idx, part='train'):
