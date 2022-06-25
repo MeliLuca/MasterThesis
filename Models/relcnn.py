@@ -43,6 +43,7 @@ class RelCNN(pl.LightningModule):
         self.use_distances = use_distances
         self.use_abs_positions = use_abs_positions
 
+        ## list(self.backbone.children())[-1].in_features == self.backbone.embed_dim
         if self.use_relations:
             #self.rel_head = nn.Conv2d(self.backbone.layer1[0].expansion * 512, 
             #                          self.num_rel_classes, kernel_size=1)
@@ -52,7 +53,8 @@ class RelCNN(pl.LightningModule):
         if self.use_distances:
             self.dist_head = MultiHeadAttentionScores(list(self.backbone.children())[-1].in_features, 1)
         if self.use_abs_positions:
-            self.abs_pos_head = MultiHeadAttentionScores(list(self.backbone.children())[-1].in_features, 1)
+            num_patches = (self.args.img_height // self.args.patch_size) ** 2
+            self.abs_pos_head = nn.Linear(list(self.backbone.children())[-1].in_features, num_patches)
 
     def forward_feat(self, x):
         """

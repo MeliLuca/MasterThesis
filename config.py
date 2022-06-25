@@ -24,6 +24,7 @@ def get_args(stdin, verbose=False):
     parser.add_argument('--exp_id', type=str, default='', 
                         help='Experiment ID (like "u1").')
     parser.add_argument('--enable_progress_bar', type=bool, default=True, help='Show the progress bar')
+    parser.add_argument('--add_label', type=bool, default=True, help='add label to logger wandb to not have errors')
 
     # Datasets params
     parser.add_argument('--dataset', type=str, default='cifar10', help='Name of the dataset.')
@@ -115,7 +116,7 @@ def get_args(stdin, verbose=False):
         patch_size = {
             'cifar10': 4,
             'cifar10_36': 4,
-            'cifar10_226': 64, ## 34
+            'cifar10_226': 34, ## 34
             'cifar10_224': 32,
             'cifar100': 4,
             'cifar100_224': 32,

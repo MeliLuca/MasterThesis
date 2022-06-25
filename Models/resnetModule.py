@@ -107,7 +107,7 @@ class ResNetModule(pl.LightningModule):
             if self.args.backbone == 'cifar10_model':
                 preds = self.class_layer(preds)
             else:
-                preds = self.origin_backbone.avgpool(preds)
+                preds = self.origin_backbone.s(preds)
                 preds = torch.flatten(preds, 1)
                 preds = self.origin_backbone.fc(preds)
 
