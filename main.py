@@ -75,7 +75,7 @@ def main(args):
         trainer.test(dataloaders=dls['test'])
     
     elif args.mode == 'analysis':
-        Analysis.getFilter(model, dls['validation'], args.stats_path)
+        Analysis.Analysis(model, dls['validation'], args.stats_path).features_maps()
 
     else:
         raise Exception(f'Error. Model "{args.mode}" not supported.')
