@@ -11,7 +11,7 @@ from captum.attr import LayerAttribution
 from matplotlib.colors import LinearSegmentedColormap
 from captum.attr import visualization as viz
 
-def getConvFilters(dataloader, model, stats_path):
+def getConvFilters(model):
         ## GET CONV LAYER FROM MODEL 
         # we will save the conv layer weights in this list
         model_weights =[]
@@ -53,7 +53,7 @@ class Analysis():
         plt.imshow(np.transpose(npimg, (1, 2, 0)))
         plt.show()
 
-    def features_map(self):
+    def features_maps(self):
         # make a copy of the `results`
         outputs = []
         names = []
