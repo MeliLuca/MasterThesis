@@ -44,6 +44,6 @@ python3 $HOME/storage/MasterThesis/main.py \
  --lr 0.1 \
  --backbone resnet50 \
  --task upstream \
---model_checkpoint jobs/resnet50/cifar10/stats/resnet50_cifar10_224_SGD_WD_DecayLR_REL/checkpoints/best.ckpt \
+--model_checkpoint stats/resnet50_cifar10_224_SGD_WD_DecayLR_REL/checkpoints/best.ckpt \
  --use_relations
 ## added more layer that usual !!!
