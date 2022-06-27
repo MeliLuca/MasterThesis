@@ -15,6 +15,7 @@ from datasets.dataloaders import get_datasets, get_dataloaders
 from Models import resnetSmall, resnetModule, relcnn
 from utils import get_logger, get_callbacks
 from trainer import get_trainer
+import Analysis
 
 # Settings
 format_str = '%(asctime)s - [%(levelname)s] - %(message)s'
@@ -72,6 +73,9 @@ def main(args):
     
     elif args.mode == 'test':
         trainer.test(dataloaders=dls['test'])
+    
+    elif args.mode == 'analysis':
+        Analysis.getFilter(model, dls['validation'], args.stats_path)
 
     else:
         raise Exception(f'Error. Model "{args.mode}" not supported.')
