@@ -36,7 +36,7 @@ export WANDB_API_KEY=1c9bad0d162960a36cc8fecc456d0dc024cb834c
 python3 $HOME/storage/MasterThesis/main.py \
  --epochs 190 \
  --logger wandb \
- --stats_path resnet50_cifar10_224_SGD_WD_DecayLR_REL \
+ --stats_path resnet50_cifar10_224_SGD_WD_DecayLR_REL_DIST \
  --dataset cifar10_224 \
  --batch_size 64 \
  --optimizer sgd \
