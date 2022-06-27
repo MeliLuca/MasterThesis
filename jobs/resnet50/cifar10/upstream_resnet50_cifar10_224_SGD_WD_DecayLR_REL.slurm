@@ -1,6 +1,6 @@
 #!/bin/sh
 ### job name
-#SBATCH --job-name=ciraf224
+#SBATCH --job-name=R_Up224
 
 
 ### Scelta della coda "testing" per tesisti
@@ -36,13 +36,14 @@ export WANDB_API_KEY=1c9bad0d162960a36cc8fecc456d0dc024cb834c
 python3 $HOME/storage/MasterThesis/main.py \
  --epochs 190 \
  --logger wandb \
- --stats_path resnet50_cifar10_224_SGD_WD_DecayLR_DOWN \
+ --stats_path upstream_resnet50_cifar10_224_SGD_WD_DecayLR_REL\
  --dataset cifar10_224 \
  --batch_size 64 \
  --optimizer sgd \
  --weight_decay 0.0001 \
  --lr 0.1 \
  --backbone resnet50 \
- --use_supervision \
- --model_checkpoint stats/resnet50_cifar10_224_SGD_WD_DecayLR/checkpoints/best.ckpt
+ --task upstream \
+--model_checkpoint jobs/resnet50/cifar10/stats/resnet50_cifar10_224_SGD_WD_DecayLR_REL/checkpoints/best.ckpt \
+ --use_relations
 ## added more layer that usual !!!
