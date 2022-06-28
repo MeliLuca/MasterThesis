@@ -6,6 +6,8 @@ import argparse
 import json
 import logging
 
+from prometheus_client import Metric
+
 
 def get_args(stdin, verbose=False):
     """
@@ -104,7 +106,7 @@ def get_args(stdin, verbose=False):
         'svhn': 10,
     }
     args.num_classes = num_classes[args.dataset]
-    if args.task == 'downstream':
+    if args.task == 'downstream' or args.metric_monitor=='val_acc':
         args.metric_monitor = 'val_acc_clf'
         args.metric_maxmin = 'max'
     else:

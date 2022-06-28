@@ -44,5 +44,6 @@ python3 $HOME/storage/MasterThesis/main.py \
  --lr 0.1 \
  --backbone resnet50 \
  --exp_id NoShuffle \
- --use_relations
+ --use_relations \
+ --metric_monitor val_loss_rel
 ## added more layer that usual !!!
