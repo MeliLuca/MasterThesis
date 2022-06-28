@@ -6,8 +6,6 @@ import argparse
 import json
 import logging
 
-from prometheus_client import Metric
-
 
 def get_args(stdin, verbose=False):
     """
