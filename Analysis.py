@@ -59,7 +59,7 @@ class Analysis():
     def conv_filters(self):
         # visualize the first conv layer filters
         plt.figure(figsize=(20, 17))
-        for i, filter in enumerate(self.model_weights[0]):
+        for i, filter in enumerate(self.weights[0]):
             plt.subplot(8, 8, i+1) # (8, 8) because in conv0 we have 7x7 filters and total of 64 (see printed shapes)
             plt.imshow(filter[0, :, :].detach(), cmap='gray')
             plt.axis('off')
