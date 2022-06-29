@@ -64,7 +64,7 @@ class Analysis():
             plt.imshow(filter[0, :, :].detach(), cmap='gray')
             plt.axis('off')
             plt.set_title(f'filter-{self.path}', fontsize=15)
-            plt.savefig(f'stats/filters/filter-{self.path}.png')
+            plt.savefig(f'filters/filter-{self.path}.png')
 
     def features_maps(self):
         # make a copy of the `results`
