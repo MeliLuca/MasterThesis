@@ -44,7 +44,7 @@ class Analysis():
         self.dataloader = dataloader
         self.model = model
         self.path = path
-        self.conv_filters, self.weights = getConvFilters(dataloader, model, path)
+        self.conv_filters, self.weights = getConvFilters(model)
         self.image, self.image_label = next(iter(dataloader))
 
     def imshow(img):
