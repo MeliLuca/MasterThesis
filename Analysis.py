@@ -63,7 +63,7 @@ class Analysis():
             plt.subplot(8, 8, i+1) # (8, 8) because in conv0 we have 7x7 filters and total of 64 (see printed shapes)
             plt.imshow(filter[0, :, :].detach(), cmap='gray')
             plt.axis('off')
-            plt.savefig('analysis/filter.png')
+            plt.savefig('filter.png')
 
     def features_maps(self):
         # make a copy of the `results`
