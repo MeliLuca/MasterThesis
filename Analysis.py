@@ -40,7 +40,7 @@ def getConvFilters(model):
         return conv_layers, model_weights
 
 class Analysis():
-    def __init__(self, dataloader, model, path):
+    def __init__(self, model, dataloader, path):
         self.dataloader = dataloader
         self.model = model
         self.path = path
