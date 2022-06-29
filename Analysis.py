@@ -20,6 +20,8 @@ def getConvFilters(model):
         # get all the model children as list
         model_children = list(model.children()) # baseline model π
         print(model_children)
+        print('model children in pos 0')
+        print(model_children[0])
         #counter to keep count of the conv layers
         counter = 0
         #append all the conv layers and their respective wights to the list
@@ -77,4 +79,5 @@ class Analysis():
             imgplot = plt.imshow(processed[i])
             a.axis("off")
             a.set_title(names[i].split('(')[0], fontsize=15)
-        plt.savefig(str(f'{path}-feature_maps.jpg'), bbox_inches='tight') # ONLY FOR SAVE THE IMAGE
+        file_name = f'{path}-feature_maps.jpg'
+        plt.savefig(str(file_name), bbox_inches='tight') # ONLY FOR SAVE THE IMAGE
