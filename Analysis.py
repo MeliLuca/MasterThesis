@@ -18,7 +18,7 @@ def getConvFilters(model):
         #we will save the 49 conv layers in this list
         conv_layers = []
         # get all the model children as list
-        model_children = list(list(model.children())[0]) # baseline model π
+        model_children = list(list(model.children())[0].children()) # baseline model π
         print(model_children)
         print('model children in pos 0')
         print(model_children[0])
