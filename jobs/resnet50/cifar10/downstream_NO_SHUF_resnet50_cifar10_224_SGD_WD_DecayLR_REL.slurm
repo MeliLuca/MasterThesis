@@ -1,6 +1,6 @@
 #!/bin/sh
 ### job name
-#SBATCH --job-name=down_REL224
+#SBATCH --job-name=Down_REL224
 
 
 ### Scelta della coda "testing" per tesisti
