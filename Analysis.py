@@ -19,9 +19,6 @@ def getConvFilters(model):
         conv_layers = []
         # get all the model children as list
         model_children = list(list(model.children())[0].children()) # baseline model π
-        print(model_children)
-        print('model children in pos 0')
-        print(model_children[0])
         #counter to keep count of the conv layers
         counter = 0
         #append all the conv layers and their respective wights to the list
@@ -37,8 +34,8 @@ def getConvFilters(model):
                             counter+=1
                             model_weights.append(child.weight)
                             conv_layers.append(child)
-        print(f"Total convolution layers: {counter}")
-        print("conv_layers")
+        # print(f"Total convolution layers: {counter}")
+        # print("conv_layers")
         # last_conv = conv_layers[-1]
         return conv_layers, model_weights
 
