@@ -19,6 +19,7 @@ def getConvFilters(model):
         conv_layers = []
         # get all the model children as list
         model_children = list(model.children())[0] # baseline model π
+        print(model_children)
         #counter to keep count of the conv layers
         counter = 0
         #append all the conv layers and their respective wights to the list
