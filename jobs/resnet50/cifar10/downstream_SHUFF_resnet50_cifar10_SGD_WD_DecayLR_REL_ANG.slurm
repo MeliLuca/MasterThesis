@@ -45,5 +45,6 @@ python3 $HOME/storage/MasterThesis/main.py \
  --lr 0.1 \
  --backbone cifar10_model \
  --use_supervision \
- --model_checkpoint stats/upstream_SHUFF_resnet50_cifar10_SGD_WD_DecayLR_REL_ANG/checkpoints/best.ckpt
+ --model_checkpoint stats/upstream_SHUFF_resnet50_cifar10_SGD_WD_DecayLR_REL_ANG/checkpoints/best.ckpt \
+ --exp_id down_REL_ANG_SHUFF
 ## added more layer that usual !!!
