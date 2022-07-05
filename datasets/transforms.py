@@ -295,7 +295,7 @@ def get_transforms(args):
             'train_simsiam': None,
         }
 
-    elif args.dataset in ['cifar10', 'cifar100', 'tiny_imagenet', 'svhn']:
+    elif args.dataset in ['cifar10', 'cifar100', 'tiny_imagenet', 'svhn', 'pathmnist']:
         if args.dataset == ['cifar10']:
              # Cifar10
             trans = {

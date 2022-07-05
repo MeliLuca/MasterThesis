@@ -19,6 +19,9 @@ import torch
 import math
 import torch.nn.functional as F
 import tarfile
+import medmnist
+from medmnist import INFO
+
 
 # Custom
 from datasets.encode_locations import create_connectivity_matrix, create_dist_matrix, create_angle_matrix, SSLSignal
@@ -222,6 +225,14 @@ def get_datasets(args, transform='default', target_transform='default', patch_tr
         ds_test = None
         ds_train_simsiam = SVHN(split='train', transform=transform['train_simsiam'], target_transform=target_transform['train_simsiam'], **ds_args)
 
+    elif args.dataset == 'pathmnist':
+        data_flag = 'pathmnist'
+        info = INFO[data_flag]
+        DataClass = getattr(medmnist, info['python_class'])
+        ds_train = DataClass(split='train', transform=transform['train'],target_transform=target_transform['train'], **ds_args)
+        dt_train_aug = DataClass(split='train', transform=transform['train_aug'],target_transform=target_transform['train_aug'], **ds_args)
+        ds_validation = DataClass(split='validation', transform=transform['validation'],target_transform=target_transform['validation'], **ds_args)
+        ds_test = DataClass(split='test', transform=transform['test'],target_transform=target_transform['test'], **ds_args)
     else:
         raise Exception(f'Error. Dataset {args.dataset} not supported.')
 
