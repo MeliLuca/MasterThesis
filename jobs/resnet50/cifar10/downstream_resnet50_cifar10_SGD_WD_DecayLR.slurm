@@ -37,7 +37,7 @@ export WANDB_API_KEY=1c9bad0d162960a36cc8fecc456d0dc024cb834c
 python3 $HOME/storage/MasterThesis/main.py \
  --epochs 190 \
  --logger wandb \
- --stats_path /down_resnet50_cifar10_SGD_WD_DecayLR \
+ --stats_path downstream_resnet50_cifar10_SGD_WD_DecayLR \
  --dataset cifar10 \
  --batch_size 256 \
  --optimizer sgd \
@@ -45,5 +45,6 @@ python3 $HOME/storage/MasterThesis/main.py \
  --lr 0.1 \
  --backbone cifar10_model \
  --use_supervision \
- --model_checkpoint stats/resnet50_cifar10_SGD_WD_DecayLR/checkpoints/best.ckpt
+ --model_checkpoint stats/upstream_resnet50_cifar10_SGD_WD_DecayLR/checkpoints/best.ckpt \
+ --exp_id down_BASE
 ## added more layer that usual !!!
