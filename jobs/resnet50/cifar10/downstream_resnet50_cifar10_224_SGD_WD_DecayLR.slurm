@@ -44,5 +44,5 @@ python3 $HOME/storage/MasterThesis/main.py \
  --lr 0.1 \
  --backbone resnet50 \
  --use_supervision \
- --model_checkpoint stats/resnet50_cifar10_224_SGD_WD_DecayLR/checkpoints/best-v2.ckpt
+ --model_checkpoint stats/resnet50_cifar10_224_SGD_WD_DecayLR/checkpoints/best-v1.ckpt
 ## added more layer that usual !!!

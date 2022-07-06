@@ -45,5 +45,5 @@ python3 $HOME/storage/MasterThesis/main.py \
  --backbone resnet50 \
  --model_checkpoint stats/upstream_SHUFF_resnet50_cifar10_224_SGD_WD_DecayLR_ANG_DIST/checkpoints/best.ckpt \
  --use_supervision \
- --exp_id down_ANG_SHUFF
+ --exp_id down_ANG_DIST_SHUFF
 ## added more layer that usual !!!
