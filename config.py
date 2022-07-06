@@ -147,7 +147,7 @@ def get_args(stdin, verbose=False):
         'oxford_pet': 224,
         'cars': 224,
         'svhn': 32,
-        'pathmnist' : 32,
+        'pathmnist': 32,
     }
     args.img_height = img_height[args.dataset]
     if verbose:
