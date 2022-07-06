@@ -233,6 +233,8 @@ def get_datasets(args, transform='default', target_transform='default', patch_tr
         ds_train_aug = DataClass(split='train', transform=transform['train_aug'],target_transform=target_transform['train_aug'], **ds_args)
         ds_validation = DataClass(split='val', transform=transform['validation'],target_transform=target_transform['validation'], **ds_args)
         ds_test = DataClass(split='test', transform=transform['test'],target_transform=target_transform['test'], **ds_args)
+        ds_train_simsiam = DataClass(split='train', transform=transform['train_simsiam'], 
+                               target_transform=target_transform['train_simsiam'], **ds_args)
     else:
         raise Exception(f'Error. Dataset {args.dataset} not supported.')
 
@@ -256,7 +258,8 @@ def get_datasets(args, transform='default', target_transform='default', patch_tr
             'validation': ShuffleDataset(ds_validation, patch_transform=patch_transform['validation'], 
                                          **shuffle_dataset_args),
             'test': None,
-            'train_simsiam': None,
+            'train_simsiam': ShuffleDataset(ds_train_simsiam, patch_transform=patch_transform['train_simsiam'], 
+                                            **shuffle_dataset_args),
         }
 
     elif args.task == 'downstream':
