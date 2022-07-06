@@ -34,7 +34,7 @@ source $HOME/miniconda3/etc/profile.d/conda.sh
 conda activate new_env
 export WANDB_API_KEY=1c9bad0d162960a36cc8fecc456d0dc024cb834c
 python3 $HOME/storage/MasterThesis/main.py \
- --epochs 190 \
+ --epochs 100 \
  --logger wandb \
  --stats_path downstream_resnet18_cifar10_224_SGD_WD_DecayLR \
  --dataset cifar10_224 \
