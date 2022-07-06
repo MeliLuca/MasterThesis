@@ -41,6 +41,6 @@ python3 $HOME/storage/MasterThesis/main.py \
  --batch_size 128 \
  --optimizer adam \
  --lr 0.001 \
- --backbone resnet18 \
+ --backbone cifar10 \
  --use_supervision \
 ## added more layer that usual !!!

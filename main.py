@@ -36,7 +36,6 @@ def main(args):
     
     # Dataloaders
     dls = get_dataloaders(args)
-    inputs = next(iter(dls['train']))
     # Get model
     if args.backbone =='resnet-small':
         model = resnetSmall.get_model(args)

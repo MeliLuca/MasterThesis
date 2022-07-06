@@ -10,12 +10,12 @@
             "args": [
                 "--dataset=pathmnist", 
                 "--num_gpus=0", 
-                "--backbone=cifar10_model" ,
+                "--backbone=cifar10_model",
                 "--batch_size=1",
                 "--optimizer=sgd",
-                "--use_supervision",
-                "--use_abs_positions",
-                "--use_relations"
+                "--use_relations",
+                "--task=upstream",
+                "--shuffle_patches"
             ],
             "request": "launch",
             "program": "${workspaceFolder}/main.py",

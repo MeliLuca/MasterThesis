@@ -129,7 +129,7 @@ def get_args(stdin, verbose=False):
             'oxford_pet': 32,
             'cars': 32,
             'svhn': 4,
-            'pathmnist': 4,
+            'pathmnist': 32,
         }
         args.patch_size = patch_size[args.dataset]
     img_height = {
@@ -147,7 +147,7 @@ def get_args(stdin, verbose=False):
         'oxford_pet': 224,
         'cars': 224,
         'svhn': 32,
-        'pathmnist': 32,
+        'pathmnist': 224,
     }
     args.img_height = img_height[args.dataset]
     if verbose:
