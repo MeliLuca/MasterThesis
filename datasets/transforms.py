@@ -232,7 +232,7 @@ def get_transforms(args):
             'train_simsiam': None,
         }
 
-    elif args.dataset in ['cifar10_36', 'cifar10_226','cifar10_224', 'cifar100_224', 'tiny_imagenet_224']:
+    elif args.dataset in ['cifar10_36', 'cifar10_226','cifar10_224', 'cifar100_224', 'tiny_imagenet_224', 'pathmnist']:
         trans = {
             'train_aug': transforms.Compose([
                 to_rgb_ifneeded,
@@ -295,7 +295,7 @@ def get_transforms(args):
             'train_simsiam': None,
         }
 
-    elif args.dataset in ['cifar10', 'cifar100', 'tiny_imagenet', 'svhn', 'pathmnist']:
+    elif args.dataset in ['cifar10', 'cifar100', 'tiny_imagenet', 'svhn']:
         if args.dataset == ['cifar10']:
              # Cifar10
             trans = {

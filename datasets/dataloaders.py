@@ -19,8 +19,8 @@ import torch
 import math
 import torch.nn.functional as F
 import tarfile
-# import medmnist
-# from medmnist import INFO
+import medmnist
+from medmnist import INFO
 
 
 # Custom

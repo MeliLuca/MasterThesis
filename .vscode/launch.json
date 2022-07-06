@@ -8,7 +8,7 @@
             "name": "main py",
             "type": "python",
             "args": [
-                "--dataset=cifar10", 
+                "--dataset=pathmnist", 
                 "--num_gpus=0", 
                 "--backbone=cifar10_model" ,
                 "--batch_size=1",

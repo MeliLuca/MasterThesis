@@ -4,6 +4,7 @@
 
 from ast import arg
 import pytorch_lightning as pl
+from sklearn import datasets
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -131,7 +132,7 @@ class RelCNN(pl.LightningModule):
         loss = 0.0
 
         if self.use_supervision:
-            y_cls = batch['labels'] # [B]
+            y_cls = batch['labels'] if self.args.dataset != 'pathmnist' else  batch['labels'].squeeze() # [B]
             # print(f'############## {y_cls.shape}')
             torch.use_deterministic_algorithms(False)
             loss_clf = F.cross_entropy(logits['clf'], y_cls)
@@ -143,6 +144,7 @@ class RelCNN(pl.LightningModule):
 
         if self.use_relations:
             y_rel = batch['relations'] # [B, N_PATCH, N_PATCH]
+            # print(f'y_rel shape is {y_rel.shape}')
             # y_rel = create_connectivity_matrix(logits['rel'].shape[-1])
             torch.use_deterministic_algorithms(False)
             loss_rel = F.cross_entropy(logits['rel'], y_rel)
