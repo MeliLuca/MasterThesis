@@ -256,8 +256,7 @@ def get_datasets(args, transform='default', target_transform='default', patch_tr
             'validation': ShuffleDataset(ds_validation, patch_transform=patch_transform['validation'], 
                                          **shuffle_dataset_args),
             'test': None,
-            'train_simsiam': ShuffleDataset(ds_train_simsiam, patch_transform=patch_transform['train_simsiam'], 
-                                            **shuffle_dataset_args),
+            'train_simsiam': None,
         }
 
     elif args.task == 'downstream':
