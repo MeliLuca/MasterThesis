@@ -43,7 +43,7 @@ python3 $HOME/storage/MasterThesis/main.py \
  --weight_decay 0.0001 \
  --lr 0.1 \
  --backbone cifar10_model \
- --model_version resnet20
+ --model_version resnet20 \
  --use_relations \
  --exp_id Up_SHUFF_res20 \
  --task upstream \
