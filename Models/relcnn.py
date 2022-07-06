@@ -33,7 +33,10 @@ class RelCNN(pl.LightningModule):
         self.save_hyperparameters()
         self.args = args
         if self.args.backbone == 'cifar10_model':
-            self.backbone = resnet_cifar10.__dict__['resnet56'](*bargs, **bkwargs)
+            if self.args.model_version :
+                self.backbone = resnet_cifar10.__dict__[self.args.model_version](*bargs, **bkwargs)
+            else :
+                self.backbone = resnet_cifar10.__dict__['resnet56'](*bargs, **bkwargs)
         else : 
             self.backbone = models.__dict__[args.backbone](*bargs, **bkwargs)
         self.use_relations = use_relations
@@ -122,13 +125,14 @@ class RelCNN(pl.LightningModule):
 
         # Retrieve data
         x = batch['images'] # [B, C, H, W]
-
+        # print(f'############## {x.shape}')
         # Forward and loss
         logits = self(x)
         loss = 0.0
 
         if self.use_supervision:
             y_cls = batch['labels'] # [B]
+            # print(f'############## {y_cls.shape}')
             torch.use_deterministic_algorithms(False)
             loss_clf = F.cross_entropy(logits['clf'], y_cls)
             torch.use_deterministic_algorithms(True)
