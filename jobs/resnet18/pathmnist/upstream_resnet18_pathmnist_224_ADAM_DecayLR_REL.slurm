@@ -40,7 +40,7 @@ python3 $HOME/storage/MasterThesis/main.py \
  --dataset pathmnist \
  --batch_size 128 \
  --optimizer adam \
- --lr 0.01 \
+ --lr 0.001 \
  --backbone resnet18 \
  --use_relations \
  --exp_id Up_SHUFF \
