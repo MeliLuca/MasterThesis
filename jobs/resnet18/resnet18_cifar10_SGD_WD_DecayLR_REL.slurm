@@ -42,7 +42,8 @@ python3 $HOME/storage/MasterThesis/main.py \
  --optimizer sgd \
  --weight_decay 0.0001 \
  --lr 0.1 \
- --backbone resnet18 \
+ --backbone cifar10_model \
+ --model_version resnet20 \
  --use_supervision \
  --use_relations \
  --shuffle_patches \
