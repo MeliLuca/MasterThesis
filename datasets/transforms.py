@@ -11,6 +11,8 @@ import random
 
 # Custom
 from datasets import constants
+from datasets.rand_augment import rand_augment_transform
+
 
 
 def image2patches(x, patch_size):
@@ -173,38 +175,30 @@ def get_transforms(args):
     """
     Return the transformations for the datasets.
     """
+    trans_end = [
+        transforms.ToTensor(),
+        gray2rgb_ifneeded,
+        rgba2rgb_ifneeded,
+        transforms.Normalize(*constants.get_normalization(args.dataset, args.data_base_path, args.labels_path))]
+
     if args.dataset in ['imagenet', 'flower102', 'oxford_pet', 'cars']:
-        trans = {
-            'train_aug': transforms.Compose([
-                to_rgb_ifneeded,
-                transforms.RandomResizedCrop(224),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-            ]),
-            'train': transforms.Compose([
-                to_rgb_ifneeded,
-                transforms.Resize(256),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-            ]),
-            'validation': transforms.Compose([
-                to_rgb_ifneeded,
-                transforms.Resize(256),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-            ]),
-            'test': transforms.Compose([
-                to_rgb_ifneeded,
-                transforms.Resize(256),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-            ]),
-            'train_simsiam': get_simsiam_transform(args),
-        }
+        trans_train_aug = [
+            to_rgb_ifneeded,
+            transforms.RandomResizedCrop(args.img_height),
+            transforms.RandomHorizontalFlip()]
+        trans_train = [
+            to_rgb_ifneeded,
+            transforms.Resize(256),
+            transforms.CenterCrop(args.img_height)]
+        trans_validation = [
+            to_rgb_ifneeded,
+            transforms.Resize(256),
+            transforms.CenterCrop(args.img_height)]
+        trans_test = [
+            to_rgb_ifneeded,
+            transforms.Resize(256),
+            transforms.CenterCrop(args.img_height)]
+
         trans_target = {
             'train': None,
             'train_aug': None,   
@@ -233,42 +227,19 @@ def get_transforms(args):
         }
 
     elif args.dataset in ['cifar10_36', 'cifar10_226','cifar10_224', 'cifar100_224', 'tiny_imagenet_224', 'pathmnist']:
-        trans = {
-            'train_aug': transforms.Compose([
-                to_rgb_ifneeded,
-                transforms.RandomResizedCrop(args.img_height),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                gray2rgb_ifneeded,
-                rgba2rgb_ifneeded,
-                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-            ]),
-            'train': transforms.Compose([
-                to_rgb_ifneeded,
-                transforms.Resize(args.img_height),
-                transforms.ToTensor(),
-                gray2rgb_ifneeded,
-                rgba2rgb_ifneeded,
-                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-            ]),
-            'validation': transforms.Compose([
-                to_rgb_ifneeded,
-                transforms.Resize(args.img_height),
-                transforms.ToTensor(),
-                gray2rgb_ifneeded,
-                rgba2rgb_ifneeded,
-                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-            ]),
-            'test': transforms.Compose([
-                to_rgb_ifneeded,
-                transforms.Resize(args.img_height),
-                transforms.ToTensor(),
-                gray2rgb_ifneeded,
-                rgba2rgb_ifneeded,
-                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-            ]),
-            'train_simsiam': get_simsiam_transform(args),
-        }
+        trans_train_aug = [
+            to_rgb_ifneeded,
+            transforms.RandomResizedCrop(args.img_height),
+            transforms.RandomHorizontalFlip()]
+        trans_train = [
+            to_rgb_ifneeded,
+            transforms.Resize((args.img_height,args.img_height))]
+        trans_validation = [
+            to_rgb_ifneeded,
+            transforms.Resize((args.img_height,args.img_height))]
+        trans_test = [
+            to_rgb_ifneeded,
+            transforms.Resize((args.img_height,args.img_height))]
         trans_target = {
             'train': None,
             'train_aug': None,   
@@ -325,32 +296,20 @@ def get_transforms(args):
                 'train_simsiam': get_simsiam_transform(args),
             }
         else:
-            trans = {
-                'train_aug': transforms.Compose([
-                    to_rgb_ifneeded,
-                    transforms.RandomCrop(args.img_height, padding=4),
-                    transforms.RandomHorizontalFlip(),
-                    transforms.ToTensor(),
-                    transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-                ]),
-                'train': transforms.Compose([
-                    to_rgb_ifneeded,
-                    transforms.ToTensor(),
-                    transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-                ]),
-                'validation': transforms.Compose([
-                    to_rgb_ifneeded,
-                    transforms.ToTensor(),
-                    transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-                ]),
-                'test': transforms.Compose([
-                    to_rgb_ifneeded,
-                    transforms.ToTensor(),
-                    transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-                ]),
-                'train_simsiam': get_simsiam_transform(args),
-            }
-        trans_target = {
+            trans_train_aug = [
+            to_rgb_ifneeded,
+            transforms.RandomCrop(args.img_height, padding=4),
+            transforms.RandomHorizontalFlip()]
+            trans_train = [
+            to_rgb_ifneeded,
+            transforms.Resize(args.img_height)]
+            trans_validation = [
+            to_rgb_ifneeded,
+            transforms.Resize(args.img_height)]
+            trans_test = [
+            to_rgb_ifneeded,
+            transforms.Resize(args.img_height)]
+            trans_target = {
             'train': None,
             'train_aug': None,   
             'validation': None,   
@@ -440,6 +399,19 @@ def get_transforms(args):
             'test': None,   
             'train_simsiam': None,
         }
+        return trans, trans_target, patch_trans
+    
+
+    if args.use_randAugment:
+        trans_train_aug += [rand_augment_transform('rand-m9-n6-mstd0.5-inc1', aa_params)]
+
+    trans = {
+        'train_aug': transforms.Compose(trans_train_aug + trans_end),
+        'train': transforms.Compose(trans_train + trans_end),
+        'validation': transforms.Compose(trans_validation + trans_end),
+        'test': transforms.Compose(trans_test + trans_end),
+        'train_simsiam': get_simsiam_transform(args),
+    }
 
     return trans, trans_target, patch_trans
 
