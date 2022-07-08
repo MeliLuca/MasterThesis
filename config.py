@@ -35,6 +35,7 @@ def get_args(stdin, verbose=False):
                         help='Print useful info about the dataset.')
     parser.add_argument('--shuffle_patches', dest='shuffle_patches', action='store_true', 
                         help='Shuffle the input patches.')
+    parser.add_argument('--use_randAugment', dest='use_randAugment', action='store_true', help='add random augmentation')
 
     # Optimizer params
     parser.add_argument('--optimizer', type=str, default='adamw', help='The kind of optimizer.', 

@@ -20,7 +20,7 @@ from sklearn.decomposition import PCA
 from Layers.MultiHeadAttention import MultiHeadAttentionScores
 from datasets.encode_locations import create_connectivity_matrix
 from utils import cross_entropy, accuracy
-from Models import resnet_cifar10
+from Models import resnet_cifar10, botNet
 
 
 ##################################################
@@ -38,6 +38,8 @@ class RelCNN(pl.LightningModule):
                 self.backbone = resnet_cifar10.__dict__[self.args.model_version](*bargs, **bkwargs)
             else :
                 self.backbone = resnet_cifar10.__dict__['resnet56'](*bargs, **bkwargs)
+        elif self.args.backbone == 'botnet':
+            self.backbone = botNet.__dict__['resnet50'](*bargs, **bkwargs) 
         else : 
             self.backbone = models.__dict__[args.backbone](*bargs, **bkwargs)
         self.use_relations = use_relations

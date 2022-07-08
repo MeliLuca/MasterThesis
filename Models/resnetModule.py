@@ -11,7 +11,7 @@ import numpy as np
 import torchvision
 from PIL import Image
 from Layers import MultiHeadAttention
-from Models import resnet_cifar10, resnet
+from Models import resnet_cifar10, botNet
 
 
 class ResNetModule(pl.LightningModule):
