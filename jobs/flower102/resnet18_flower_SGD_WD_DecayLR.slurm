@@ -41,7 +41,7 @@ python3 $HOME/storage/MasterThesis/main.py \
     --logger wandb \
     --stats_path resnet18_flower_SGD_WD_DecayLR \
     --dataset flower102 \
-    --batch_size 12864 \
+    --batch_size 128 \
     --optimizer sgd \
     --weight_decay 0.0001 \
     --lr 0.1 \
