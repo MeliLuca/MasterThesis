@@ -51,14 +51,14 @@ class RelCNN(pl.LightningModule):
         self.use_distances = use_distances
         self.use_abs_positions = use_abs_positions
 
-        self.linear = nn.Linear(3136, 49)
+        self.linear = nn.Linear(1024, 64)
 
         ## DA CAMBIARE
         ## list(self.backbone.children())[-1].in_features == self.backbone.embed_dim
         if self.use_relations:
             #self.rel_head = nn.Conv2d(self.backbone.layer1[0].expansion * 512, 
             #                          self.num_rel_classes, kernel_size=1)
-            self.rel_head = MultiHeadAttentionScores(64, num_rel_classes)
+            self.rel_head = MultiHeadAttentionScores(16, num_rel_classes)
         if self.use_angles:
             self.angle_head = MultiHeadAttentionScores(list(self.backbone.children())[-1].in_features, 1)
         if self.use_distances:
