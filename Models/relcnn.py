@@ -14,7 +14,7 @@ import logging
 import wandb
 from torchvision.utils import make_grid
 from sklearn.decomposition import PCA
-from bottleneck_transformer_pytorch import BottleStack
+# from bottleneck_transformer_pytorch import BottleStack
 
 
 
@@ -40,8 +40,8 @@ class RelCNN(pl.LightningModule):
                 self.backbone = resnet_cifar10.__dict__[self.args.model_version](*bargs, **bkwargs)
             else :
                 self.backbone = resnet_cifar10.__dict__['resnet56'](*bargs, **bkwargs)
-        elif self.args.backbone == 'botnet':
-            self.backbone = botNet.__dict__['resnet50'](*bargs, **bkwargs) 
+        # elif self.args.backbone == 'botnet':
+        #     self.backbone = botNet.__dict__['resnet50'](*bargs, **bkwargs) 
         else : 
             self.backbone = models.__dict__[args.backbone](*bargs, **bkwargs)
         self.use_relations = use_relations
