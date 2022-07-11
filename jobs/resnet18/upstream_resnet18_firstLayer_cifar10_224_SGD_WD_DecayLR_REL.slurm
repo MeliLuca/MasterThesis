@@ -46,6 +46,5 @@ python3 $HOME/storage/MasterThesis/main.py \
  --use_relations \
  --exp_id Up_FirstLayer \
  --task upstream \
- --shuffle_patches \
- --num_workers 0
+ --shuffle_patches
 ## added more layer that usual !!!
