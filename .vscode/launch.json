@@ -8,14 +8,12 @@
             "name": "main py",
             "type": "python",
             "args": [
-                "--dataset=pathmnist", 
+                "--dataset=flower102", 
                 "--num_gpus=0", 
-                "--backbone=cifar10_model",
+                "--backbone=resnet18" ,
                 "--batch_size=1",
-                "--optimizer=sgd",
-                "--use_relations",
-                "--task=upstream",
-                "--shuffle_patches"
+                "--num_workers=0",
+                "--use_supervision"
             ],
             "request": "launch",
             "program": "${workspaceFolder}/main.py",

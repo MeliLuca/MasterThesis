@@ -107,7 +107,7 @@ class BottleneckAttn(nn.Module):
             self, dim, dim_out=None, feat_size=None, stride=1, num_heads=4, dim_head=None,
             qk_ratio=1.0, qkv_bias=False, scale_pos_embed=False):
         super().__init__()
-        assert feat_size is not None, 'A concrete feature size matching expected input (H, W) is required'
+        # assert feat_size is not None, 'A concrete feature size matching expected input (H, W) is required'
         dim_out = dim_out or dim
         print(f'num heads is {num_heads}')
         # assert dim_out % num_heads == 0
@@ -136,8 +136,8 @@ class BottleneckAttn(nn.Module):
     def forward(self, x):
         B, C, H, W = x.shape
         print(f'shape in attn block forward is {x.shape}')
-        _assert(H == self.pos_embed.height, '')
-        _assert(W == self.pos_embed.width, '')
+        # _assert(H == self.pos_embed.height, '')
+        # _assert(W == self.pos_embed.width, '')
 
         x = self.qkv(x)  # B, (2 * dim_head_qk + dim_head_v) * num_heads, H, W
 

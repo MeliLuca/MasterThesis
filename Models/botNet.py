@@ -44,14 +44,14 @@ class Bottleneck(nn.Module):
 
     def __init__(self, in_planes, planes, stride=1, attn_block=False):
         super(Bottleneck, self).__init__()
+        self.attn_block = attn_block
         self.conv1 = nn.Conv2d(in_planes, planes, kernel_size=1, bias=False)
         self.bn1 = nn.BatchNorm2d(planes)
-        print(f'input planes is {in_planes}, planes is {planes}')
-        if attn_block :
-            self.conv2 = BottleneckAttn(planes, planes, (7,7), num_heads=8)
-        else :
-            self.conv2 = nn.Conv2d(planes, planes, kernel_size=3,
+        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3,
                                stride=stride, padding=1, bias=False)
+        if attn_block :
+            self.attn = torch.nn.MultiheadAttention(in_planes, 8, batch_first=True)
+            # self.attn = BottleneckAttn(planes, self.expansion * planes, planes)
         self.bn2 = nn.BatchNorm2d(planes)
         self.conv3 = nn.Conv2d(planes, self.expansion *
                                planes, kernel_size=1, bias=False)
@@ -67,7 +67,10 @@ class Bottleneck(nn.Module):
 
     def forward(self, x):
         out = F.relu(self.bn1(self.conv1(x)))
-        out = self.conv2(out)
+        if self.attn_block:
+            out = self.attn(out, out, out)
+        else:
+            out = self.conv2(out)
         print(f'out dimension is {out.shape}')
         out = F.relu(self.bn2(out))
         out = self.bn3(self.conv3(out))

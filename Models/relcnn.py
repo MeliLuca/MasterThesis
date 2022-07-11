@@ -14,6 +14,8 @@ import logging
 import wandb
 from torchvision.utils import make_grid
 from sklearn.decomposition import PCA
+from bottleneck_transformer_pytorch import BottleStack
+
 
 
 # Custom
@@ -80,7 +82,7 @@ class RelCNN(pl.LightningModule):
         return x
 
     # def self.forward_feat_with_rel(x):
-    def forward(self, x):
+    def forward(self, x, analysis=False):
         x = self.forward_feat(x)
         B, C, H, W = x.shape
         out={}
@@ -100,7 +102,7 @@ class RelCNN(pl.LightningModule):
                 x_clf = self.backbone.avgpool(x)
                 x_clf = torch.flatten(x_clf, 1)
             out['clf'] = self.backbone.fc(x_clf)
-        return out
+        return out if not analysis else out['clf']
 
     def configure_optimizers(self):
         """                                                                                                             

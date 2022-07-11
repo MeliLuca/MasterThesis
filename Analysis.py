@@ -6,10 +6,11 @@ import torchvision
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2 as cv
-# from captum.attr import LayerGradCam
-# from captum.attr import LayerAttribution
-# from matplotlib.colors import LinearSegmentedColormap
-# from captum.attr import visualization as viz
+from captum.attr import LayerGradCam
+from captum.attr import LayerAttribution
+from matplotlib.colors import LinearSegmentedColormap
+from captum.attr import visualization as viz
+from captum.attr import GuidedGradCam
 
 def getConvFilters(model):
         ## GET CONV LAYER FROM MODEL 
@@ -45,7 +46,9 @@ class Analysis():
         self.model = model
         self.path = path
         self.conv_layers, self.weights = getConvFilters(model)
-        self.image, self.image_label = next(iter(dataloader))
+        self.data = next(iter(dataloader))
+        self.image = self.data['images']
+        self.image_label = self.data['labels'].item()
 
     def imshow(img):
         img = img / 2 + 0.5     # unnormalize
@@ -88,3 +91,27 @@ class Analysis():
             a.set_title(names[i].split('(')[0], fontsize=15)
         file_name = f'{path}-feature_maps.jpg'
         plt.savefig(str(file_name), bbox_inches='tight') # ONLY FOR SAVE THE IMAGE
+    
+    def guided_grad_cam(self):
+        self.model.eval()
+        # pred = self.model(self.image).argmax(dim=1)
+        default_cmap = LinearSegmentedColormap.from_list('custom blue', 
+                                                 [(0, '#ffffff'),
+                                                  (0.25, '#000000'),
+                                                  (1, '#000000')], N=256)
+
+        guided_gc = GuidedGradCam(self.model, self.conv_layers[-1])
+        attribution_gc = guided_gc.attribute(self.image, self.image_label, additional_forward_args=[True])
+        printer_image = np.transpose((self.image.squeeze().cpu().detach().numpy() / 2) + 0.5, (1, 2, 0))
+        print('start to print stuff')
+        printer_attr_gc = np.transpose(attribution_gc.squeeze(0).cpu().detach().numpy(), (1,2,0))
+        fig = viz.visualize_image_attr_multiple(
+            printer_attr_gc, 
+            printer_image,
+            ["original_image", "heat_map"],
+            ["all", "positive"], 
+            cmap=default_cmap, 
+            show_colorbar=True,
+            outlier_perc=1
+            )
+        fig.savefig('prova.png', bbox_inches='tight') 
