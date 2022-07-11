@@ -88,10 +88,10 @@ class RelCNN(pl.LightningModule):
         x = self.forward_feat(x)
         B, C, H, W = x.shape
         out={}
-        x_att = self.linear(torch.flatten(x, 2)).transpose(1, 2)
+        # x_att = self.linear(torch.flatten(x, 2)).transpose(1, 2)
+        x_att = torch.flatten(x, 2).transpose(1, 2)
         if self.use_relations:
             out['rel'] = self.rel_head(x_att)
-            # out['rel'] = self.linear(self.rel_head(x_att))
         if self.use_angles:
             out['angle'] = self.angle_head(x_att)
         if self.use_distances:
