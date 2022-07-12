@@ -1,4 +1,5 @@
 from importlib.resources import path
+from unittest import case
 import torch
 from torchvision import transforms
 import torch.optim as optim
@@ -40,7 +41,67 @@ def getConvFilters(model):
         # last_conv = conv_layers[-1]
         return conv_layers, model_weights
 
-class Analysis():
+def filters(path, weights):
+        # visualize the first conv layer filters
+        plt.figure(figsize=(20, 17))
+        plt.title(f'filter-{path}', fontsize=20)
+        for i, filter in enumerate(weights[0]):
+            plt.subplot(8, 8, i+1) # (8, 8) because in conv0 we have 7x7 filters and total of 64 (see printed shapes)
+            plt.imshow(filter[0, :, :].detach(), cmap='gray')
+            plt.axis('off')
+            plt.savefig(f'filters/filter-{path}.png')
+
+def features_map(image, conv_layers, path):
+    # make a copy of the `results`
+    outputs = []
+    names = []
+    image_to_process = image
+    for layer in conv_layers[0:]:
+        image_to_process = layer(image_to_process)
+        outputs.append(image_to_process)
+        names.append(str(layer))
+    print(len(outputs))
+    processed = []
+    for feature_map in outputs:
+        feature_map = feature_map.squeeze(0)
+        gray_scale = torch.sum(feature_map,0)
+        gray_scale = gray_scale / feature_map.shape[0]
+        processed.append(gray_scale.data.cpu().numpy())
+
+    fig = plt.figure(figsize=(15, 10))
+    for i in range(len(processed)):
+        a = fig.add_subplot(5, 11, i+1)
+        imgplot = plt.imshow(processed[i])
+        a.axis("off")
+        a.set_title(names[i].split('(')[0], fontsize=15)
+    file_name = f'{path}-feature_maps.jpg'
+    plt.savefig(str(file_name), bbox_inches='tight') # ONLY FOR SAVE THE IMAGE
+
+def guided_grad_cam(model, conv_layers, image, image_label, path):
+    model.eval()
+    # pred = self.model(self.image).argmax(dim=1)
+    default_cmap = LinearSegmentedColormap.from_list('custom blue', 
+                                                [(0, '#ffffff'),
+                                                (0.25, '#000000'),
+                                                (1, '#000000')], N=256)
+
+    guided_gc = GuidedGradCam(model, conv_layers[-1])
+    attribution_gc = guided_gc.attribute(image, image_label, additional_forward_args=[True])
+    printer_image = np.transpose((image.squeeze().cpu().detach().numpy() / 2) + 0.5, (1, 2, 0))
+    print('start to print stuff')
+    printer_attr_gc = np.transpose(attribution_gc.squeeze(0).cpu().detach().numpy(), (1,2,0))
+    fig = viz.visualize_image_attr_multiple(
+        printer_attr_gc, 
+        printer_image,
+        ["original_image", "heat_map"],
+        ["all", "positive"], 
+        cmap=default_cmap, 
+        show_colorbar=True,
+        outlier_perc=1
+        )
+    fig.savefig('prova.png', bbox_inches='tight') 
+
+class Create():
     def __init__(self, model, dataloader, path):
         self.dataloader = dataloader
         self.model = model
@@ -56,62 +117,10 @@ class Analysis():
         plt.imshow(np.transpose(npimg, (1, 2, 0)))
         plt.show()
     
-    def conv_filters(self):
-        # visualize the first conv layer filters
-        plt.figure(figsize=(20, 17))
-        plt.title(f'filter-{self.path}', fontsize=20)
-        for i, filter in enumerate(self.weights[0]):
-            plt.subplot(8, 8, i+1) # (8, 8) because in conv0 we have 7x7 filters and total of 64 (see printed shapes)
-            plt.imshow(filter[0, :, :].detach(), cmap='gray')
-            plt.axis('off')
-            plt.savefig(f'filters/filter-{self.path}.png')
-
-    def features_maps(self):
-        # make a copy of the `results`
-        outputs = []
-        names = []
-        image_to_process = self.image
-        for layer in self.conv_layers[0:]:
-            image_to_process = layer(image_to_process)
-            outputs.append(image_to_process)
-            names.append(str(layer))
-        print(len(outputs))
-        processed = []
-        for feature_map in outputs:
-            feature_map = feature_map.squeeze(0)
-            gray_scale = torch.sum(feature_map,0)
-            gray_scale = gray_scale / feature_map.shape[0]
-            processed.append(gray_scale.data.cpu().numpy())
-
-        fig = plt.figure(figsize=(15, 10))
-        for i in range(len(processed)):
-            a = fig.add_subplot(5, 11, i+1)
-            imgplot = plt.imshow(processed[i])
-            a.axis("off")
-            a.set_title(names[i].split('(')[0], fontsize=15)
-        file_name = f'{path}-feature_maps.jpg'
-        plt.savefig(str(file_name), bbox_inches='tight') # ONLY FOR SAVE THE IMAGE
-    
-    def guided_grad_cam(self):
-        self.model.eval()
-        # pred = self.model(self.image).argmax(dim=1)
-        default_cmap = LinearSegmentedColormap.from_list('custom blue', 
-                                                 [(0, '#ffffff'),
-                                                  (0.25, '#000000'),
-                                                  (1, '#000000')], N=256)
-
-        guided_gc = GuidedGradCam(self.model, self.conv_layers[-1])
-        attribution_gc = guided_gc.attribute(self.image, self.image_label, additional_forward_args=[True])
-        printer_image = np.transpose((self.image.squeeze().cpu().detach().numpy() / 2) + 0.5, (1, 2, 0))
-        print('start to print stuff')
-        printer_attr_gc = np.transpose(attribution_gc.squeeze(0).cpu().detach().numpy(), (1,2,0))
-        fig = viz.visualize_image_attr_multiple(
-            printer_attr_gc, 
-            printer_image,
-            ["original_image", "heat_map"],
-            ["all", "positive"], 
-            cmap=default_cmap, 
-            show_colorbar=True,
-            outlier_perc=1
-            )
-        fig.savefig('prova.png', bbox_inches='tight') 
+    def get_type(self, func):
+        if func == 'filters' :
+            return filters(self.path, self.weights)
+        elif func == 'features_map' :
+            return features_map(self.image, self.conv_layers, self.path)
+        elif func == 'grad_cam' :
+            return guided_grad_cam(self.model, self.conv_layers, self.image, self.image_label, self.path)
