@@ -47,7 +47,7 @@ def filters(path, weights):
         plt.title(f'filter-{path}', fontsize=20)
         for i, filter in enumerate(weights[0]):
             plt.subplot(8, 8, i+1) # (8, 8) because in conv0 we have 7x7 filters and total of 64 (see printed shapes)
-            plt.imshow(filter[0, :, :].detach(), cmap='gray')
+            plt.imshow(filter[:, :, :].detach())
             plt.axis('off')
             plt.savefig(f'filters/filter-{path}.png')
 
