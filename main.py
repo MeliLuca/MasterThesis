@@ -12,7 +12,7 @@ import torch
 # Custom
 from config import get_args
 from datasets.dataloaders import get_datasets, get_dataloaders
-from Models import resnetSmall, resnetModule, relcnn
+from Models import relcnn, relvit
 from utils import get_logger, get_callbacks
 from trainer import get_trainer
 import Analysis
@@ -37,12 +37,13 @@ def main(args):
     # Dataloaders
     dls = get_dataloaders(args)
     # Get model
-    if args.backbone =='resnet-small':
-        model = resnetSmall.get_model(args)
-    if args.backbone =='cifar10_model':
-        model = relcnn.get_model(args)
+    if args.backbone == 'vit':
+        model = relvit.get_model(args)
     else:
-        model = relcnn.get_model(args)
+        if args.backbone =='cifar10_model':
+            model = relcnn.get_model(args)
+        else:
+            model = relcnn.get_model(args)
     # elif args.backbone == 'simsiam':
     #     model = relvit_simsiam.get_model(args)
     # elif args.bacbkone == 'cnn':

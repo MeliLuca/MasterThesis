@@ -27,29 +27,38 @@ def getConvFilters(model):
         for i in range(len(model_children)):    
             if type(model_children[i]) == torch.nn.Conv2d:
                 counter+=1
-                model_weights.append(model_children[i].weight)
+                model_weights.append(model_children[i].weight.detach())
                 conv_layers.append(model_children[i])
             elif type(model_children[i]) == torch.nn.Sequential:
                 for j in range(len(model_children[i])):
                     for child in model_children[i][j].children():
                         if type(child) == torch.nn.Conv2d:
                             counter+=1
-                            model_weights.append(child.weight)
+                            model_weights.append(child.weight.detach())
                             conv_layers.append(child)
         # print(f"Total convolution layers: {counter}")
         # print("conv_layers")
         # last_conv = conv_layers[-1]
         return conv_layers, model_weights
 
-def filters(path, weights):
+def filters(path, weights, num_layer=None):
         # visualize the first conv layer filters
-        plt.figure(figsize=(20, 17))
-        plt.title(f'filter-{path}', fontsize=20)
-        for i, filter in enumerate(weights[0]):
-            plt.subplot(8, 8, i+1) # (8, 8) because in conv0 we have 7x7 filters and total of 64 (see printed shapes)
-            plt.imshow(filter[:, :, :].detach())
-            plt.axis('off')
-            plt.savefig(f'filters/filter-{path}.png')
+        def print_filters(layer, idx):
+            nomralized_filters = (layer - layer.min()) / (layer.max() - layer.min())
+            plt.figure(figsize=(20, 17))
+            plt.title(f'filter-{path}', fontsize=20)
+            for j, filter in enumerate(nomralized_filters):
+                plt.subplot(8, 8, j+1) # (8, 8) because in conv0 we have 7x7 filters and total of 64 (see printed shapes)
+                plt.imshow(filter[0, ...])
+                plt.axis('off')
+                plt.savefig(f'filters/{idx+1}_layer-{path}_v2.png')
+
+        if num_layer == None :
+            for i, layer in enumerate(weights):
+                print_filters(layer, i)
+        else :
+            print_filters(weights[num_layer], num_layer)
+                
 
 def features_map(image, conv_layers, path):
     # make a copy of the `results`
@@ -117,10 +126,11 @@ class Create():
         plt.imshow(np.transpose(npimg, (1, 2, 0)))
         plt.show()
     
-    def get_type(self, func):
-        if func == 'filters' :
-            return filters(self.path, self.weights)
-        elif func == 'features_map' :
+    def get_type(self, param):
+        func = param.split("-")
+        if func[0] == 'filters' :
+            return filters(self.path, self.weights, int(func[1])) if len(func)>1 else filters(self.path, self.weights)
+        elif func[0] == 'features_map' :
             return features_map(self.image, self.conv_layers, self.path)
-        elif func == 'grad_cam' :
+        elif func[0] == 'grad_cam' :
             return guided_grad_cam(self.model, self.conv_layers, self.image, self.image_label, self.path)
