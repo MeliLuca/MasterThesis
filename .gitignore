@@ -1,6 +1,6 @@
 .xml
 .pyc
-.png
+*.png
 .tar
 __pycache__
 datasets/data
