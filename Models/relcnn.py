@@ -14,7 +14,6 @@ import logging
 import wandb
 from torchvision.utils import make_grid
 from sklearn.decomposition import PCA
-# from bottleneck_transformer_pytorch import BottleStack
 
 
 
@@ -22,7 +21,6 @@ from sklearn.decomposition import PCA
 from Layers.MultiHeadAttention import MultiHeadAttentionScores
 from datasets.encode_locations import create_connectivity_matrix
 from utils import cross_entropy, accuracy
-from Models import resnet_cifar10, botNet
 
 
 ##################################################
