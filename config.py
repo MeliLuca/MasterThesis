@@ -5,6 +5,9 @@
 import argparse
 import json
 import logging
+from torch import det
+
+from yaml import parse
 
 
 def get_args(stdin, verbose=False):
@@ -53,6 +56,7 @@ def get_args(stdin, verbose=False):
     parser.add_argument('--patch_size', type=int, default=-1, help='The patch size.')
     parser.add_argument('--use_relations', dest='use_relations', action='store_true', 
                         help='Learn patches spatial relations.')
+    parser.add_argument('--use_segmentation', dest='use_segmentation', action='store_true', help='Learn semantic segmentation.')
     parser.add_argument('--use_supervision', dest='use_supervision', action='store_true', help='Learn image classes.')
     parser.add_argument('--use_distances', dest='use_distances', action='store_true', help='Learn patch distances.')
     parser.add_argument('--use_angles', dest='use_angles', action='store_true', help='Learn patch angles.')
@@ -105,6 +109,7 @@ def get_args(stdin, verbose=False):
         'cars': 196,
         'svhn': 10,
         'pathmnist': 9,
+        'ade20k' : 150,
     }
     args.num_classes = num_classes[args.dataset]
     if args.task == 'downstream' and args.metric_monitor=='val_acc':
@@ -132,6 +137,7 @@ def get_args(stdin, verbose=False):
             'cars': 32,
             'svhn': 4,
             'pathmnist': 32,
+            'ade20k': 32
         }
         args.patch_size = patch_size[args.dataset]
     img_height = {
@@ -150,6 +156,7 @@ def get_args(stdin, verbose=False):
         'cars': 224,
         'svhn': 32,
         'pathmnist': 224,
+        'ade20k': 224,
     }
     args.img_height = img_height[args.dataset]
     if verbose:

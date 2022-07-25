@@ -21,6 +21,7 @@ from sklearn.decomposition import PCA
 from timm.models import vision_transformer as vit
 import Models.vit_dino as vit_dino
 from Layers.MultiHeadAttention import MultiHeadAttentionScores
+from Layers import UNet
 from utils import cross_entropy, accuracy
 import utils
 from torchvision.utils import make_grid
@@ -38,7 +39,7 @@ class RelViT(pl.LightningModule):
     """
     def __init__(self, args, num_classes, num_rel_classes=9, use_relations=False, use_positional_emb=True, 
                  use_supervision=True, patch_size=32, dropout=0.1, freeze_fet_enc=False, use_distances=False, 
-                 use_angles=False, use_abs_positions=False, proj_dropout=0.0):
+                 use_angles=False, use_abs_positions=False, proj_dropout=0.0, use_segmentation=True):
         super().__init__()
         self.args = args
         self.num_classes = num_classes
@@ -52,7 +53,16 @@ class RelViT(pl.LightningModule):
         self.dropout = dropout
         self.proj_dropout = proj_dropout
         self.freeze_fet_enc = freeze_fet_enc
+        self.use_segmentation = use_segmentation
         self.backbone = self._get_backbone()
+        if self.use_segmentation :
+            self.linear_channel = nn.Linear(self.backbone.embed_dim, 3)
+            self.linear_dimension = nn.Linear(49, 1024)
+            self.upsample = nn.Upsample(scale_factor=7, mode='bilinear')
+            self.segm_head = UNet.build_unet()
+            # self.linear_channel = nn.Linear(self.backbone.embed_dim, 3)
+            # self.linear_size = nn.Linear(65, 65//2)
+            # self.segm_head = UNet.build_unet()
         if self.use_relations:
             self.rel_head = MultiHeadAttentionScores(self.backbone.embed_dim, num_rel_classes)
         if self.use_supervision:
@@ -94,7 +104,7 @@ class RelViT(pl.LightningModule):
             if self.args.add_clf_to_patches:
                 z_patches = feats['z_patches'] + feats['z'].unsqueeze(1)
             else:
-                z_patches = feats['z_patches']
+                z_patches = feats['z_patches'] # [B x ? x emb_dim]
 
         if self.use_relations:
             out['rel'] = self.rel_head(z_patches)
@@ -106,6 +116,12 @@ class RelViT(pl.LightningModule):
             out['abs_pos'] = self.abs_pos_head(z_patches).transpose(1, 2)
         if self.use_supervision:
             out['clf'] = self.clf_head(feats['z'])
+        if self.use_segmentation:
+            B,_,emb = feats['z_patches'].shape
+            segm_in =  self.linear_dimension(feats['z_patches'].transpose(1, 2))
+            segm_in = segm_in.view([B, emb, 32, 32])
+            segm_in = self.upsample(segm_in)
+            out['seg'] = self.linear_channel(segm_in.transpose(1,3))
         return out
 
     def training_step(self, batch, batch_idx, part='train'):
@@ -127,6 +143,12 @@ class RelViT(pl.LightningModule):
             acc_cls = accuracy(logits['clf'], y_cls)
             self.log(f'{part}_acc_clf', acc_cls, prog_bar=True)
             self.log(f'{part}_loss_clf', loss_clf)
+
+        if self.use_segmentation:
+            y_target = batch['labels']
+            loss_seg = F.cross_entropy(logits['seg'].transpose(1,3), y_target)
+            loss += loss_seg
+            self.log(f'{part}_loss_seg', loss_seg)
 
         if self.use_relations:
             y_rel = batch['relations'] # [B, N_PATCH, N_PATCH]
@@ -247,6 +269,7 @@ def get_model(args):
         'freeze_fet_enc': args.freeze_fet_enc,
         'use_abs_positions': args.use_abs_positions,
         'proj_dropout': args.proj_dropout,
+        'use_segmentation': args.use_segmentation,
     }
     model = RelViT(**model_args)
     if len(args.model_checkpoint) > 0:

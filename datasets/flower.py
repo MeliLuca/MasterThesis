@@ -77,13 +77,17 @@ class Flower102(Dataset):
         if self.target_transform is not None:
             label = self.target_transform(label)
         if self.use_segmentation:
+            print('Use SEGMENTAAAATIONNNNNN')
             seg_path = os.path.join(self.data_path, 'segmim',
                                     f'segmim_{idx_map:05d}.jpg')
             seg = Image.open(seg_path)
             if self.seg_transform is not None:
                 sef = self.seg_transform(seg)
+            target = {}
+            target['label'] = label
+            target['mask'] = seg
             return img, seg, label
-        return img, label
+        return img, target
 
     def __len__(self):
         return len(self.setid)

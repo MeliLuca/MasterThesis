@@ -15,7 +15,7 @@ import subprocess
 from torch.utils.data import Dataset, DataLoader
 from PIL import Image
 from torchvision.datasets import CIFAR10, CIFAR100, ImageFolder, SVHN
-import torch
+import torch, torchvision
 import math
 import torch.nn.functional as F
 import tarfile
@@ -31,6 +31,7 @@ from datasets.caltech import Caltech256
 from datasets.flower import Flower102
 from datasets.cars import Cars
 from datasets.oxford_pet import OxfordPet
+from datasets.ade20k import ADE20KSegmentation
 import utils
 
 
@@ -198,11 +199,11 @@ def get_datasets(args, transform='default', target_transform='default', patch_tr
         ds_train_simsiam = Caltech256(train=True, transform=transform['train_simsiam'], target_transform=target_transform['train_simsiam'], **ds_args)
 
     elif args.dataset == 'flower102':
-        ds_train = Flower102(split='train', transform=transform['train'], target_transform=target_transform['train'], **ds_args)
-        ds_train_aug = Flower102(split='train', transform=transform['train_aug'], target_transform=target_transform['train_aug'], **ds_args)
-        ds_validation = Flower102(split='val', transform=transform['validation'], target_transform=target_transform['validation'], **ds_args)
-        ds_test = Flower102(split='test', transform=transform['test'], target_transform=target_transform['test'], **ds_args)
-        ds_train_simsiam = Flower102(split='train', transform=transform['train_simsiam'], target_transform=target_transform['train_simsiam'], **ds_args)
+        ds_train = Flower102(split='train', transform=transform['train'], target_transform=target_transform['train'], use_segmentation=args.use_segmentation, **ds_args)
+        ds_train_aug = Flower102(split='train', transform=transform['train_aug'], target_transform=target_transform['train_aug'], use_segmentation=args.use_segmentation, **ds_args)
+        ds_validation = Flower102(split='val', transform=transform['validation'], target_transform=target_transform['validation'], use_segmentation=args.use_segmentation, **ds_args)
+        ds_test = Flower102(split='test', transform=transform['test'], target_transform=target_transform['test'], use_segmentation=args.use_segmentation, **ds_args)
+        ds_train_simsiam = Flower102(split='train', transform=transform['train_simsiam'], target_transform=target_transform['train_simsiam'], use_segmentation=args.use_segmentation, **ds_args)
 
     elif args.dataset == 'oxford_pet':
         ds_train = OxfordPet(train=True, transform=transform['train'], target_transform=target_transform['train'], **ds_args)
@@ -235,6 +236,13 @@ def get_datasets(args, transform='default', target_transform='default', patch_tr
         ds_test = DataClass(split='test', transform=transform['test'],target_transform=target_transform['test'], **ds_args)
         ds_train_simsiam = DataClass(split='train', transform=transform['train_simsiam'], 
                                target_transform=target_transform['train_simsiam'], **ds_args)
+    elif args.dataset == 'ade20k':
+        ds_train = ADE20KSegmentation(split='train', transform=transform['train'], target_transform=target_transform['train'], **ds_args)
+        ds_train_aug = ADE20KSegmentation(split='train', transform=transform['train_aug'], target_transform=target_transform['train_aug'], **ds_args)
+        ds_validation = ADE20KSegmentation(split='test', transform=transform['validation'], target_transform=target_transform['validation'], **ds_args)
+        ds_test = None
+        ds_train_simsiam = ADE20KSegmentation(split='train', transform=transform['train_simsiam'], target_transform=target_transform['train_simsiam'], **ds_args)
+        
     else:
         raise Exception(f'Error. Dataset {args.dataset} not supported.')
 
@@ -278,6 +286,23 @@ def get_datasets(args, transform='default', target_transform='default', patch_tr
             'test': None,
             'train_simsiam': None,
         }
+    
+    # elif args.task == 'segmentation':
+    #     img_dataset_args = {
+    #         'img_size': args.img_height,
+    #         'patch_size': args.patch_size,
+    #         'use_relations': args.use_relations,
+    #         'use_distances': args.use_distances,
+    #         'use_angles': args.use_angles,
+    #         'use_abs_positions': args.use_abs_positions,
+    #     }
+    #     dss = {
+    #         'train': ds_train,
+    #         'train_aug': ds_train_aug,
+    #         'validation': ds_validation,
+    #         'test': None,
+    #         'train_simsiam': None,
+    #     }
 
     else:
         raise Exception(f'Error. Task "{args.task}" not supported.')

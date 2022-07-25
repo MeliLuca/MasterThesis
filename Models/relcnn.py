@@ -21,7 +21,7 @@ from sklearn.decomposition import PCA
 from Layers.MultiHeadAttention import MultiHeadAttentionScores
 from datasets.encode_locations import create_connectivity_matrix
 from utils import cross_entropy, accuracy
-
+from Models import resnet_cifar10
 
 ##################################################
 # RelCNN Model

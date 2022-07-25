@@ -376,45 +376,80 @@ def get_transforms(args):
             'test': None,
             'train_simsiam': None,
         }
-
-    elif args.dataset == 'voc':
-        raise Exception('TO CHECK...')
-        #trans = {
-        #    'train': transforms.Compose([
-        #        lambda x: smart_resize(x, 255, 255),
-        #        transforms.CenterCrop((255, 255)),
-        #        transforms.ToTensor(),
-        #        lambda x: image2patches(x, patch_size=crop_size[patch_size]),
-        #        transforms.CenterCrop((patch_size, patch_size)),
-        #    ]),
-        #    'train_aug': transforms.Compose([
-        #        lambda x: smart_resize(x, 255, 255),
-        #        transforms.RandomCrop((255, 255)),
-        #        transforms.ToTensor(),
-        #        lambda x: image2patches(x, patch_size=crop_size[patch_size]),
-        #        transforms.RandomCrop((patch_size, patch_size)),
-        #    ]),
-        #    'validation': transforms.Compose([
-        #        lambda x: smart_resize(x, 255, 255),
-        #        transforms.CenterCrop((255, 255)),
-        #        transforms.ToTensor(),
-        #        lambda x: image2patches(x, patch_size=crop_size[patch_size]),
-        #        transforms.CenterCrop((patch_size, patch_size)),
-        #    ]),
-        #    'test': transforms.Compose([
-        #        lambda x: smart_resize(x, 255, 255),
-        #        transforms.CenterCrop((255, 255)),
-        #        transforms.ToTensor(),
-        #        lambda x: image2patches(x, patch_size=crop_size[patch_size]),
-        #        transforms.CenterCrop((patch_size, patch_size)),
-        #    ]),
-        #}
-        #trans_target = {
-        #    'train': lambda x: -1,
-        #    'train_aug': lambda x: -1,   
-        #    'validation': lambda x: -1,   
-        #    'test': lambda x: -1,   
-        #}
+    
+    elif args.dataset in ['ade20k']:
+        trans = {
+            'train_aug': transforms.Compose([
+                to_rgb_ifneeded,
+                transforms.Resize(256),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
+            ]),
+            'train': transforms.Compose([
+                to_rgb_ifneeded,
+                transforms.Resize(256),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
+            ]),
+            'validation': transforms.Compose([
+                to_rgb_ifneeded,
+                transforms.Resize(256),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
+            ]),
+            'test': transforms.Compose([
+                to_rgb_ifneeded,
+                transforms.Resize(256),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
+            ]),
+            'train_simsiam': get_simsiam_transform(args),
+        }
+        trans_target = {
+            'train': transforms.Compose([
+                transforms.Resize(256),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
+            ]),
+            'train_aug': transforms.Compose([
+                transforms.Resize(256),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
+            ]),   
+            'validation': transforms.Compose([
+                transforms.Resize(256),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
+            ]),  
+            'test': None,   
+            'train_simsiam': None,
+        }
+        patch_trans = {
+            'train': None,
+            'train_aug': transforms.Compose([
+                lambda x: x.transpose(0, 1),
+                PerPatchAug(transforms.RandomCrop(int(np.round(args.patch_size / 1.15)))), # for patch_size = 32 -> 28
+                transforms.Resize(args.patch_size),
+                PerPatchAug(
+                    transforms.RandomApply([
+                        transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
+                    ], p=0.8)
+                ),
+                PerPatchAug(transforms.RandomGrayscale(p=0.2)),
+                #GaussianMasking(args.patch_size, args.patch_size / 5),
+                lambda x: x.transpose(0, 1),
+            ]),
+            'validation': None,
+            'test': None,
+            'train_simsiam': None,
+        }
 
     else:
         print('No transformations match. No transformations are applied to the datasets.')

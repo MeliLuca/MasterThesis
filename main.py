@@ -2,6 +2,7 @@
 # Imports
 ##################################################
 
+from ast import arg
 import sys
 import pytorch_lightning as pl
 import logging
@@ -56,7 +57,7 @@ def main(args):
     if args.mode in ['train', 'training']:
         trainer.fit(model, dls['train_aug'], dls['validation'])
         trainer.validate(model=None, dataloaders=dls['validation'])
-
+        
     elif args.mode in ['validate', 'validation', 'validating']:
         trainer.validate(model, dataloaders=dls['validation'])
     
