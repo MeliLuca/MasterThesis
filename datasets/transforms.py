@@ -8,6 +8,9 @@ import torch.nn.functional as F
 import numpy as np
 from PIL import ImageFilter
 import random
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
+import cv2
 
 # Custom
 from datasets import constants
@@ -379,55 +382,35 @@ def get_transforms(args):
     
     elif args.dataset in ['ade20k']:
         trans = {
-            'train_aug': transforms.Compose([
-                to_rgb_ifneeded,
-                transforms.Resize(256),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
+            'train_aug': A.Compose([
+                A.Resize(width=256, height=256),
+                A.RandomResizedCrop(width=224, height=224),
+                A.HorizontalFlip(p=0.5),
+                A.RandomBrightnessContrast(p=0.2),
+                A.Normalize(*constants.NORMALIZATION[args.dataset]),
+                ToTensorV2()
             ]),
-            'train': transforms.Compose([
-                to_rgb_ifneeded,
-                transforms.Resize(256),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
+            'train': A.Compose([
+                A.Resize(width=224, height=224),
+                A.Normalize(*constants.NORMALIZATION[args.dataset]),
+                ToTensorV2()
             ]),
-            'validation': transforms.Compose([
-                to_rgb_ifneeded,
-                transforms.Resize(256),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
+            'validation': A.Compose([
+                A.Resize(width=224, height=224),
+                A.Normalize(*constants.NORMALIZATION[args.dataset]),
+                ToTensorV2()
             ]),
-            'test': transforms.Compose([
-                to_rgb_ifneeded,
-                transforms.Resize(256),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
+            'test': A.Compose([
+                A.Resize(width=224, height=224),
+                A.Normalize(*constants.NORMALIZATION[args.dataset]),
+                ToTensorV2()
             ]),
             'train_simsiam': get_simsiam_transform(args),
         }
         trans_target = {
-            'train': transforms.Compose([
-                transforms.Resize(256),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-            ]),
-            'train_aug': transforms.Compose([
-                transforms.Resize(256),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-            ]),   
-            'validation': transforms.Compose([
-                transforms.Resize(256),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.Normalize(*constants.NORMALIZATION[args.dataset])
-            ]),  
+            'train': None,
+            'train_aug': None,   
+            'validation':None,  
             'test': None,   
             'train_simsiam': None,
         }

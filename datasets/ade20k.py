@@ -38,21 +38,23 @@ class ADE20KSegmentation(Dataset):
         print('Found {} images in the folder {}'.format(len(self.images), root))
 
     def __getitem__(self, index):
-        img = Image.open(os.path.join(self.root,self.images[index])).convert('RGB')
+        img_path = os.path.join(self.root,self.images[index])
+        img = Image.open(img_path).convert('RGB')
         if self.mode == 'test':
             img = self._img_transform(img)
             if self.transform is not None:
                 img = self.transform(img)
             return img
-        mask = Image.open(os.path.join(self.root,self.masks[index]))
-        
-        # general resize, normalize and to Tensor
+        mask = loadAde20K(img_path)['class_mask']
+        # mask = Image.open(os.path.join(self.root,self.masks[index]))
+        img = np.array(img)
+        mask = np.array(mask)
+        # general resize, normalize and to Tensor. 
+        # 
         if self.transform is not None:
-            img = self.transform(img)
-        if self.target_transform is not None:
-            mask = self.target_transform(mask)
-        else : 
-            mask = np.array(mask)
+            transformed = self.transform(image=img, mask=mask) #Albumentations Transform
+            img = transformed["image"]
+            mask = transformed["mask"]
         return img, mask
 
     def _mask_transform(self, mask):

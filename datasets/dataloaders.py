@@ -21,6 +21,7 @@ import torch.nn.functional as F
 import tarfile
 import medmnist
 from medmnist import INFO
+import albumentations as A
 
 
 # Custom

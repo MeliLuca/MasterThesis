@@ -33,6 +33,21 @@ cmap = cm.get_cmap('viridis')
 # RelViT Model
 ##################################################
 
+class NaiveDecoder(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.linear_channel = nn.Linear(self.backbone.embed_dim, 1)
+        self.linear_dimension = nn.Linear(49, 1024)
+        self.upsample = nn.Upsample(scale_factor=7, mode='bilinear')
+
+    def forward(self, x):
+        B,_,emb = x.shape
+        segm_in =  self.linear_dimension(x.transpose(1, 2))
+        segm_in = segm_in.view([B, emb, 32, 32])
+        segm_in = self.upsample(segm_in)
+        out = self.linear_channel(segm_in.transpose(1,3))
+        return out
+
 class RelViT(pl.LightningModule):
     """
     Lightning module that defines the Relational Vision Transformer Model.
@@ -56,13 +71,11 @@ class RelViT(pl.LightningModule):
         self.use_segmentation = use_segmentation
         self.backbone = self._get_backbone()
         if self.use_segmentation :
-            self.linear_channel = nn.Linear(self.backbone.embed_dim, 3)
-            self.linear_dimension = nn.Linear(49, 1024)
-            self.upsample = nn.Upsample(scale_factor=7, mode='bilinear')
-            self.segm_head = UNet.build_unet()
-            # self.linear_channel = nn.Linear(self.backbone.embed_dim, 3)
-            # self.linear_size = nn.Linear(65, 65//2)
-            # self.segm_head = UNet.build_unet()
+            if self.args.model_version == 'naive':
+                self.segm_head = NaiveDecoder()
+            if self.args.model_version == 'unet':
+                self.segm_head = UNet.build_unet()
+
         if self.use_relations:
             self.rel_head = MultiHeadAttentionScores(self.backbone.embed_dim, num_rel_classes)
         if self.use_supervision:
@@ -117,11 +130,7 @@ class RelViT(pl.LightningModule):
         if self.use_supervision:
             out['clf'] = self.clf_head(feats['z'])
         if self.use_segmentation:
-            B,_,emb = feats['z_patches'].shape
-            segm_in =  self.linear_dimension(feats['z_patches'].transpose(1, 2))
-            segm_in = segm_in.view([B, emb, 32, 32])
-            segm_in = self.upsample(segm_in)
-            out['seg'] = self.linear_channel(segm_in.transpose(1,3))
+            out['seg'] = self.segm_head(feats['z_patches'])
         return out
 
     def training_step(self, batch, batch_idx, part='train'):
@@ -145,8 +154,8 @@ class RelViT(pl.LightningModule):
             self.log(f'{part}_loss_clf', loss_clf)
 
         if self.use_segmentation:
-            y_target = batch['labels']
-            loss_seg = F.cross_entropy(logits['seg'].transpose(1,3), y_target)
+            y_target = batch['labels'].float()
+            loss_seg = F.cross_entropy(logits['seg'].squeeze(-1), y_target)
             loss += loss_seg
             self.log(f'{part}_loss_seg', loss_seg)
 
