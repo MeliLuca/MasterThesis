@@ -34,9 +34,9 @@ cmap = cm.get_cmap('viridis')
 ##################################################
 
 class NaiveDecoder(nn.Module):
-    def __init__(self):
+    def __init__(self, emb_dim):
         super().__init__()
-        self.linear_channel = nn.Linear(self.backbone.embed_dim, 1)
+        self.linear_channel = nn.Linear(emb_dim, 1)
         self.linear_dimension = nn.Linear(49, 1024)
         self.upsample = nn.Upsample(scale_factor=7, mode='bilinear')
 
@@ -72,8 +72,8 @@ class RelViT(pl.LightningModule):
         self.backbone = self._get_backbone()
         if self.use_segmentation :
             if self.args.model_version == 'naive':
-                self.segm_head = NaiveDecoder()
-            if self.args.model_version == 'unet':
+                self.segm_head = NaiveDecoder(self.backbone.embed_dim)
+            elif self.args.model_version == 'unet':
                 self.segm_head = UNet.build_unet()
 
         if self.use_relations:

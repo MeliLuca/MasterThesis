@@ -136,7 +136,7 @@ class ADE20KSegmentation(Dataset):
 def _get_ade20k_pairs(folder, mode='train'):
     img_paths = []
     mask_paths = []
-    with open('/data/ADE20K_2021_17_01/index_ade20k.pkl', 'rb') as f:
+    with open(os.path.join(folder, 'index_ade20k.pkl'), 'rb') as f:
         items = pickle.load(f)
     file_name_list = items['filename']
     folder = items['folder']
