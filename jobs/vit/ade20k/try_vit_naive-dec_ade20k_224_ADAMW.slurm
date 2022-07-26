@@ -31,6 +31,7 @@ which nvcc
 
 ### Without singularity...
 source $HOME/miniconda3/etc/profile.d/conda.sh
+conda init bash
 conda activate new_env
 export WANDB_API_KEY=1c9bad0d162960a36cc8fecc456d0dc024cb834c
 python3 $HOME/storage/MasterThesis/main.py \
