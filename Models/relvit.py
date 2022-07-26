@@ -147,7 +147,9 @@ class RelViT(pl.LightningModule):
 
         if self.use_supervision:
             y_cls = batch['labels'] # [B]
+            torch.use_deterministic_algorithms(False)
             loss_clf = F.cross_entropy(logits['clf'], y_cls)
+            torch.use_deterministic_algorithms(True)
             loss += loss_clf
             acc_cls = accuracy(logits['clf'], y_cls)
             self.log(f'{part}_acc_clf', acc_cls, prog_bar=True)
@@ -155,14 +157,18 @@ class RelViT(pl.LightningModule):
 
         if self.use_segmentation:
             y_target = batch['labels'].float()
+            torch.use_deterministic_algorithms(False)
             loss_seg = F.cross_entropy(logits['seg'].squeeze(-1), y_target)
+            torch.use_deterministic_algorithms(True)
             loss += loss_seg
             self.log(f'{part}_loss_seg', loss_seg)
 
         if self.use_relations:
             y_rel = batch['relations'] # [B, N_PATCH, N_PATCH]
+            torch.use_deterministic_algorithms(False)
             loss_rel = cross_entropy(logits['rel'], y_rel, smooth=self.args.smooth_rel, 
                                      dropout=self.args.dropout_rel if part == 'train' else 0.0)
+            torch.use_deterministic_algorithms(True)
             loss += loss_rel
             acc_rel = accuracy(logits['rel'], y_rel)
             self.log(f'{part}_acc_rel', acc_rel, prog_bar=True)
@@ -182,7 +188,9 @@ class RelViT(pl.LightningModule):
 
         if self.use_abs_positions:
             y_abs_pos = batch['abs_positions'] # [B, N_PATCH]
+            torch.use_deterministic_algorithms(False)
             loss_abs_pos = F.cross_entropy(logits['abs_pos'], y_abs_pos)
+            torch.use_deterministic_algorithms(True)
             loss += loss_abs_pos
             acc_abs_pos = accuracy(logits['abs_pos'], y_abs_pos)
             self.log(f'{part}_acc_abs_pos', acc_abs_pos, prog_bar=True)
