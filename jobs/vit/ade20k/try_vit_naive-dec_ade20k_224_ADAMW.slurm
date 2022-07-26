@@ -42,3 +42,5 @@ python3 $HOME/storage/MasterThesis/main.py \
  --use_segmentation \
  --model_version naive \
 ## added more layer that usual !!!
+####     with open(os.path.join(folder, 'index_ade20k.pkl'), 'rb') as f:
+####   FileNotFoundError: [Errno 2] No such file or directory: './datasets/data/ADE20K_2021_17_01/index_ade20k.pkl'
