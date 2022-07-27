@@ -2,10 +2,12 @@
 # Imports
 ##################################################
 
+from pyexpat import model
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torchvision.models.segmentation import fcn_resnet50
 from torch.optim import SGD, Adam, AdamW
 import logging
 import wandb
@@ -21,7 +23,7 @@ from sklearn.decomposition import PCA
 from timm.models import vision_transformer as vit
 import Models.vit_dino as vit_dino
 from Layers.MultiHeadAttention import MultiHeadAttentionScores
-from Layers import UNet
+from Layers import UNet, PUP
 from utils import cross_entropy, accuracy
 import utils
 from torchvision.utils import make_grid
@@ -36,17 +38,30 @@ cmap = cm.get_cmap('viridis')
 class NaiveDecoder(nn.Module):
     def __init__(self, emb_dim):
         super().__init__()
-        self.linear_channel = nn.Linear(emb_dim, 1)
+        self.linear_channel = nn.Linear(emb_dim, 150)
         self.linear_dimension = nn.Linear(49, 1024)
         self.upsample = nn.Upsample(scale_factor=7, mode='bilinear')
 
     def forward(self, x):
         B,_,emb = x.shape
-        segm_in =  self.linear_dimension(x.transpose(1, 2))
-        segm_in = segm_in.view([B, emb, 32, 32])
+        segm_in =  self.linear_channel(x)
+        segm_in = self.linear_dimension(segm_in.transpose(1,2))
+        segm_in = segm_in.view([B, 150, 32, 32])
         segm_in = self.upsample(segm_in)
-        out = self.linear_channel(segm_in.transpose(1,3))
-        return out
+        return segm_in
+
+class PUPDecoder(nn.Module):
+    def __init__(self, emb_dim):
+        super().__init__()
+        self.linear_channel = nn.Linear(emb_dim, 1024)
+        self.decoder = PUP.Decoder2D(1024, 150)
+
+    def forward(self, x):
+        segm_in = self.linear_channel(x)
+        B,_,emb = segm_in.shape
+        segm_in = segm_in.view([B,emb,7,7])
+        segm_in = self.decoder(segm_in)
+        return segm_in
 
 class RelViT(pl.LightningModule):
     """
@@ -75,7 +90,10 @@ class RelViT(pl.LightningModule):
                 self.segm_head = NaiveDecoder(self.backbone.embed_dim)
             elif self.args.model_version == 'unet':
                 self.segm_head = UNet.build_unet()
-
+            elif self.args.model_version == 'pup':
+                self.segm_head = PUPDecoder(self.backbone.embed_dim)
+            else :
+                self.segm_head = nn.Identity()
         if self.use_relations:
             self.rel_head = MultiHeadAttentionScores(self.backbone.embed_dim, num_rel_classes)
         if self.use_supervision:
@@ -104,6 +122,8 @@ class RelViT(pl.LightningModule):
                 'drop_rate': self.dropout,
             }
             backbone = vit_dino.__dict__[f'vit_{self.args.model_size}'](**backbone_args)
+        elif self.args.backbone == 'fcn':
+            backbone = fcn_resnet50(num_classes=self.num_classes)
         return backbone
 
     def forward(self, x):
@@ -112,13 +132,15 @@ class RelViT(pl.LightningModule):
         """
         out = {}
         mask = self.args.attn_mask if len(self.args.attn_mask) > 0 else None
-        feats = self.backbone(x, mask=mask)
+        # feats = self.backbone(x, mask=mask)
+        feats = self.backbone(x)
         if self.args.backbone in ['vit']:
             if self.args.add_clf_to_patches:
                 z_patches = feats['z_patches'] + feats['z'].unsqueeze(1)
             else:
                 z_patches = feats['z_patches'] # [B x ? x emb_dim]
-
+        elif self.args.backbone in ['fcn']:
+            z_patches = feats['out']
         if self.use_relations:
             out['rel'] = self.rel_head(z_patches)
         if self.use_distances:
@@ -130,7 +152,7 @@ class RelViT(pl.LightningModule):
         if self.use_supervision:
             out['clf'] = self.clf_head(feats['z'])
         if self.use_segmentation:
-            out['seg'] = self.segm_head(feats['z_patches'])
+            out['seg'] = self.segm_head(z_patches)
         return out
 
     def training_step(self, batch, batch_idx, part='train'):
@@ -156,9 +178,9 @@ class RelViT(pl.LightningModule):
             self.log(f'{part}_loss_clf', loss_clf)
 
         if self.use_segmentation:
-            y_target = batch['labels'].float()
+            y_target = batch['labels'].long()
             torch.use_deterministic_algorithms(False)
-            loss_seg = F.cross_entropy(logits['seg'].squeeze(-1), y_target)
+            loss_seg = F.cross_entropy(logits['seg'], y_target)
             torch.use_deterministic_algorithms(True)
             loss += loss_seg
             self.log(f'{part}_loss_seg', loss_seg)

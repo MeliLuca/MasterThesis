@@ -69,10 +69,10 @@ class build_unet(nn.Module):
         super().__init__()
 
         """ Encoder """
-        self.e1 = encoder_block(3, 64)
-        self.e2 = encoder_block(64, 128)
-        self.e3 = encoder_block(128, 256)
-        self.e4 = encoder_block(256, 512)
+        # self.e1 = encoder_block(3, 64)
+        # self.e2 = encoder_block(64, 128)
+        # self.e3 = encoder_block(128, 256)
+        # self.e4 = encoder_block(256, 512)
 
         """ Bottleneck """
         self.b = conv_block(512, 1024)

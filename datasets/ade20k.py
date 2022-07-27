@@ -13,7 +13,7 @@ from datasets.utils_ade20k import loadAde20K
 url = 'http://groups.csail.mit.edu/vision/datasets/ADE20K/toolkit/index_ade20k.pkl'
 
 class ADE20KSegmentation(Dataset):
-    BASE_DIR = 'ADE20K_2021_17_01'
+    BASE_DIR = 'ADEChallengeData2016'
     NUM_CLASS = 150
    
     def __init__(self, root, split='train', mode='train', download=False, transform=None,
@@ -38,15 +38,14 @@ class ADE20KSegmentation(Dataset):
         print('Found {} images in the folder {}'.format(len(self.images), root))
 
     def __getitem__(self, index):
-        img_path = os.path.join(self.root,self.images[index])
-        img = Image.open(img_path).convert('RGB')
+        img = Image.open(self.images[index]).convert('RGB')
         if self.mode == 'test':
             img = self._img_transform(img)
             if self.transform is not None:
                 img = self.transform(img)
             return img
-        mask = loadAde20K(img_path)['class_mask']
         # mask = Image.open(os.path.join(self.root,self.masks[index]))
+        mask = Image.open(self.masks[index])
         img = np.array(img)
         mask = np.array(mask)
         # general resize, normalize and to Tensor. 
@@ -136,13 +135,22 @@ class ADE20KSegmentation(Dataset):
 def _get_ade20k_pairs(folder, mode='train'):
     img_paths = []
     mask_paths = []
-    with open(os.path.join(folder, 'index_ade20k.pkl'), 'rb') as f:
-        items = pickle.load(f)
-    file_name_list = items['filename']
-    folder = items['folder']
-    for i, filename in enumerate(file_name_list):
-        if 'train' in filename:
-            img_paths += [os.path.join(folder[i], file_name_list[i])]
-            mask_paths += [os.path.join(folder[i], file_name_list[i].replace('.jpg', '_seg.png'))]
+    if mode == 'train':
+        img_folder = os.path.join(folder, 'images/training')
+        mask_folder = os.path.join(folder, 'annotations/training')
+    else:
+        img_folder = os.path.join(folder, 'images/validation')
+        mask_folder = os.path.join(folder, 'annotations/validation')
+    for filename in os.listdir(img_folder):
+        basename, _ = os.path.splitext(filename)
+        if filename.endswith(".jpg"):
+            imgpath = os.path.join(img_folder, filename)
+            maskname = basename + '.png'
+            maskpath = os.path.join(mask_folder, maskname)
+            if os.path.isfile(maskpath):
+                img_paths.append(imgpath)
+                mask_paths.append(maskpath)
+            else:
+                print('cannot find the mask:', maskpath)
     
     return img_paths, mask_paths

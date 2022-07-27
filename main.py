@@ -38,7 +38,7 @@ def main(args):
     # Dataloaders
     dls = get_dataloaders(args)
     # Get model
-    if args.backbone == 'vit':
+    if args.backbone in ['vit', 'fcn']:
         model = relvit.get_model(args)
     else:
         if args.backbone =='cifar10_model':
@@ -57,7 +57,7 @@ def main(args):
     if args.mode in ['train', 'training']:
         trainer.fit(model, dls['train_aug'], dls['validation'])
         trainer.validate(model=None, dataloaders=dls['validation'])
-        
+
     elif args.mode in ['validate', 'validation', 'validating']:
         trainer.validate(model, dataloaders=dls['validation'])
     
