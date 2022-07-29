@@ -1,14 +1,17 @@
 #!/bin/sh
 ### job name
 #SBATCH --job-name=naiveDec
+
 ### Scelta della coda "testing" per tesisti
 ### Numero di host (nodes) occupati dal Job e numero di processi da allocare per nodo (ppn)
-# SBATCH --ntasks=1
-### Memoria che ci si aspetta che il programma utilizzi
+#SBATCH --ntasks=1
+
 ### Limite di tempo che vogliamo assegnare al nostro job (qui un'ora: HH:MM:SS)
-# SBATCH --time=500:00:00
+#SBATCH --time=500:00:00
+
 ### Richiesta della percentuale di GPU
-# SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:1
+
 ### Alcuni comandi di shell che stampano lo stato
 ### del sistema prima dell'esecuzione
 cd ~/storage/MasterThesis/jobs/vit/ade20k
