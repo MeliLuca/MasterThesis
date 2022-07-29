@@ -11,7 +11,7 @@
                 "--dataset=ade20k", 
                 "--num_gpus=0",
                 "--backbone=vit" ,
-                "--model_version=pup",
+                "--model_version=naive",
                 "--batch_size=1",
                 "--num_workers=0",
                 "--use_segmentation",

@@ -8,7 +8,6 @@ echo "directory"
 pwd
 source $HOME/miniconda3/etc/profile.d/conda.sh
 conda activate new_env
-cd $HOME/storage/MasterThesis
 echo "conda version from echo $(conda --version)"
 export WANDB_API_KEY=1c9bad0d162960a36cc8fecc456d0dc024cb834c
 python3 $HOME/storage/MasterThesis/main.py \
