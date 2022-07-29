@@ -9,8 +9,11 @@ import pickle
 from PIL import Image
 from torch.utils.data import Dataset
 from datasets.utils_ade20k import loadAde20K
+import utils
 
-url = 'http://groups.csail.mit.edu/vision/datasets/ADE20K/toolkit/index_ade20k.pkl'
+urls={
+ 'images':'http://data.csail.mit.edu/places/ADEchallenge/ADEChallengeData2016.zip'
+}
 
 class ADE20KSegmentation(Dataset):
     BASE_DIR = 'ADEChallengeData2016'
@@ -28,7 +31,7 @@ class ADE20KSegmentation(Dataset):
         self.use_segmentation = use_segmentation
         self.seg_transform = seg_transform
         self.mode = mode
-
+        self._setup_data()
         # assert os.path.exists(root), "Please setup the dataset using ../datasets/ade20k.py"
         
         self.images, self.masks = _get_ade20k_pairs(self.data_path, self.split)
@@ -36,6 +39,29 @@ class ADE20KSegmentation(Dataset):
         if len(self.images) == 0:
             raise RuntimeError("Found 0 images in subfolders of:" + root + "\n")
         print('Found {} images in the folder {}'.format(len(self.images), root))
+
+    def _check_files(self):
+        files = [
+            os.path.exists(os.path.join(self.data_path, os.path.basename(url)))
+            for url in urls.values()
+        ]
+        return all(files)
+
+    def _setup_data(self):
+        data_already_downloaded = self._check_files()
+
+        if self.download:
+            if data_already_downloaded:
+                logging.info('Files already downloaded.')
+            else:
+                for key, url in urls.items():
+                    fname = os.path.basename(url)
+                    utils.download_file(url, os.path.join(self.data_path, fname))
+                    if fname.endswith('.tgz'):
+                        utils.extract_tar(os.path.join(self.data_path, fname))
+        else:
+            if not data_already_downloaded:
+                logging.error('Data not found. You can download it passing "download=True".')
 
     def __getitem__(self, index):
         img = Image.open(self.images[index]).convert('RGB')
