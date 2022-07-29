@@ -46,8 +46,8 @@ class ADE20KSegmentation(Dataset):
             if data_already_downloaded:
                 logging.info('Files already downloaded.')
             else:
-                subprocess.run(f'wget -r -nc -P {self.data_dir} {url}'.split())
-                subprocess.run(f'unzip -qq -n {self.data_dir}/ADEChallengeData2016.zip -d {self.data_dir}'.split())
+                subprocess.run(f'wget -r -nc -P {self.root} {url}'.split())
+                subprocess.run(f'unzip -qq -n {self.root}/ADEChallengeData2016.zip -d {self.root}'.split())
         else:
             if not data_already_downloaded:
                 logging.error('Data not found. You can download it passing "download=True".')
