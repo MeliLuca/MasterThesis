@@ -24,7 +24,7 @@ from timm.models import vision_transformer as vit
 import Models.vit_dino as vit_dino
 from Layers.MultiHeadAttention import MultiHeadAttentionScores
 from Layers import UNet, PUP
-from utils import cross_entropy, accuracy
+from utils import cross_entropy, accuracy, mIOU
 import utils
 from torchvision.utils import make_grid
 
@@ -181,16 +181,18 @@ class RelViT(pl.LightningModule):
             y_target = batch['labels'].long()
             torch.use_deterministic_algorithms(False)
             loss_seg = F.cross_entropy(logits['seg'], y_target)
-            torch.use_deterministic_algorithms(True)
+            torch.use_deterministic_algorithms(True, warn_only=True)
             loss += loss_seg
+            miou = mIOU(y_target, logits['seg'], num_classes=self.num_classes)
             self.log(f'{part}_loss_seg', loss_seg)
+            self.log(f'{part}_miou', miou)
 
         if self.use_relations:
             y_rel = batch['relations'] # [B, N_PATCH, N_PATCH]
             torch.use_deterministic_algorithms(False)
             loss_rel = cross_entropy(logits['rel'], y_rel, smooth=self.args.smooth_rel, 
                                      dropout=self.args.dropout_rel if part == 'train' else 0.0)
-            torch.use_deterministic_algorithms(True)
+            torch.use_deterministic_algorithms(True, warn_only=True)
             loss += loss_rel
             acc_rel = accuracy(logits['rel'], y_rel)
             self.log(f'{part}_acc_rel', acc_rel, prog_bar=True)
