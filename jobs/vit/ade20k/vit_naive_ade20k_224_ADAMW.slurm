@@ -1,6 +1,6 @@
 #!/bin/sh
 #SBATCH --job-name=Naive
-#SBATCH --ntask=1
+#SBATCH --ntasks=1
 #SBATCH --time=500:00:00
 #SBATCH --gres=gpu:1
 source $HOME/miniconda3/etc/profile.d/conda.sh
