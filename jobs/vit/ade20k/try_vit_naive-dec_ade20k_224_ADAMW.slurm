@@ -17,6 +17,7 @@
 
 ### Alcuni comandi di shell che stampano lo stato
 ### del sistema prima dell'esecuzione
+cd ~/storage/MasterThesis/jobs/vit/ade20k
 echo -n 'Date: '
 date
 echo -n 'Directory: '
