@@ -180,7 +180,7 @@ class RelViT(pl.LightningModule):
         if self.use_segmentation:
             y_target = batch['labels'].long()
             torch.use_deterministic_algorithms(False)
-            loss_seg = F.cross_entropy(logits['seg'], y_target, ignore_index=0)
+            loss_seg = F.cross_entropy(logits['seg'], y_target)
             torch.use_deterministic_algorithms(True)
             loss += loss_seg
             self.log(f'{part}_loss_seg', loss_seg)
