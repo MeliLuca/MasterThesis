@@ -5,15 +5,14 @@ import numpy as np
 import logging
 import zipfile
 import pickle
+import subprocess
 
 from PIL import Image
 from torch.utils.data import Dataset
 from datasets.utils_ade20k import loadAde20K
 import utils
 
-urls={
- 'images':'http://data.csail.mit.edu/places/ADEchallenge/ADEChallengeData2016.zip'
-}
+url='http://data.csail.mit.edu/places/ADEchallenge/ADEChallengeData2016.zip'
 
 class ADE20KSegmentation(Dataset):
     BASE_DIR = 'ADEChallengeData2016'
@@ -40,25 +39,15 @@ class ADE20KSegmentation(Dataset):
             raise RuntimeError("Found 0 images in subfolders of:" + root + "\n")
         print('Found {} images in the folder {}'.format(len(self.images), root))
 
-    def _check_files(self):
-        files = [
-            os.path.exists(os.path.join(self.data_path, os.path.basename(url)))
-            for url in urls.values()
-        ]
-        return all(files)
-
     def _setup_data(self):
-        data_already_downloaded = self._check_files()
+        data_already_downloaded = os.path.exists(os.path.join(self.data_path, os.path.basename(url)))
 
         if self.download:
             if data_already_downloaded:
                 logging.info('Files already downloaded.')
             else:
-                for key, url in urls.items():
-                    fname = os.path.basename(url)
-                    utils.download_file(url, os.path.join(self.data_path, fname))
-                    if fname.endswith('.tgz'):
-                        utils.extract_tar(os.path.join(self.data_path, fname))
+                subprocess.run(f'wget -r -nc -P {self.data_dir} {url}'.split())
+                subprocess.run(f'unzip -qq -n {self.data_dir}/ADEChallengeData2016.zip -d {self.data_dir}'.split())
         else:
             if not data_already_downloaded:
                 logging.error('Data not found. You can download it passing "download=True".')
