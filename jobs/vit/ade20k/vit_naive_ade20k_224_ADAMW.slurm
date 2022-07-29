@@ -1,11 +1,15 @@
-#!/bin/sh
-#SBATCH --job-name=Naive
+#!/bin/bash
+#SBATCH --job-name="naive"
+#SBATCH --partition=allgroups
 #SBATCH --ntasks=1
-#SBATCH --time=500:00:00
-#SBATCH --gres=gpu:1
+#SBATCH --mem=1G
+#SBATCH --time=01:00:00
+echo "directory"
+pwd
 source $HOME/miniconda3/etc/profile.d/conda.sh
 conda activate new_env
 cd $HOME/storage/MasterThesis
+echo "conda version from echo $(conda --version)"
 export WANDB_API_KEY=1c9bad0d162960a36cc8fecc456d0dc024cb834c
 python3 $HOME/storage/MasterThesis/main.py \
  --epochs 100 \
@@ -16,4 +20,4 @@ python3 $HOME/storage/MasterThesis/main.py \
  --optimizer adamw \
  --backbone vit \
  --use_segmentation \
- --model_version naive 
+ --model_version naive
