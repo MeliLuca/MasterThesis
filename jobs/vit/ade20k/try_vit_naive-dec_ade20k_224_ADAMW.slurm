@@ -29,10 +29,10 @@ which nvcc
 ### Esecuzione del nostro programma
 
 ### Without singularity...
-source ${HOME}/miniconda3/etc/profile.d/conda.sh
+source $HOME/miniconda3/etc/profile.d/conda.sh
 conda activate new_env
 export WANDB_API_KEY=1c9bad0d162960a36cc8fecc456d0dc024cb834c
-python3 ${HOME}/storage/MasterThesis/main.py \
+python3 $HOME/storage/MasterThesis/main.py \
  --epochs 100 \
  --logger wandb \
  --stats_path try_vit_naive-dec_ade20k_224_ADAMW\
