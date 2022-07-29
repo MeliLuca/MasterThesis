@@ -24,6 +24,7 @@ echo -n 'Directory: '
 pwd
 echo -n 'Questo job viene eseguito sui seguenti nodi: '
 echo ${SLURM_NODELIST}
+echo $HOME
 nvidia-smi
 which nvcc
 ### Esecuzione del nostro programma
