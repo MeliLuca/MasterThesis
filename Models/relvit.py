@@ -38,7 +38,7 @@ cmap = cm.get_cmap('viridis')
 class NaiveDecoder(nn.Module):
     def __init__(self, emb_dim):
         super().__init__()
-        self.linear_channel = nn.Linear(emb_dim, 150)
+        self.linear_channel = nn.Linear(emb_dim, 151)
         self.linear_dimension = nn.Linear(49, 1024)
         self.upsample = nn.Upsample(scale_factor=7, mode='bilinear')
 
@@ -46,7 +46,7 @@ class NaiveDecoder(nn.Module):
         B,_,emb = x.shape
         segm_in =  self.linear_channel(x)
         segm_in = self.linear_dimension(segm_in.transpose(1,2))
-        segm_in = segm_in.view([B, 150, 32, 32])
+        segm_in = segm_in.view([B, 151, 32, 32])
         segm_in = self.upsample(segm_in)
         return segm_in
 
@@ -180,7 +180,7 @@ class RelViT(pl.LightningModule):
         if self.use_segmentation:
             y_target = batch['labels'].long()
             torch.use_deterministic_algorithms(False)
-            loss_seg = F.cross_entropy(logits['seg'], y_target)
+            loss_seg = F.cross_entropy(logits['seg'], y_target, ignore_index=0)
             torch.use_deterministic_algorithms(True)
             loss += loss_seg
             self.log(f'{part}_loss_seg', loss_seg)
