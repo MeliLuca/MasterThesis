@@ -4,7 +4,7 @@
 #SBATCH --ntasks=1
 #SBATCH --mem=1G
 #SBATCH --time=01:00:00
-echo "directory"
+echo "home directory is $HOME"
 pwd
 source $HOME/miniconda3/etc/profile.d/conda.sh
 conda activate spec_env
