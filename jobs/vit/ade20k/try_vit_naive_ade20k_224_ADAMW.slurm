@@ -14,16 +14,6 @@
 
 ### Alcuni comandi di shell che stampano lo stato
 ### del sistema prima dell'esecuzione
-cd ~/storage/MasterThesis/jobs/vit/ade20k
-echo -n 'Date: '
-date
-echo -n 'Directory: '
-pwd
-echo -n 'Questo job viene eseguito sui seguenti nodi: '
-echo ${SLURM_NODELIST}
-echo $HOME
-nvidia-smi
-which nvcc
 ### Esecuzione del nostro programma
 
 ### Without singularity...
