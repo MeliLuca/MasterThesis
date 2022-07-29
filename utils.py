@@ -147,6 +147,8 @@ def get_logger(args):
             task_str += ['angle']
         if args.use_abs_positions:
             task_str += ['abs_pos']
+        if args.use_segmentation:
+            task_str += ['seg']
         exp_id = str(args.exp_id) if args.exp_id != '' else random.choices(string.ascii_uppercase + string.digits, k=4)
         name = [
             args.exp_id, args.dataset, '-'.join(task_str), 
