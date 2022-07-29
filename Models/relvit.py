@@ -54,7 +54,7 @@ class PUPDecoder(nn.Module):
     def __init__(self, emb_dim):
         super().__init__()
         self.linear_channel = nn.Linear(emb_dim, 1024)
-        self.decoder = PUP.Decoder2D(1024, 150)
+        self.decoder = PUP.Decoder2D(1024, 151)
 
     def forward(self, x):
         segm_in = self.linear_channel(x)
