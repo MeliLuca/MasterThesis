@@ -181,8 +181,10 @@ class RelViT(pl.LightningModule):
             y_target = batch['labels'].long()
             torch.use_deterministic_algorithms(False)
             loss_seg = F.cross_entropy(logits['seg'], y_target, ignore_index=0)
-            torch.use_deterministic_algorithms(True)
-            # torch.use_deterministic_algorithms(True, warn_only=True)
+            if self.args.num_gpus > 0:
+                torch.use_deterministic_algorithms(True, warn_only=True)
+            else:
+                torch.use_deterministic_algorithms(True)
             loss += loss_seg
             miou = mIOU(y_target, logits['seg'], num_classes=self.num_classes)
             self.log(f'{part}_loss_seg', loss_seg)
@@ -193,8 +195,10 @@ class RelViT(pl.LightningModule):
             torch.use_deterministic_algorithms(False)
             loss_rel = cross_entropy(logits['rel'], y_rel, smooth=self.args.smooth_rel, 
                                      dropout=self.args.dropout_rel if part == 'train' else 0.0)
-            torch.use_deterministic_algorithms(True)
-            # torch.use_deterministic_algorithms(True, warn_only=True)
+            if self.args.num_gpus > 0:
+                torch.use_deterministic_algorithms(True, warn_only=True)
+            else:
+                torch.use_deterministic_algorithms(True)
             loss += loss_rel
             acc_rel = accuracy(logits['rel'], y_rel)
             self.log(f'{part}_acc_rel', acc_rel, prog_bar=True)
