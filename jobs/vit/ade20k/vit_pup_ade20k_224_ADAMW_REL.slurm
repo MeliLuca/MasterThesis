@@ -15,7 +15,7 @@ python3 $HOME/storage/MasterThesis/main.py \
  --logger wandb \
  --stats_path vit_pup_ade20k_224_ADAMW \
  --dataset ade20k \
- --batch_size 128 \
+ --batch_size 64 \
  --optimizer adamw \
  --backbone vit \
  --use_segmentation \
