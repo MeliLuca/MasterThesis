@@ -63,6 +63,19 @@ class PUPDecoder(nn.Module):
         segm_in = self.decoder(segm_in)
         return segm_in
 
+class UNetDecoder(nn.Module):
+    def __init__(self, emb_dim):
+        super().__init__()
+        self.linear_channel = nn.Linear(emb_dim, 512)
+        self.decoder = UNet.build_unet(150)
+
+    def forward(self, x):
+        segm_in = self.linear_channel(x)
+        B,_,emb = segm_in.shape
+        segm_in = segm_in.view([B,emb,7,7])
+        segm_in = self.decoder(segm_in)
+        return segm_in
+
 class RelViT(pl.LightningModule):
     """
     Lightning module that defines the Relational Vision Transformer Model.
@@ -89,7 +102,7 @@ class RelViT(pl.LightningModule):
             if self.args.model_version == 'naive':
                 self.segm_head = NaiveDecoder(self.backbone.embed_dim)
             elif self.args.model_version == 'unet':
-                self.segm_head = UNet.build_unet()
+                self.segm_head = UNetDecoder(self.backbone.embed_dim)
             elif self.args.model_version == 'pup':
                 self.segm_head = PUPDecoder(self.backbone.embed_dim)
             else :

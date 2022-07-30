@@ -54,7 +54,7 @@ class decoder_block(nn.Module):
         super().__init__()
 
         self.up = nn.ConvTranspose2d(in_c, out_c, kernel_size=2, stride=2, padding=0)
-        self.conv = conv_block(out_c+out_c, out_c)
+        self.conv = conv_block(out_c, out_c)
 
     def forward(self, inputs):
         x = self.up(inputs)
@@ -65,7 +65,7 @@ class decoder_block(nn.Module):
 
 
 class build_unet(nn.Module):
-    def __init__(self):
+    def __init__(self, num_classes):
         super().__init__()
 
         """ Encoder """
@@ -79,12 +79,13 @@ class build_unet(nn.Module):
 
         """ Decoder """
         self.d1 = decoder_block(1024, 512)
-        self.d2 = decoder_block(512, 256)
-        # self.d3 = decoder_block(256, 128)
-        # self.d4 = decoder_block(128, 64)
+        self.d2 = decoder_block(512, 512)
+        self.d3 = decoder_block(512, 256)
+        self.d4 = decoder_block(256, 256)
+        self.d5 = decoder_block(256, 256)
 
         """ Classifier """
-        self.outputs = nn.Conv2d(256, 150, kernel_size=1, padding=0)
+        self.outputs = nn.Conv2d(256, num_classes+1, kernel_size=1, padding=0)
 
     def forward(self, inputs):
         """ Encoder """
@@ -101,8 +102,9 @@ class build_unet(nn.Module):
         d2 = self.d2(d1)
         d3 = self.d3(d2)
         d4 = self.d4(d3)
+        d5 = self.d5(d4)
 
         """ Classifier """
-        outputs = self.outputs(d4)
+        outputs = self.outputs(d5)
 
         return outputs
