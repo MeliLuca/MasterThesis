@@ -149,10 +149,9 @@ def get_logger(args):
             task_str += ['abs_pos']
         if args.use_segmentation:
             task_str += ['seg']
-        exp_id = str(args.exp_id) if args.exp_id != '' else random.choices(string.ascii_uppercase + string.digits, k=4)
         name = [
             args.exp_id, args.dataset, '-'.join(task_str), 
-            '-'.join([str(args.backbone), str(args.model_size), str(args.patch_size), str(args.img_height)])
+            '-'.join([str(args.backbone), str(args.model_version) ,str(args.model_size), str(args.patch_size), str(args.img_height)])
         ]
         logger = pl.loggers.WandbLogger(
             save_dir= save_dir,
