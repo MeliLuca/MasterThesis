@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name="pup"
+#SBATCH --job-name="pup_rel"
 #SBATCH --ntasks=1
 #SBATCH --mem=1G
 #SBATCH --time=500:00:00
