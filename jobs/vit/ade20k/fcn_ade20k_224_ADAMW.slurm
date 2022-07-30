@@ -1,9 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name="pup"
-#SBATCH --partition=allgroups
+#SBATCH --job-name="fcn"
 #SBATCH --ntasks=1
 #SBATCH --mem=1G
-#SBATCH --time=01:00:00
+#SBATCH --time=500:00:00
 echo "home directory is $HOME"
 pwd
 source $HOME/miniconda3/etc/profile.d/conda.sh
