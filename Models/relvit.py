@@ -123,7 +123,7 @@ class RelViT(pl.LightningModule):
             }
             backbone = vit_dino.__dict__[f'vit_{self.args.model_size}'](**backbone_args)
         elif self.args.backbone == 'fcn':
-            backbone = fcn_resnet50(num_classes=self.num_classes)
+            backbone = fcn_resnet50(num_classes=self.num_classes+1)
         return backbone
 
     def forward(self, x):
