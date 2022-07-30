@@ -45,7 +45,7 @@ def get_args(stdin, verbose=False):
     parser.add_argument('--optimizer', type=str, default='adamw', help='The kind of optimizer.', 
                         choices=['sgd', 'adam', 'adamw'])
     parser.add_argument('--lr', type=float, default=5e-4, help='The learning rate.')
-    parser.add_argument('--metric_monitor', type=str, default='val_acc', 
+    parser.add_argument('--metric_monitor', type=str,
                         help='The metric used for early stopping.')
     parser.add_argument('--grad_clip_val', type=float, default=1.0, help='Gradient clipping value.')
 
@@ -112,7 +112,7 @@ def get_args(stdin, verbose=False):
         'ade20k' : 150,
     }
     args.num_classes = num_classes[args.dataset]
-    if args.task == 'downstream' and args.metric_monitor=='val_acc':
+    if args.task == 'downstream' and args.metric_monitor=='val_acc' and not args.use_segmentation :
         args.metric_monitor = 'val_acc_clf'
         args.metric_maxmin = 'max'
     else:
