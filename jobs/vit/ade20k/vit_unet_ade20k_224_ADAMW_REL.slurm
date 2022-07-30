@@ -1,7 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name="unet_rel"
 #SBATCH --ntasks=1
-#SBATCH --mem=1G
 #SBATCH --time=500:00:00
 echo "directory"
 pwd
@@ -14,7 +13,7 @@ python3 $HOME/storage/MasterThesis/main.py \
  --logger wandb \
  --stats_path vit_unet_ade20k_224_ADAMW_REL \
  --dataset ade20k \
- --batch_size 32 \
+ --batch_size 128 \
  --optimizer adamw \
  --backbone vit \
  --use_segmentation \
