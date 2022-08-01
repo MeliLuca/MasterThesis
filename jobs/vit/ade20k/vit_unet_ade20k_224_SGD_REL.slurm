@@ -13,7 +13,7 @@ python3 $HOME/storage/MasterThesis/main.py \
  --logger wandb \
  --stats_path vit_unet_ade20k_224_SGD_REL \
  --dataset ade20k \
- --batch_size 128 \
+ --batch_size 16 \
  --optimizer sgd \ 
  --weight_decay 0.0001 \
  --lr 0.1 \
