@@ -84,6 +84,7 @@ class RelViT(pl.LightningModule):
                  use_supervision=True, patch_size=32, dropout=0.1, freeze_fet_enc=False, use_distances=False, 
                  use_angles=False, use_abs_positions=False, proj_dropout=0.0, use_segmentation=True):
         super().__init__()
+        self.save_hyperparameters()
         self.args = args
         self.num_classes = num_classes
         self.use_supervision = use_supervision
@@ -144,7 +145,6 @@ class RelViT(pl.LightningModule):
         Forward function of the model.
         """
         out = {}
-        mask = self.args.attn_mask if len(self.args.attn_mask) > 0 else None
         # feats = self.backbone(x, mask=mask)
         feats = self.backbone(x)
         if self.args.backbone in ['vit']:

@@ -11,10 +11,10 @@
                 "--dataset=ade20k", 
                 "--num_gpus=0",
                 "--backbone=vit" ,
-                "--model_version=unet",
                 "--batch_size=1",
                 "--num_workers=0",
-                "--use_segmentation",
+                "--use_relation",
+                "--task=upstream"
             ],
             "request": "launch",
             "program": "${workspaceFolder}/main.py",

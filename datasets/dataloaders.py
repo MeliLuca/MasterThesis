@@ -106,19 +106,19 @@ class ImageDataset(Dataset):
         return len(self.ds)
 
     def __getitem__(self, i):
-        if self.use_segmentation:
-            x, y, f = self.ds.__getitem__(i)
-            sample = {
-                'images': x,
-                'labels': y,
-                'mask_file': f,
-            }
-        else:
-            x, y = self.ds.__getitem__(i)
-            sample = {
-                'images': x,
-                'labels': y,
-            }
+        # if self.use_segmentation:
+        #     x, y, f = self.ds.__getitem__(i)
+        #     sample = {
+        #         'images': x,
+        #         'labels': y,
+        #         'mask_file': f,
+        #     }
+        # else:
+        x, y = self.ds.__getitem__(i)
+        sample = {
+            'images': x,
+            'labels': y,
+        }
         if self.ssl_signal is not None:
             num_patches = int(self.img_size // self.patch_size) ** 2
             side = int(math.sqrt(num_patches))
