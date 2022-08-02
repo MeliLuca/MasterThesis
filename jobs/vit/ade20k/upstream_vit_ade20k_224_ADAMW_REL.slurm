@@ -18,3 +18,5 @@ python3 $HOME/storage/MasterThesis/main.py \
  --optimizer adamw \
  --backbone vit \
  --task upstream \
+ --use_relatioins \
+ --exp_id up

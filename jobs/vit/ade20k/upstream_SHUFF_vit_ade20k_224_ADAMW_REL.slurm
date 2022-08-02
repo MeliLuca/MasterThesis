@@ -19,3 +19,5 @@ python3 $HOME/storage/MasterThesis/main.py \
  --backbone vit \
  --task upstream \
  --shuffle_patches \
+ --use_relations \
+ --exp_id up_shuff
