@@ -19,4 +19,5 @@ python3 $HOME/storage/MasterThesis/main.py \
  --backbone vit \
  --use_segmentation \
  --model_version pup \
+ --exp_id modified_feats \
  ### features=[1024, 512, 512 ,256, 256]
