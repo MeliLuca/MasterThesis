@@ -15,7 +15,7 @@ python3 $HOME/storage/MasterThesis/main.py \
  --stats_path vit_pup_ade20k_224_SGD_REL \
  --dataset ade20k \
  --batch_size 64 \
- --optimizer sgd \ 
+ --optimizer sgd \
  --weight_decay 0.9 \
  --lr 0.001 \
  --backbone vit \
