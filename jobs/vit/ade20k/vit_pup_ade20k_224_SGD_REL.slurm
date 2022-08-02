@@ -3,7 +3,7 @@
 #SBATCH --ntasks=1
 #SBATCH --mem=1G
 #SBATCH --time=500:00:00
-echo "directory"
+echo "home directory is $HOME"
 pwd
 source $HOME/miniconda3/etc/profile.d/conda.sh
 conda activate new_env
@@ -22,4 +22,4 @@ python3 $HOME/storage/MasterThesis/main.py \
  --use_segmentation \
  --model_version pup \
  --use_relations \
- --exp_id sgd
+ --exp_id sgd \
