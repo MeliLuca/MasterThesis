@@ -5,7 +5,7 @@ import torch.nn as nn
     of Progressive UPsampling of SERT paper https://fudan-zvg.github.io/SETR/
 """
 class Decoder2D(nn.Module):
-    def __init__(self, in_channels, out_channels, features=[1024, 512, 512 ,256, 256]):
+    def __init__(self, in_channels, out_channels, features=[512, 256, 256 ,256, 256]):
         super().__init__()
         self.decoder_1 = nn.Sequential(
                     nn.Conv2d(in_channels, features[0], 3, padding=1),
