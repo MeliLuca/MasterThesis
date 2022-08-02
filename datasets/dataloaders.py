@@ -92,11 +92,12 @@ class ShuffleDataset(Dataset):
 
 class ImageDataset(Dataset):
     def __init__(self, ds, img_size, patch_size, use_relations=False, use_distances=False, use_angles=False, 
-                 use_abs_positions=False):
+                 use_abs_positions=False, use_segmentation=False):
         self.ds = ds
         self.img_size = img_size
         self.patch_size = patch_size
         self.ssl_signal = None
+        self.use_segmentation=use_segmentation
         if use_relations or use_distances or use_angles or use_abs_positions:
             self.ssl_signal = SSLSignal(use_relations=use_relations, use_distances=use_distances, 
                                         use_angles=use_angles, use_abs_positions=use_abs_positions)
@@ -105,11 +106,19 @@ class ImageDataset(Dataset):
         return len(self.ds)
 
     def __getitem__(self, i):
-        x, y = self.ds.__getitem__(i)
-        sample = {
-            'images': x,
-            'labels': y,
-        }
+        if self.use_segmentation:
+            x, y, f = self.ds.__getitem__(i)
+            sample = {
+                'images': x,
+                'labels': y,
+                'mask_file': f,
+            }
+        else:
+            x, y = self.ds.__getitem__(i)
+            sample = {
+                'images': x,
+                'labels': y,
+            }
         if self.ssl_signal is not None:
             num_patches = int(self.img_size // self.patch_size) ** 2
             side = int(math.sqrt(num_patches))
@@ -279,6 +288,7 @@ def get_datasets(args, transform='default', target_transform='default', patch_tr
             'use_distances': args.use_distances,
             'use_angles': args.use_angles,
             'use_abs_positions': args.use_abs_positions,
+            'use_segmentation' : args.use_segmentation,
         }
         dss = {
             'train': ImageDataset(ds_train, **img_dataset_args),

@@ -16,8 +16,8 @@ python3 $HOME/storage/MasterThesis/main.py \
  --dataset ade20k \
  --batch_size 64 \
  --optimizer sgd \
- --weight_decay 0.0001 \
- --lr 0.1 \
+ --weight_decay 0.9 \
+ --lr 0.001 \
  --backbone vit \
  --use_segmentation \
  --model_version pup \
