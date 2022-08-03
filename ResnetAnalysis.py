@@ -110,6 +110,10 @@ def guided_grad_cam(model, conv_layers, image, image_label, path):
         )
     fig.savefig('prova.png', bbox_inches='tight') 
 
+def prediction(model, image, image_label):
+    model.eval()
+    pred = model(image)
+
 class Create():
     def __init__(self, model, dataloader, path):
         self.dataloader = dataloader
@@ -134,3 +138,5 @@ class Create():
             return features_map(self.image, self.conv_layers, self.path)
         elif func[0] == 'grad_cam' :
             return guided_grad_cam(self.model, self.conv_layers, self.image, self.image_label, self.path)
+        elif func[0] == 'pred' :
+            return prediction(self.model, self.image, self.image_label, self.path)

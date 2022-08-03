@@ -16,7 +16,8 @@ from datasets.dataloaders import get_datasets, get_dataloaders
 from Models import relcnn, relvit
 from utils import get_logger, get_callbacks
 from trainer import get_trainer
-import Analysis
+import ResnetAnalysis
+import VitAnalysis
 
 # Settings
 format_str = '%(asctime)s - [%(levelname)s] - %(message)s'
@@ -76,8 +77,10 @@ def main(args):
         trainer.test(dataloaders=dls['test'])
     
     elif args.mode == 'analysis':
-        Analysis.Create(model, dls['validation'], args.stats_path).get_type(args.type)
-
+        if args.backbone in ['cifar10_model', 'resnet50']:
+            ResnetAnalysis.Create(model, dls['validation'], args.stats_path).get_type(args.type)
+        if args.backbone in ['vit','fcn']:
+            VitAnalysis.Create(model,dls['validation'], args.stats_path).get_prediction()
     else:
         raise Exception(f'Error. Model "{args.mode}" not supported.')
 
