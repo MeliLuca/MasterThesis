@@ -20,12 +20,12 @@ class Create():
         self.image = self.data['images']
         self.image_label = self.data['labels']
 
-    def imshow(img, path):
+    def imshow(self, img):
         img = img / 2 + 0.5     # unnormalize
         npimg = img.numpy()
         plt.imshow(np.transpose(npimg, (1, 2, 0)))
         print('######  saving the prediction')
-        plt.savefig(os.path.join(path, '-prediction'))
+        plt.savefig(f'{path}_prediction.png')
     
     def get_prediction(self):
         print('######  Eval model')
@@ -33,5 +33,5 @@ class Create():
         print('#### start to compute the prediction')
         pred = self.model(self.image)
         print('##### start to print the predictioin]')
-        imshow(pred, self.path)
+        imshow(self, pred)
         return 
