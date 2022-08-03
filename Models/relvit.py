@@ -7,7 +7,8 @@ import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torchvision.models.segmentation import fcn_resnet50
+from torchvision.models.segmentation import fcn_resnet50, FCN_ResNet50_Weights
+from torchvision.models import ResNet50_Weights
 from torch.optim import SGD, Adam, AdamW
 import logging
 import wandb
@@ -46,7 +47,7 @@ class NaiveDecoder(nn.Module):
         B,_,emb = x.shape
         segm_in =  self.linear_channel(x)
         segm_in = self.linear_dimension(segm_in.transpose(1,2))
-        segm_in = segm_in.view([B, 151, 32, 32])
+        segm_in = segm_in.view([B, 151, 7, 7])
         segm_in = self.upsample(segm_in)
         return segm_in
 
@@ -82,7 +83,7 @@ class RelViT(pl.LightningModule):
     """
     def __init__(self, args, num_classes, num_rel_classes=9, use_relations=False, use_positional_emb=True, 
                  use_supervision=True, patch_size=32, dropout=0.1, freeze_fet_enc=False, use_distances=False, 
-                 use_angles=False, use_abs_positions=False, proj_dropout=0.0, use_segmentation=True):
+                 use_angles=False, use_abs_positions=False, proj_dropout=0.0, use_segmentation=True, pretrained=False):
         super().__init__()
         self.save_hyperparameters()
         self.args = args
@@ -98,6 +99,7 @@ class RelViT(pl.LightningModule):
         self.proj_dropout = proj_dropout
         self.freeze_fet_enc = freeze_fet_enc
         self.use_segmentation = use_segmentation
+        self.pretrained = pretrained
         self.backbone = self._get_backbone()
         if self.use_segmentation :
             if self.args.model_version == 'naive':
@@ -137,7 +139,11 @@ class RelViT(pl.LightningModule):
             }
             backbone = vit_dino.__dict__[f'vit_{self.args.model_size}'](**backbone_args)
         elif self.args.backbone == 'fcn':
-            backbone = fcn_resnet50(num_classes=self.num_classes+1)
+            if self.pretrained:
+                weights = ResNet50_Weights.DEFAULT
+                backbone = fcn_resnet50(num_classes=self.num_classes+1, weights_backbone=weights)
+            else:
+                backbone = fcn_resnet50(num_classes=self.num_classes+1)
         return backbone
 
     def forward(self, x):
@@ -268,7 +274,6 @@ class RelViT(pl.LightningModule):
                 if self.args.logger == 'wandb':
                     self.logger.experiment.log({'rgb_emb_filters': [wandb.Image(rgb_filt)]})
 
-
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -330,6 +335,7 @@ def get_model(args):
         'use_abs_positions': args.use_abs_positions,
         'proj_dropout': args.proj_dropout,
         'use_segmentation': args.use_segmentation,
+        'pretrained': args.pretrained,
     }
     model = RelViT(**model_args)
     if len(args.model_checkpoint) > 0:
