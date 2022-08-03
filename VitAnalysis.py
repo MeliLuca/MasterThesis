@@ -17,7 +17,7 @@ class Create():
         self.path = path
         self.data = next(iter(dataloader))
         self.image = self.data['images']
-        self.image_label = self.data['labels'].item()
+        self.image_label = self.data['labels']
 
     def imshow(img):
         img = img / 2 + 0.5     # unnormalize
