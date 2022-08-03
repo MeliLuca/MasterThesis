@@ -88,7 +88,7 @@ def get_args(stdin, verbose=False):
     parser.add_argument('--model_version', type=str, default=False, help='Version of the model (used for cifar10_model)')
     parser.add_argument('--emb_dim', type=str, default=64, help='Embedded dim for attention layer.')
     parser.add_argument('--decay_lr_sched', type=str, default='cosine', help='Strategy to schedule lr decay')
-    parser.add_argument('--pretrained', type=str, default=False, help='Use pretrained version of the model')
+    parser.add_argument('--pretrained', dest='pretrained', action='storage', help='Use pretrained version of the model')
 
 
     # Parse args
