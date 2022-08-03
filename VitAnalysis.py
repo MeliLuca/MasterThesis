@@ -26,7 +26,7 @@ class Create():
         print('#### start to compute the prediction')
         pred = torch.nn.functional.softmax(self.model(self.image)['seg'], dim=1)
         print('##### start to print the predictioin]')
-        plt.imshow(pred)
+        plt.imshow(pred.detach().numpy())
         print('######  saving the prediction')
         plt.savefig(f'{path}_prediction.png')
         return 
