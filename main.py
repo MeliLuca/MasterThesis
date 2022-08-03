@@ -80,6 +80,7 @@ def main(args):
         if args.backbone in ['cifar10_model', 'resnet50']:
             ResnetAnalysis.Create(model, dls['validation'], args.stats_path).get_type(args.type)
         if args.backbone in ['vit','fcn']:
+            print("############  create prediction")
             VitAnalysis.Create(model,dls['validation'], args.stats_path).get_prediction()
     else:
         raise Exception(f'Error. Model "{args.mode}" not supported.')
