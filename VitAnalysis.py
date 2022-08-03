@@ -29,3 +29,4 @@ class Create():
         self.model.eval()
         pred = self.model(self.image)
         imshow(pred, self.path)
+        return 
