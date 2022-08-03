@@ -24,9 +24,9 @@ class Create():
         print('######  Eval model')
         self.model.eval()
         print('#### start to compute the prediction')
-        pred = self.model(self.image)
+        pred = torch.nn.functional.softmax(self.model(self.image), dim=1)
         print('##### start to print the predictioin]')
-        plt.imshow(np.transpose(pred, (1, 2, 0)))
+        plt.imshow(pred)
         print('######  saving the prediction')
         plt.savefig(f'{path}_prediction.png')
         return 
