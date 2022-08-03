@@ -24,10 +24,10 @@ class Create():
         print('######  Eval model')
         self.model.eval()
         print('#### start to compute the prediction')
-        pred = self.model(self.image)['seg']
+        pred = self.model(self.image)['seg'].detach().numpy()
         pred = np.argmax(pred, axis=1)
         print('##### start to print the predictioin]')
-        plt.imshow(pred.detach().numpy())
+        plt.imshow(pred)
         print('######  saving the prediction')
         plt.savefig(f'{path}_prediction.png')
         return 
