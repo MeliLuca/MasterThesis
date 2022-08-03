@@ -5,8 +5,9 @@ import torch.nn as nn
     of Progressive UPsampling of SERT paper https://fudan-zvg.github.io/SETR/
 """
 class Decoder2D(nn.Module):
-    def __init__(self, in_channels, out_channels, features=[512, 256, 256 ,128, 64]):
+    def __init__(self, in_channels, out_channels,  patch_size, features=[512, 512, 256, 256 ,256]):
         super().__init__()
+        self.patch_size = patch_size
         self.decoder_1 = nn.Sequential(
                     nn.Conv2d(in_channels, features[0], 3, padding=1),
                     nn.BatchNorm2d(features[0]),
@@ -31,12 +32,13 @@ class Decoder2D(nn.Module):
             nn.ReLU(inplace=True),
             nn.Upsample(scale_factor=2, mode="bilinear", align_corners=True)
         )
-        self.decoder_5 = nn.Sequential(
-            nn.Conv2d(features[3], features[4], 3, padding=1),
-            nn.BatchNorm2d(features[4]),
-            nn.ReLU(inplace=True),
-            nn.Upsample(scale_factor=2, mode="bilinear", align_corners=True)
-        )
+        if patch_size == 32:
+            self.decoder_5 = nn.Sequential(
+                nn.Conv2d(features[3], features[4], 3, padding=1),
+                nn.BatchNorm2d(features[4]),
+                nn.ReLU(inplace=True),
+                nn.Upsample(scale_factor=2, mode="bilinear", align_corners=True)
+            )
 
         self.final_out = nn.Conv2d(features[-1], out_channels, 3, padding=1)
 
@@ -45,6 +47,7 @@ class Decoder2D(nn.Module):
         x = self.decoder_2(x)
         x = self.decoder_3(x)
         x = self.decoder_4(x)
-        x = self.decoder_5(x)           
+        if self.patch_size == 32:
+            x = self.decoder_5(x)           
         x = self.final_out(x)
         return x

@@ -4,6 +4,7 @@
 
 from pyexpat import model
 import pytorch_lightning as pl
+from requests import patch
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -17,6 +18,7 @@ import numpy as np
 from PIL import Image
 import logging
 from sklearn.decomposition import PCA
+from math import sqrt
 
 # Custom
 #from models.vit import vit
@@ -37,30 +39,31 @@ cmap = cm.get_cmap('viridis')
 ##################################################
 
 class NaiveDecoder(nn.Module):
-    def __init__(self, emb_dim):
+    def __init__(self, emb_dim, num_patches):
         super().__init__()
         self.linear_channel = nn.Linear(emb_dim, 151)
-        self.linear_dimension = nn.Linear(49, 1024)
+        self.linear_dimension = nn.Linear(num_patches, 1024)
         self.upsample = nn.Upsample(scale_factor=7, mode='bilinear')
 
     def forward(self, x):
         B,_,emb = x.shape
-        segm_in =  self.linear_channel(x)
+        segm_in = self.linear_channel(x)
         segm_in = self.linear_dimension(segm_in.transpose(1,2))
-        segm_in = segm_in.view([B, 151, 7, 7])
+        segm_in = segm_in.view([B, 151, 32, 32])
         segm_in = self.upsample(segm_in)
         return segm_in
 
 class PUPDecoder(nn.Module):
-    def __init__(self, emb_dim):
+    def __init__(self, emb_dim, patch_size):
         super().__init__()
         self.linear_channel = nn.Linear(emb_dim, 1024)
-        self.decoder = PUP.Decoder2D(1024, 151)
+        self.decoder = PUP.Decoder2D(1024, 151, patch_size=patch_size)
 
     def forward(self, x):
         segm_in = self.linear_channel(x)
-        B,_,emb = segm_in.shape
-        segm_in = segm_in.view([B,emb,7,7])
+        B,num_patches,emb = segm_in.shape
+        sqrt_patches = int(sqrt(num_patches))
+        segm_in = segm_in.view([B,emb,sqrt_patches,sqrt_patches])
         segm_in = self.decoder(segm_in)
         return segm_in
 
@@ -100,14 +103,15 @@ class RelViT(pl.LightningModule):
         self.freeze_fet_enc = freeze_fet_enc
         self.use_segmentation = use_segmentation
         self.pretrained = pretrained
+        self.num_patches = (self.args.img_height // self.args.patch_size) ** 2
         self.backbone = self._get_backbone()
         if self.use_segmentation :
             if self.args.model_version == 'naive':
-                self.segm_head = NaiveDecoder(self.backbone.embed_dim)
+                self.segm_head = NaiveDecoder(self.backbone.embed_dim, self.num_patches)
             elif self.args.model_version == 'unet':
-                self.segm_head = UNetDecoder(self.backbone.embed_dim)
+                self.segm_head = UNetDecoder(self.backbone.embed_dim, self.num_patches)
             elif self.args.model_version == 'pup':
-                self.segm_head = PUPDecoder(self.backbone.embed_dim)
+                self.segm_head = PUPDecoder(self.backbone.embed_dim, self.patch_size)
             else :
                 self.segm_head = nn.Identity()
         if self.use_relations:
@@ -138,8 +142,13 @@ class RelViT(pl.LightningModule):
                 'drop_rate': self.dropout,
             }
             backbone = vit_dino.__dict__[f'vit_{self.args.model_size}'](**backbone_args)
+            if self.pretrained:
+                trained_model = torch.hub.load('facebookresearch/dino:main', 'dino_vits16')
+                backbone.load_state_dict(trained_model.state_dict())
+            
         elif self.args.backbone == 'fcn':
             if self.pretrained:
+                # https://pytorch.org/vision/stable/models/generated/torchvision.models.resnet50.html#torchvision.models.ResNet50_Weights
                 weights = ResNet50_Weights.DEFAULT
                 backbone = fcn_resnet50(num_classes=self.num_classes+1, weights_backbone=weights)
             else:
