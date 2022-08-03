@@ -18,4 +18,4 @@ python3 $HOME/storage/MasterThesis/main.py \
  --optimizer adamw \
  --backbone fcn \
  --use_segmentation \
- --pretrained = True \
+ --pretrained True \
