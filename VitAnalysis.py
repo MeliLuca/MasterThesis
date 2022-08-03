@@ -27,7 +27,7 @@ class Create():
         pred = self.model(self.image)['seg'].detach().numpy()
         pred = np.argmax(pred, axis=1)
         print('##### start to print the predictioin]')
-        plt.imshow(pred)
+        plt.imshow(np.transpose(pred, (1, 2, 0)))
         print('######  saving the prediction')
         plt.savefig(f'{path}_prediction.png')
         return 
