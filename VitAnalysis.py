@@ -25,7 +25,7 @@ class Create():
         self.model.eval()
         print('#### start to compute the prediction')
         pred = self.model(self.image)['seg']
-        pred = torch.nn.functional.softmax(pred, dim=1)
+        pred = np.argmax(pred, axis=1)
         print('##### start to print the predictioin]')
         plt.imshow(pred.detach().numpy())
         print('######  saving the prediction')
