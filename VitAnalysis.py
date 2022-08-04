@@ -32,7 +32,6 @@ class Create():
         for i, img in enumerate (self.images) :
             pred = np.argmax(batch_pred[i].detach().numpy(), axis=0, keepdims=True)
             print('##### start to print the predictioin]')
-            plt.title('Origin - Prediction - Mask')
             ax_1 = fig.add_subplot(B,3,i*3+1) 
             ax_1.set_title('Original')
             show_1 = ax_1.imshow(np.transpose(img.detach().numpy(), (1, 2, 0)))
