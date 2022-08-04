@@ -30,7 +30,7 @@ class Create():
         print('#### start to compute the prediction')
         for i, img in enumerate (self.images) :
             print(f'before argmax pred is {batch_pred[i].shape}')
-            pred = np.argmax(batch_pred[i].detach().numpy(), axis=0)
+            pred = np.argmax(batch_pred[i].detach().numpy(), axis=0, keepdims=True)
             print(f'after argmax prediction is {pred.shape}')
             print('##### start to print the predictioin]')
             fig = plt.figure(figsize=(100, 100))
