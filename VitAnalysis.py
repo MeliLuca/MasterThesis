@@ -20,6 +20,7 @@ class Create():
         self.data = next(iter(dataloader))
         self.image = self.data['images']
         self.image_label = self.data['labels']
+        self.filename = self.data['filename']
     
     def get_prediction(self):
         print('######  Eval model')
@@ -37,6 +38,6 @@ class Create():
         ax_3 = fig.add_subplot(133) # (8, 8) because in conv0 we have 7x7 filters and total of 64 (see printed shapes)
         ax_3.imshow(np.transpose(self.image_label, (1, 2, 0)))
         print('######  saving the prediction')
-        str_path = self.path + '_prediction'
+        str_path = self.path + '_prediction_' + self.filename
         plt.savefig(str_path)
         return 
