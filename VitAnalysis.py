@@ -26,10 +26,10 @@ class Create():
         print('######  Eval model')
         self.model.eval()
         B = len(self.images)
+        batch_pred = self.model(self.images)['seg']
         print('#### start to compute the prediction')
         for i, img in enumerate (self.images) :
-            pred = self.model(img)['seg'].detach().numpy()
-            pred = np.argmax(pred, axis=1)
+            pred = np.argmax(batch_pred[i].detach().numpy(), axis=1)
             print('##### start to print the predictioin]')
             fig = plt.figure(figsize=(100, 100))
             plt.title('Origin - Prediction - Mask')
