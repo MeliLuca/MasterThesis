@@ -113,8 +113,11 @@ def get_args(stdin, verbose=False):
         'ade20k' : 150,
     }
     args.num_classes = num_classes[args.dataset]
-    if args.task == 'downstream' and args.metric_monitor=='val_acc' and not args.use_segmentation :
+    if args.task == 'downstream' and args.metric_monitor=='val_acc':
         args.metric_monitor = 'val_acc_clf'
+        args.metric_maxmin = 'max'
+    elif args.use_segmentation and args.metric_monitor=='val_miou':
+        args.metric_monitor = 'val_miou'
         args.metric_maxmin = 'max'
     else:
         args.metric_monitor = 'val_loss'
