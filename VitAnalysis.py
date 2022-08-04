@@ -27,7 +27,7 @@ class Create():
         self.model.eval()
         B = len(self.images)
         batch_pred = self.model(self.images)['seg']
-        fig = plt.figure(25,25)
+        fig = plt.figure(figsize=(25,25))
         print('#### start to compute the prediction')
         for i, img in enumerate (self.images) :
             pred = np.argmax(batch_pred[i].detach().numpy(), axis=0, keepdims=True)
