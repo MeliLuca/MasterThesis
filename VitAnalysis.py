@@ -45,6 +45,6 @@ class Create():
             ax_3.imshow(np.transpose(self.images_label[i].unsqueeze(dim=0), (1, 2, 0)))
             ax_3.set_title('Mask')
         print('######  saving the prediction')
-        str_path = self.path + '_prediction_' + self.filename[0].split('.')[1]
+        str_path = self.path + '_prediction_' + self.filename[0].split('.')[1].split('/')[-1]
         plt.savefig(str_path)
         return 
