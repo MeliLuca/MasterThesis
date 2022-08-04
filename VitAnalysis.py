@@ -31,7 +31,7 @@ class Create():
         plt.figure(figsize=(20, 20))
         plt.title('Origin - Prediction - Mask')
         plt.subplot(1, 1, 1) # (8, 8) because in conv0 we have 7x7 filters and total of 64 (see printed shapes)
-        plt.imshow(np.transpose(self.image, (1, 2, 0)))
+        plt.imshow(np.transpose(self.image.detach().numpy(), (1, 2, 0)))
         plt.subplot(2, 1, 2) # (8, 8) because in conv0 we have 7x7 filters and total of 64 (see printed shapes)
         plt.imshow(np.transpose(pred, (1, 2, 0)))
         plt.subplot(3, 1, 3) # (8, 8) because in conv0 we have 7x7 filters and total of 64 (see printed shapes)
