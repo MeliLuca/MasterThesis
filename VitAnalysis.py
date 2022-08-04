@@ -38,6 +38,6 @@ class Create():
         ax_3 = fig.add_subplot(133) # (8, 8) because in conv0 we have 7x7 filters and total of 64 (see printed shapes)
         ax_3.imshow(np.transpose(self.image_label, (1, 2, 0)))
         print('######  saving the prediction')
-        str_path = self.path + '_prediction_' + self.filename
+        str_path = self.path + '_prediction_' + self.filename[0]
         plt.savefig(str_path)
         return 
