@@ -21,4 +21,5 @@ python3 $HOME/storage/MasterThesis/main.py \
  --model_version naive \
  --patch_size 16 \
  --use_positional_embeddings \
- --metric_monitor val_miou
+ --metric_monitor val_miou \
+ --exp_id pos_emb
