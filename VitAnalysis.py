@@ -27,7 +27,7 @@ class Create():
         self.model.eval()
         B = len(self.images)
         batch_pred = self.model(self.images)['seg']
-        fig, axes = plt.subplots(16,3)
+        fig = plt.figure(25,25)
         print('#### start to compute the prediction')
         for i, img in enumerate (self.images) :
             pred = np.argmax(batch_pred[i].detach().numpy(), axis=0, keepdims=True)
@@ -44,5 +44,6 @@ class Create():
             ax_3.set_title('Mask')
         print('######  saving the prediction')
         str_path = self.path + '_prediction_' + self.filename[0].split('.')[1].split('/')[-1]
+        fig.tight_layout()
         plt.savefig(str_path)
         return 
