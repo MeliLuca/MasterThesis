@@ -30,12 +30,11 @@ class Create():
         print('##### start to print the predictioin]')
         fig = plt.figure(figsize=(100, 100))
         plt.title('Origin - Prediction - Mask')
-        ax_1 = fig.add_subplot(111) 
+        ax_1 = fig.add_subplot(131) 
         ax_1.imshow(np.transpose(self.image.squeeze().detach().numpy(), (1, 2, 0)))
-    
-        ax_2 = fig.add_subplot(212) # (8, 8) because in conv0 we have 7x7 filters and total of 64 (see printed shapes)
+        ax_2 = fig.add_subplot(132) # (8, 8) because in conv0 we have 7x7 filters and total of 64 (see printed shapes)
         ax_2.imshow(np.transpose(pred, (1, 2, 0)))
-        ax_3 = fig.add_subplot(313) # (8, 8) because in conv0 we have 7x7 filters and total of 64 (see printed shapes)
+        ax_3 = fig.add_subplot(133) # (8, 8) because in conv0 we have 7x7 filters and total of 64 (see printed shapes)
         ax_3.imshow(np.transpose(self.image_label, (1, 2, 0)))
         print('######  saving the prediction')
         str_path = self.path + '_prediction'
