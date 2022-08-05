@@ -337,3 +337,38 @@ def mIOU(label, pred, num_classes=19):
             present_iou_list.append(iou_now)
         iou_list.append(iou_now)
     return np.mean(present_iou_list)
+
+def unpadding(y, target_size):
+    H, W = target_size
+    H_pad, W_pad = y.size(2), y.size(3)
+    # crop predictions on extra pixels coming from padding
+    extra_h = H_pad - H
+    extra_w = W_pad - W
+    if extra_h > 0:
+        y = y[:, :, :-extra_h]
+    if extra_w > 0:
+        y = y[:, :, :, :-extra_w]
+    return y
+
+def padding(im, patch_size, fill_value=0):
+    # make the image sizes divisible by patch_size
+    H, W = im[0], im[1]
+    pad_h, pad_w = 0, 0
+    if H % patch_size > 0:
+        pad_h = patch_size - (H % patch_size)
+    if W % patch_size > 0:
+        pad_w = patch_size - (W % patch_size)
+    im_padded = im
+    if pad_h > 0 or pad_w > 0:
+        im_padded = F.pad(im, (0, pad_w, 0, pad_h), value=fill_value)
+    return im_padded
+
+
+def init_weights(m):
+    if isinstance(m, torch.nn.Linear):
+        trunc_normal_(m.weight, std=0.02)
+        if isinstance(m, torch.nn.Linear) and m.bias is not None:
+            torch.nn.init.constant_(m.bias, 0)
+    elif isinstance(m, torch.nn.LayerNorm):
+        torch.nn.init.constant_(m.bias, 0)
+        torch.nn.init.constant_(m.weight, 1.0)

@@ -381,9 +381,11 @@ def get_transforms(args):
         }
     
     elif args.dataset in ['ade20k']:
+        crop_size = (512, 512)
+        max_ratio = 4
         trans = {
             'train_aug': A.Compose([
-                A.Resize(width=256, height=256),
+                A.Resize(width=512* max_ratio, height=512),
                 A.RandomResizedCrop(width=224, height=224),
                 A.HorizontalFlip(p=0.5),
                 A.RandomBrightnessContrast(p=0.2),

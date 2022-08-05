@@ -26,7 +26,7 @@ from math import sqrt
 from timm.models import vision_transformer as vit
 import Models.vit_dino as vit_dino
 from Layers.MultiHeadAttention import MultiHeadAttentionScores
-from Layers import UNet, PUP
+from Layers import Segmenter, PUP
 from utils import cross_entropy, accuracy, mIOU
 import utils
 from torchvision.utils import make_grid
@@ -67,17 +67,13 @@ class PUPDecoder(nn.Module):
         segm_in = self.decoder(segm_in)
         return segm_in
 
-class UNetDecoder(nn.Module):
-    def __init__(self, emb_dim):
+class SegmenterDecoder(nn.Module):
+    def __init__(self, args_model):
         super().__init__()
-        self.linear_channel = nn.Linear(emb_dim, 512)
-        self.decoder = UNet.build_unet(150)
+        self.decoder = Segmenter.MaskTransformer(**args_model)
 
     def forward(self, x):
-        segm_in = self.linear_channel(x)
-        B,_,emb = segm_in.shape
-        segm_in = segm_in.view([B,emb,7,7])
-        segm_in = self.decoder(segm_in)
+        segm_in = self.decoder(x,(224,224))
         return segm_in
 
 class RelViT(pl.LightningModule):
@@ -108,8 +104,18 @@ class RelViT(pl.LightningModule):
         if self.use_segmentation :
             if self.args.model_version == 'naive':
                 self.segm_head = NaiveDecoder(self.backbone.embed_dim, self.num_patches)
-            elif self.args.model_version == 'unet':
-                self.segm_head = UNetDecoder(self.backbone.embed_dim, self.num_patches)
+            elif self.args.model_version == 'segmenter':
+                args_dec = {
+                    'n_cls': self.num_classes+1,
+                    'patch_size': self.patch_size,
+                    'd_encoder': self.backbone.embed_dim,
+                    'd_model': self.backbone.embed_dim,
+                    'n_heads': self.backbone.embed_dim //64,
+                    'd_ff': 4 * self.backbone.embed_dim,
+                    'drop_path_rate': 0.0,
+                    'dropout': self.dropout,
+                    }
+                self.segm_head = SegmenterDecoder(args_dec)
             elif self.args.model_version == 'pup':
                 self.segm_head = PUPDecoder(self.backbone.embed_dim, self.patch_size)
             else :
