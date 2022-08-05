@@ -22,5 +22,6 @@ python3 $HOME/storage/MasterThesis/main.py \
  --patch_size 16 \
  --use_positional_embeddings \
  --metric_monitor val_miou \
- --pretrained
+ --pretrained \
+ --exp_id pretrained
  ### features=[512, 512, 256, 256 ,256]
