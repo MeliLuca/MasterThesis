@@ -149,6 +149,8 @@ def get_logger(args):
             task_str += ['abs_pos']
         if args.use_segmentation:
             task_str += ['seg']
+        if args.use_positional_embeddings:
+            task_str += ['pos_emb']
         name = [
             args.exp_id, args.dataset, '-'.join(task_str), 
             '-'.join([str(args.backbone), str(args.model_version) ,str(args.model_size), str(args.patch_size), str(args.img_height)])
