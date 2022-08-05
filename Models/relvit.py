@@ -27,8 +27,7 @@ from timm.models import vision_transformer as vit
 import Models.vit_dino as vit_dino
 from Layers.MultiHeadAttention import MultiHeadAttentionScores
 from Layers import Segmenter, PUP
-from utils import cross_entropy, accuracy, mIOU
-import utils
+from utils import cross_entropy, accuracy, mIOU, resize_pos_embed, get_pos_embedding_sim
 from torchvision.utils import make_grid
 
 cmap = cm.get_cmap('viridis')
@@ -151,7 +150,19 @@ class RelViT(pl.LightningModule):
             backbone = vit_dino.__dict__[f'vit_{self.args.model_size}'](**backbone_args)
             if self.pretrained:
                 trained_model = torch.hub.load('facebookresearch/dino:main', 'dino_vits16')
-                backbone.load_state_dict(trained_model.state_dict())
+                num_extra_tokens = 1 +   trained_model.pos_embed.shape[1]
+                out_dict = {}
+                for k, v in trained_model.state_dict().items():
+                    if k == "pos_embed" and v.shape != backbone.pos_embed.shape:
+                        # To resize pos embedding when using model at different size from pretrained weights
+                        v = resize_pos_embed(
+                            v,
+                            None,
+                            (self.args.img_height // self.patch_size, self.args.img_height // self.patch_size),
+                            num_extra_tokens,
+                        )
+                    out_dict[k] = v
+                backbone.load_state_dict(out_dict, strict=True)
             
         elif self.args.backbone == 'fcn':
             if self.pretrained:
@@ -267,7 +278,7 @@ class RelViT(pl.LightningModule):
             self.log('lr', self.optimizer.param_groups[0]['lr'])
         elif part == 'val':
             if self.use_positional_emb and batch_idx == 0 and self.args.backbone in ['vit', 'simsiam']:
-                pos_sim_matrix = utils.get_pos_embedding_sim(self.backbone.pos_embed.detach().cpu()) # [npatch, npatch, npatch, npatch]
+                pos_sim_matrix = get_pos_embedding_sim(self.backbone.pos_embed.detach().cpu()) # [npatch, npatch, npatch, npatch]
                 num_patches = pos_sim_matrix.shape[0]
                 pos_sim_matrix = pos_sim_matrix.view(-1, num_patches, num_patches).unsqueeze(1) # [npatch * npatch, 1, npatch, npatch]
                 pos_sim_matrix = (pos_sim_matrix + 1.0) / 2.0 # pos_sim_matrix in [0, 1]

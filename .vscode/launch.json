@@ -15,6 +15,7 @@
                 "--batch_size=1",
                 "--num_workers=0",
                 "--use_segmentation",
+                "--pretrained",
                 "--patch_size=16"
             ],
             "request": "launch",
