@@ -73,7 +73,7 @@ class SegmenterDecoder(nn.Module):
         self.decoder = Segmenter.MaskTransformer(**args_model)
 
     def forward(self, x):
-        segm_in = self.decoder(x,(224,224))
+        segm_in = self.decoder(x)
         return segm_in
 
 class RelViT(pl.LightningModule):
@@ -114,6 +114,7 @@ class RelViT(pl.LightningModule):
                     'd_ff': 4 * self.backbone.embed_dim,
                     'drop_path_rate': 0.0,
                     'dropout': self.dropout,
+                    'img_size': (self.args.img_height, self.args.img_height)
                     }
                 self.segm_head = SegmenterDecoder(args_dec)
             elif self.args.model_version == 'pup':

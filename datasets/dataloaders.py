@@ -246,7 +246,7 @@ def get_datasets(args, transform='default', target_transform='default', patch_tr
         ds_test = DataClass(split='test', transform=transform['test'],target_transform=target_transform['test'], **ds_args)
         ds_train_simsiam = DataClass(split='train', transform=transform['train_simsiam'], 
                                target_transform=target_transform['train_simsiam'], **ds_args)
-    elif args.dataset == 'ade20k':
+    elif args.dataset in ['ade20k', 'ade20k_512']:
         ds_train = ADE20KSegmentation(split='train', transform=transform['train'], target_transform=target_transform['train'], **ds_args)
         ds_train_aug = ADE20KSegmentation(split='train', transform=transform['train_aug'], target_transform=target_transform['train_aug'], **ds_args)
         ds_validation = ADE20KSegmentation(split='test', transform=transform['validation'], target_transform=target_transform['validation'], **ds_args)

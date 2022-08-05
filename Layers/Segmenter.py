@@ -45,6 +45,7 @@ class MaskTransformer(nn.Module):
         d_ff,
         drop_path_rate,
         dropout,
+        img_size,
         n_layers=2,
     ):
         super().__init__()
@@ -55,6 +56,7 @@ class MaskTransformer(nn.Module):
         self.d_model = d_model
         self.d_ff =  4 * d_model
         self.scale = d_model ** -0.5
+        self.img_size = img_size
 
         dpr = [x.item() for x in torch.linspace(0, drop_path_rate, n_layers)]
         self.blocks = nn.ModuleList(
@@ -77,9 +79,9 @@ class MaskTransformer(nn.Module):
     def no_weight_decay(self):
         return {"cls_emb"}
 
-    def forward(self, x, im_size):
-        H_ori, W_ori = im_size[0], im_size[1]
-        im = padding(im_size, self.patch_size)
+    def forward(self, x):
+        H_ori, W_ori = self.img_size[0], self.img_size[1]
+        im = padding(self.img_size, self.patch_size)
         H, W = im[0], im[1]
         GS = H // self.patch_size
 

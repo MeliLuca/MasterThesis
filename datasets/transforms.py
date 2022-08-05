@@ -380,15 +380,40 @@ def get_transforms(args):
             'train_simsiam': None,
         }
     
-    elif args.dataset in ['ade20k']:
-        crop_size = (512, 512)
-        max_ratio = 4
-        trans = {
+    elif args.dataset in ['ade20k', 'ade20k_512']:
+        if args.dataset=='ade20k_512':
+            trans = {
             'train_aug': A.Compose([
-                A.Resize(width=512* max_ratio, height=512),
+                A.augmentations.geometric.resize.RandomScale(scale_limit=[0.5,2.0]),
+                A.RandomResizedCrop(width=512, height=512),
+                A.HorizontalFlip(p=0.5),
+                A.Normalize(*constants.NORMALIZATION[args.dataset]),
+                A.PadIfNeeded(min_height=512, min_width=512),
+                ToTensorV2()
+            ]),
+            'train': A.Compose([
+                A.Resize(width=512, height=512),
+                A.Normalize(*constants.NORMALIZATION[args.dataset]),
+                ToTensorV2()
+            ]),
+            'validation': A.Compose([
+                A.Resize(width=512, height=512),
+                A.Normalize(*constants.NORMALIZATION[args.dataset]),
+                ToTensorV2()
+            ]),
+            'test': A.Compose([
+                A.Resize(width=512, height=512),
+                A.Normalize(*constants.NORMALIZATION[args.dataset]),
+                ToTensorV2()
+            ]),
+            'train_simsiam': get_simsiam_transform(args),
+        }
+        else :
+            trans = {
+            'train_aug': A.Compose([
+                A.Resize(width=256, height=256),
                 A.RandomResizedCrop(width=224, height=224),
                 A.HorizontalFlip(p=0.5),
-                A.RandomBrightnessContrast(p=0.2),
                 A.Normalize(*constants.NORMALIZATION[args.dataset]),
                 ToTensorV2()
             ]),

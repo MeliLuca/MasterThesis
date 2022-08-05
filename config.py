@@ -111,6 +111,7 @@ def get_args(stdin, verbose=False):
         'svhn': 10,
         'pathmnist': 9,
         'ade20k' : 150,
+        'ade20k_512':150,
     }
     args.num_classes = num_classes[args.dataset]
     if args.task == 'downstream' and args.metric_monitor=='val_acc':
@@ -141,7 +142,8 @@ def get_args(stdin, verbose=False):
             'cars': 32,
             'svhn': 4,
             'pathmnist': 32,
-            'ade20k': 32
+            'ade20k': 32,
+            'ade20k_512':16,
         }
         args.patch_size = patch_size[args.dataset]
     img_height = {
@@ -161,6 +163,7 @@ def get_args(stdin, verbose=False):
         'svhn': 32,
         'pathmnist': 224,
         'ade20k': 224,
+        'ade20k_512':512,
     }
     args.img_height = img_height[args.dataset]
     if verbose:

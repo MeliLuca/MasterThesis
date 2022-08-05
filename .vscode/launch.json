@@ -8,7 +8,7 @@
             "name": "main py",
             "type": "python",
             "args": [
-                "--dataset=ade20k", 
+                "--dataset=ade20k_512", 
                 "--num_gpus=0",
                 "--backbone=vit",
                 "--model_version=segmenter",
