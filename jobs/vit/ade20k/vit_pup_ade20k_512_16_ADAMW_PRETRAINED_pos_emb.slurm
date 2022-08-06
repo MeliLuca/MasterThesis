@@ -13,7 +13,7 @@ python3 $HOME/storage/MasterThesis/main.py \
  --epochs 150 \
  --logger wandb \
  --stats_path vit_pup_ade20k_512_16_ADAMW_PRETRAINED_PosEmb \
- --dataset ade20k \
+ --dataset ade20k_512 \
  --batch_size 16 \
  --optimizer adamw \
  --backbone vit \
