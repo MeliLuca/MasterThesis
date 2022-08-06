@@ -23,7 +23,6 @@ import VitAnalysis
 format_str = '%(asctime)s - [%(levelname)s] - %(message)s'
 logging.basicConfig(level=logging.INFO, format=format_str, datefmt='%d-%b-%y %H:%M:%S')
 
-
 # Main function
 def main(args):
     # Logging

@@ -3,6 +3,7 @@
 ##################################################
 
 from pyexpat import model
+from sched import scheduler
 import pytorch_lightning as pl
 from requests import patch
 import torch
@@ -27,7 +28,7 @@ from timm.models import vision_transformer as vit
 import Models.vit_dino as vit_dino
 from Layers.MultiHeadAttention import MultiHeadAttentionScores
 from Layers import Segmenter, PUP
-from utils import cross_entropy, accuracy, mIOU, resize_pos_embed, get_pos_embedding_sim
+from utils import cross_entropy, accuracy, mIOU, resize_pos_embed, get_pos_embedding_sim, PolynomialLRDecay
 from torchvision.utils import make_grid
 
 cmap = cm.get_cmap('viridis')
@@ -321,6 +322,9 @@ class RelViT(pl.LightningModule):
             optimizer = AdamW(self.parameters(), self.args.lr, weight_decay=self.args.weight_decay)
         else:
             raise Exception(f'Error. Optimizer "{self.args.optimizer}" not supported.')
+        if self.args.decay_lr_sched == 'polynomial':
+            scheduler = PolynomialLRDecay(optimizer, self.args.max_decay_steps)
+            return {"optimizer": optimizer, "lr_scheduler": scheduler}
         self.optimizer = optimizer
         return optimizer
 

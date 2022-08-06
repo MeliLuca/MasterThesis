@@ -16,7 +16,8 @@
                 "--num_workers=0",
                 "--use_segmentation",
                 "--pretrained",
-                "--patch_size=16"
+                "--patch_size=16",
+                "--decay_lr_sched=polynomial"
             ],
             "request": "launch",
             "program": "${workspaceFolder}/main.py",
