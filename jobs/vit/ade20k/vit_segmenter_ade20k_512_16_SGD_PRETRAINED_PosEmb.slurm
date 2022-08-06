@@ -12,7 +12,7 @@ export WANDB_API_KEY=1c9bad0d162960a36cc8fecc456d0dc024cb834c
 python3 $HOME/storage/MasterThesis/main.py \
  --epochs 64 \
  --logger wandb \
- --stats_path vit_segmenter_ade20k_512_16_ADAMW_PRETRAINED_PosEmb\
+ --stats_path vit_segmenter_ade20k_512_16_SGD_PRETRAINED_PosEmb\
  --dataset ade20k_512 \
  --batch_size 8 \
  --optimizer sgd \
