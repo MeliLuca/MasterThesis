@@ -12,10 +12,13 @@ export WANDB_API_KEY=1c9bad0d162960a36cc8fecc456d0dc024cb834c
 python3 $HOME/storage/MasterThesis/main.py \
  --epochs 150 \
  --logger wandb \
- --stats_path vit_pup_ade20k_512_16_ADAMW_PRETRAINED_PosEmb \
+ --stats_path vit_pup_ade20k_512_16_SGD_PRETRAINED_PosEmb \
  --dataset ade20k_512 \
  --batch_size 16 \
- --optimizer adamw \
+ --optimizer sgd \
+ --weight_decay 0 \
+ --lr 0.003 \
+ --decay_lr_sched polynomial \
  --backbone vit \
  --use_segmentation \
  --model_version pup \
@@ -23,5 +26,5 @@ python3 $HOME/storage/MasterThesis/main.py \
  --use_positional_embeddings \
  --metric_monitor val_miou \
  --pretrained \
- --exp_id pretrained
+ --exp_id pret_poly
  ### features=[512, 512, 256, 256 ,256]
