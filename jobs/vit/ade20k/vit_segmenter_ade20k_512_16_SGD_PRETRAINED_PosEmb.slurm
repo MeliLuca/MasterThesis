@@ -16,6 +16,7 @@ python3 $HOME/storage/MasterThesis/main.py \
  --dataset ade20k_512 \
  --batch_size 8 \
  --optimizer sgd \
+ --decay_lr_sched polynomial \
  --weight_decay 0 \
  --lr 0.001 \
  --backbone vit \
