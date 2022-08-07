@@ -39,16 +39,20 @@ cmap = cm.get_cmap('viridis')
 ##################################################
 
 class NaiveDecoder(nn.Module):
-    def __init__(self, emb_dim, num_patches):
+    def __init__(self, emb_dim, num_patches, img_size):
         super().__init__()
+        self.num_patches = num_patches
         self.linear_channel = nn.Linear(emb_dim, 151)
-        self.linear_dimension = nn.Linear(num_patches, 1024)
-        self.upsample = nn.Upsample(scale_factor=7, mode='bilinear')
+        if num_patches < 1024:
+            self.linear_dimension = nn.Linear(num_patches, 1024)
+        self.scale_factor = img_size // 32
+        self.upsample = nn.Upsample(scale_factor=self.scale_factor, mode='bilinear')
 
     def forward(self, x):
         B,_,emb = x.shape
-        segm_in = self.linear_channel(x)
-        segm_in = self.linear_dimension(segm_in.transpose(1,2))
+        segm_in = self.linear_channel(x).transpose(1,2)
+        if self.num_patches < 1024:
+            segm_in = self.linear_dimension(segm_in)
         segm_in = segm_in.view([B, 151, 32, 32])
         segm_in = self.upsample(segm_in)
         return segm_in
@@ -103,7 +107,7 @@ class RelViT(pl.LightningModule):
         self.backbone = self._get_backbone()
         if self.use_segmentation :
             if self.args.model_version == 'naive':
-                self.segm_head = NaiveDecoder(self.backbone.embed_dim, self.num_patches)
+                self.segm_head = NaiveDecoder(self.backbone.embed_dim, self.num_patches,self.args.img_height)
             elif self.args.model_version == 'segmenter':
                 args_dec = {
                     'n_cls': self.num_classes+1,

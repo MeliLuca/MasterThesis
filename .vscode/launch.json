@@ -11,11 +11,10 @@
                 "--dataset=ade20k_512", 
                 "--num_gpus=0",
                 "--backbone=vit",
-                "--model_version=pup",
+                "--model_version=naive",
                 "--batch_size=1",
                 "--num_workers=0",
                 "--use_segmentation",
-                "--pretrained",
                 "--patch_size=16",
                 "--decay_lr_sched=polynomial"
             ],
