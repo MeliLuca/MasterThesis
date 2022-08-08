@@ -118,6 +118,7 @@ class ImageDataset(Dataset):
             sample = {
                 'images': x,
                 'labels': y,
+                'filename': f,
             }
         if self.ssl_signal is not None:
             num_patches = int(self.img_size // self.patch_size) ** 2
