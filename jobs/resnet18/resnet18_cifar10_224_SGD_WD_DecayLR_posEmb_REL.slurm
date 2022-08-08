@@ -31,6 +31,5 @@ python3 $HOME/storage/MasterThesis/main.py \
  --use_supervision \
  --use_relations \
  --use_positional_embeddings \
- --task upstream \
  --exp_id down_ONLY_shuff
 ## added more layer that usual !!!
