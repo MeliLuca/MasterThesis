@@ -21,6 +21,7 @@ python3 $HOME/storage/MasterThesis/main.py \
  --decay_lr_sched polynomial \
  --backbone vit \
  --use_segmentation \
+ --use_relations \
  --model_version pup \
  --patch_size 16 \
  --use_positional_embeddings \
