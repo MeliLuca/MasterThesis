@@ -69,7 +69,7 @@ class ADE20KSegmentation(Dataset):
             transformed = self.transform(image=img, mask=mask) #Albumentations Transform
             img = transformed["image"]
             mask = transformed["mask"]
-        return img, mask, self.masks[index]
+        return img, mask # self.masks[index]
 
     def _mask_transform(self, mask):
         return torch.LongTensor(np.array(mask).astype('int32') - 1)
