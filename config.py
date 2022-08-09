@@ -167,7 +167,7 @@ def get_args(stdin, verbose=False):
     }
     args.img_height = img_height[args.dataset]
     ## only for ADE20K
-    args.max_decay_steps = (22120 // args.batch_size )* args.epochs
+    args.max_decay_steps = (22120)* args.epochs
     if verbose:
         args_dict = vars(args)
         logging.info('Input Args: ' + json.dumps({k: args_dict[k] for k in sorted(args_dict)}, indent=4))

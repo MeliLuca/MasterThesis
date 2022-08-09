@@ -58,43 +58,83 @@ def accuracy(preds, labels, preds_with_logits=True):
     return acc
 
 
-class PolynomialLRDecay(_LRScheduler):
-    """Polynomial learning rate decay until step reach to max_decay_step
+# class PolynomialLRDecay(_LRScheduler):
+#     """Polynomial learning rate decay until step reach to max_decay_step
     
-    Args:
-        optimizer (Optimizer): Wrapped optimizer.
-        max_decay_steps: after this step, we stop decreasing learning rate
-        end_learning_rate: scheduler stoping learning rate decay, value of learning rate must be this value
-        power: The power of the polynomial.
-    """
+#     Args:
+#         optimizer (Optimizer): Wrapped optimizer.
+#         max_decay_steps: after this step, we stop decreasing learning rate
+#         end_learning_rate: scheduler stoping learning rate decay, value of learning rate must be this value
+#         power: The power of the polynomial.
+#     """
     
-    def __init__(self, optimizer, max_decay_steps, end_learning_rate=0.00001, power=0.9):
-        if max_decay_steps <= 1.:
-            raise ValueError('max_decay_steps should be greater than 1.')
-        self.max_decay_steps = max_decay_steps
-        self.end_learning_rate = end_learning_rate
-        self.power = power
-        self.last_step = 0
-        super().__init__(optimizer)
+#     def __init__(self, optimizer, max_decay_steps, end_learning_rate=0.00001, power=0.9):
+#         if max_decay_steps <= 1.:
+#             raise ValueError('max_decay_steps should be greater than 1.')
+#         self.max_decay_steps = max_decay_steps
+#         self.end_learning_rate = end_learning_rate
+#         self.power = power
+#         self.last_step = 0
+#         super().__init__(optimizer)
         
-    def get_lr(self):
-        if self.last_step > self.max_decay_steps:
-            return [self.end_learning_rate for _ in self.base_lrs]
+#     def get_lr(self):
+#         if self.last_step > self.max_decay_steps:
+#             return [self.end_learning_rate for _ in self.base_lrs]
 
-        return [(base_lr - self.end_learning_rate) * 
-                ((1 - self.last_step / self.max_decay_steps) ** (self.power)) + 
-                self.end_learning_rate for base_lr in self.base_lrs]
+#         return [(base_lr - self.end_learning_rate) * 
+#                 ((1 - self.last_step / self.max_decay_steps) ** (self.power)) + 
+#                 self.end_learning_rate for base_lr in self.base_lrs]
     
-    def step(self, step=None):
-        if step is None:
-            step = self.last_step + 1
-        self.last_step = step if step != 0 else 1
-        if self.last_step <= self.max_decay_steps:
-            decay_lrs = [(base_lr - self.end_learning_rate) * 
-                         ((1 - self.last_step / self.max_decay_steps) ** (self.power)) + 
-                         self.end_learning_rate for base_lr in self.base_lrs]
-            for param_group, lr in zip(self.optimizer.param_groups, decay_lrs):
-                param_group['lr'] = lr
+#     def step(self, step=None):
+#         if step is None:
+#             step = self.last_step + 1
+#         self.last_step = step if step != 0 else 1
+#         if self.last_step <= self.max_decay_steps:
+#             decay_lrs = [(base_lr - self.end_learning_rate) * 
+#                          ((1 - self.last_step / self.max_decay_steps) ** (self.power)) + 
+#                          self.end_learning_rate for base_lr in self.base_lrs]
+#             for param_group, lr in zip(self.optimizer.param_groups, decay_lrs):
+#                 param_group['lr'] = lr
+
+class PolynomialLR(_LRScheduler):
+    def __init__(
+        self,
+        optimizer,
+        iter_max,
+        step_size=1,
+        iter_warmup=0.0,
+        power=0.9,
+        min_lr=1e-5,
+        last_epoch=-1,
+    ):
+        self.step_size = step_size
+        self.iter_warmup = int(iter_warmup)
+        self.iter_max = int(iter_max)
+        self.power = power
+        self.min_lr = min_lr
+        super(PolynomialLR, self).__init__(optimizer, last_epoch)
+
+    def polynomial_decay(self, lr):
+        iter_cur = float(self.last_epoch)
+        if iter_cur < self.iter_warmup:
+            coef = iter_cur / self.iter_warmup
+            coef *= (1 - self.iter_warmup / self.iter_max) ** self.power
+        else:
+            coef = (1 - iter_cur / self.iter_max) ** self.power
+        return (lr - self.min_lr) * coef + self.min_lr
+
+    def get_lr(self):
+        if (
+            (self.last_epoch == 0)
+            or (self.last_epoch % self.step_size != 0)
+            or (self.last_epoch > self.iter_max)
+        ):
+            return [group["lr"] for group in self.optimizer.param_groups]
+        return [self.polynomial_decay(lr) for lr in self.base_lrs]
+
+    def step_update(self, num_updates):
+        self.step()
+
 
 def cos_anneal(e0, e1, t0, t1, e):
     """ ramp from (e0, t0) -> (e1, t1) through a cosine schedule based on e \in [e0, e1] """
