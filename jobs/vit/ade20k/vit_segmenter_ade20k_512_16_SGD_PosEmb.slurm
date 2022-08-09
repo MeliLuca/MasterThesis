@@ -4,6 +4,7 @@
 #SBATCH --mem=1G
 #SBATCH --time=500:00:00
 #SBATCH --gres=gpu:1
+#SBATCH --mem=50G
 echo "directory"
 pwd
 source $HOME/miniconda3/etc/profile.d/conda.sh
