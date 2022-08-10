@@ -107,7 +107,7 @@ class ImageDataset(Dataset):
 
     def __getitem__(self, i):
         if self.use_segmentation:
-            x, y, f = self.ds.__getitem__(i)
+            x, y = self.ds.__getitem__(i)
             sample = {
                 'images': x,
                 'labels': y,
