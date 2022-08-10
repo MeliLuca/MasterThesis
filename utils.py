@@ -96,7 +96,7 @@ def accuracy(preds, labels, preds_with_logits=True):
 #             for param_group, lr in zip(self.optimizer.param_groups, decay_lrs):
 #                 param_group['lr'] = lr
 
-class PolynomialLR(_LRScheduler):
+class PolynomialLRDecay(_LRScheduler):
     def __init__(
         self,
         optimizer,
