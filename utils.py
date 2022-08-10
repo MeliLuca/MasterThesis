@@ -112,7 +112,7 @@ class PolynomialLRDecay(_LRScheduler):
         self.iter_max = int(iter_max)
         self.power = power
         self.min_lr = min_lr
-        super(PolynomialLR, self).__init__(optimizer, last_epoch)
+        super(PolynomialLRDecay, self).__init__(optimizer, last_epoch)
 
     def polynomial_decay(self, lr):
         iter_cur = float(self.last_epoch)
