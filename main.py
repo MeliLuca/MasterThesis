@@ -13,7 +13,7 @@ import torch
 # Custom
 from config import get_args
 from datasets.dataloaders import get_datasets, get_dataloaders
-from Models import relcnn, relvit
+from Models import relcnn, relvit, segmenter
 from utils import get_logger, get_callbacks
 from trainer import get_trainer
 import ResnetAnalysis
@@ -38,7 +38,7 @@ def main(args):
     # Dataloaders
     dls = get_dataloaders(args)
     # Get model
-    if args.backbone in ['vit', 'fcn']:
+    if args.backbone in ['vit', 'fcn', 'segmenter']:
         model = relvit.get_model(args)
     else:
         if args.backbone =='cifar10_model':

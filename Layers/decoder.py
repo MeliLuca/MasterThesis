@@ -103,8 +103,8 @@ class MaskTransformer(nn.Module):
         masks = self.mask_norm(masks)
         masks = rearrange(masks, "b (h w) n -> b n h w", h=int(GS))
 
-        masks = F.interpolate(masks, size=(H, W), mode="bilinear")
-        masks = unpadding(masks, (H_ori, W_ori))
+        # masks = F.interpolate(masks, size=(H, W), mode="bilinear")
+        # masks = unpadding(masks, (H_ori, W_ori))
 
         return masks
 

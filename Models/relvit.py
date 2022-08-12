@@ -27,7 +27,8 @@ from math import sqrt
 from timm.models import vision_transformer as vit
 import Models.vit_dino as vit_dino
 from Layers.MultiHeadAttention import MultiHeadAttentionScores
-from Layers import Segmenter, PUP
+from Layers import vit, decoder, PUP
+from Models import segmenter
 from utils import cross_entropy, accuracy, mIOU, resize_pos_embed, get_pos_embedding_sim, PolynomialLRDecay
 from torchvision.utils import make_grid
 
@@ -39,21 +40,17 @@ cmap = cm.get_cmap('viridis')
 ##################################################
 
 class NaiveDecoder(nn.Module):
-    def __init__(self, emb_dim, num_patches, img_size):
+    def __init__(self, emb_dim, patch_size, img_size):
         super().__init__()
-        self.num_patches = num_patches
+        self.patch_size = patch_size
         self.linear_channel = nn.Linear(emb_dim, 151)
-        if num_patches < 1024:
-            self.linear_dimension = nn.Linear(num_patches, 1024)
-        self.scale_factor = img_size // 32
-        self.upsample = nn.Upsample(scale_factor=self.scale_factor, mode='bilinear')
+        self.img_size = img_size
+        self.upsample = nn.Upsample(scale_factor=self.patch_size, mode='bilinear')
 
     def forward(self, x):
         B,_,emb = x.shape
         segm_in = self.linear_channel(x).transpose(1,2)
-        if self.num_patches < 1024:
-            segm_in = self.linear_dimension(segm_in)
-        segm_in = segm_in.view([B, 151, 32, 32])
+        segm_in = segm_in.view([B, 151, self.img_size//self.patch_size, self.img_size//self.patch_size])
         segm_in = self.upsample(segm_in)
         return segm_in
 
@@ -107,20 +104,20 @@ class RelViT(pl.LightningModule):
         self.backbone = self._get_backbone()
         if self.use_segmentation :
             if self.args.model_version == 'naive':
-                self.segm_head = NaiveDecoder(self.backbone.embed_dim, self.num_patches,self.args.img_height)
-            elif self.args.model_version == 'segmenter':
-                args_dec = {
-                    'n_cls': self.num_classes+1,
-                    'patch_size': self.patch_size,
-                    'd_encoder': self.backbone.embed_dim,
-                    'd_model': self.backbone.embed_dim,
-                    'n_heads': self.backbone.embed_dim //64,
-                    'd_ff': 4 * self.backbone.embed_dim,
-                    'drop_path_rate': 0.0,
-                    'dropout': self.dropout,
-                    'img_size': (self.args.img_height, self.args.img_height)
-                    }
-                self.segm_head = SegmenterDecoder(args_dec)
+                self.segm_head = NaiveDecoder(self.backbone.embed_dim, self.args.patch_size, self.args.img_height)
+            # elif self.args.model_version == 'segmenter':
+            #     args_dec = {
+            #         'n_cls': self.num_classes+1,
+            #         'patch_size': self.patch_size,
+            #         'd_encoder': self.backbone.embed_dim,
+            #         'd_model': self.backbone.embed_dim,
+            #         'n_heads': self.backbone.embed_dim //64,
+            #         'd_ff': 4 * self.backbone.embed_dim,
+            #         'drop_path_rate': 0.0,
+            #         'dropout': self.dropout,
+            #         'img_size': (self.args.img_height, self.args.img_height)
+            #         }
+            #     self.segm_head = SegmenterDecoder(args_dec)
             elif self.args.model_version == 'pup':
                 self.segm_head = PUPDecoder(self.backbone.embed_dim, self.patch_size)
             else :
@@ -176,6 +173,32 @@ class RelViT(pl.LightningModule):
                 backbone = fcn_resnet50(num_classes=self.num_classes+1, weights_backbone=weights)
             else:
                 backbone = fcn_resnet50(num_classes=self.num_classes+1)
+        elif self.args.backbone == 'segmenter':
+            encoder_args = {
+                'image_size': (self.args.img_height, self.args.img_height, 3),
+                'patch_size': self.args.patch_size,
+                'drop_path_rate': self.args.drop_path_rate,
+                'dropout': self.proj_dropout,
+                'd_model': 384,
+                'n_layers' : 6,
+                'n_heads': 12,
+                'n_cls': 150,
+                'd_ff':1536
+            }
+            args_dec = {
+                    'n_cls': self.num_classes+1,
+                    'patch_size': self.patch_size,
+                    'd_encoder': 384,
+                    'd_model': 384,
+                    'n_heads': 384 //64,
+                    'd_ff': 4 *384,
+                    'drop_path_rate': 0.0,
+                    'dropout': self.dropout,
+                    'img_size': (self.args.img_height, self.args.img_height)
+                    }
+            encoder = vit.VisionTransformer(**encoder_args)
+            dec = decoder.MaskTransformer(**args_dec)
+            backbone = segmenter.Segmenter(encoder, dec, n_cls=150)
         return backbone
 
     def forward(self, x):

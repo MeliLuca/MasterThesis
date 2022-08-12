@@ -14,7 +14,7 @@ python3 $HOME/storage/MasterThesis/main.py \
  --logger wandb \
  --stats_path vit_naive_ade20k_512_16_SGD_PosEmb_REL_16batch\
  --dataset ade20k_512 \
- --batch_size 16 \
+ --batch_size 8 \
  --optimizer sgd \
  --decay_lr_sched polynomial \
  --weight_decay 0 \
