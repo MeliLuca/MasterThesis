@@ -21,9 +21,8 @@ python3 $HOME/storage/MasterThesis/main.py \
  --decay_lr_sched polynomial \
  --weight_decay 0 \
  --lr 0.001 \
- --backbone vit \
+ --backbone segmenter \
  --use_segmentation \
- --model_version segmenter \
  --patch_size 16 \
  --use_positional_embeddings \
  --metric_monitor val_miou \
