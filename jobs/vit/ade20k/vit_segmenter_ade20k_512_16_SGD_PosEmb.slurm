@@ -12,11 +12,11 @@ conda activate new_env
 echo "conda version from echo $(conda --version)"
 export WANDB_API_KEY=1c9bad0d162960a36cc8fecc456d0dc024cb834c
 python3 $HOME/storage/MasterThesis/main.py \
- --epochs 64 \
+ --epochs 150 \
  --logger wandb \
- --stats_path vit_segmenter_ade20k_512_16_SGD_PosEmb_newSched\
+ --stats_path vit_segmenter_ade20k_512_16_SGD_PosEmb_100epoch\
  --dataset ade20k_512 \
- --batch_size 8 \
+ --batch_size 16 \
  --optimizer sgd \
  --decay_lr_sched polynomial \
  --weight_decay 0 \
