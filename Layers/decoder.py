@@ -79,10 +79,12 @@ class MaskTransformer(nn.Module):
     def no_weight_decay(self):
         return {"cls_emb"}
 
-    def forward(self, x):
-        H_ori, W_ori = self.img_size[0], self.img_size[1]
-        im = padding(self.img_size, self.patch_size)
-        H, W = im[0], im[1]
+    def forward(self, x, im_size):
+        # H_ori, W_ori = self.img_size[0], self.img_size[1]
+        # im = padding(self.img_size, self.patch_size)
+        # H, W = im[0], im[1]
+        # GS = H // self.patch_size
+        H, W = im_size
         GS = H // self.patch_size
 
         x = self.proj_dec(x)

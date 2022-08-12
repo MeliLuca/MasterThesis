@@ -192,6 +192,11 @@ def get_callbacks(args):
             model_checkpoint_clbk,
             DecayLR(lr_init=args.lr),
         ]
+    elif args.decay_lr_sched == 'poly' :
+        callbacks = [
+            model_checkpoint_clbk,
+            PolynomialLRDecay(lr_init=args.lr),
+        ]
     else :
         callbacks = [
             model_checkpoint_clbk,
@@ -430,8 +435,9 @@ def unpadding(y, target_size):
 
 def padding(im, patch_size, fill_value=0):
     # make the image sizes divisible by patch_size
-    H, W = im[0], im[1]
+    H, W = im.size(2), im.size(3)
     pad_h, pad_w = 0, 0
+    print(H % patch_size)
     if H % patch_size > 0:
         pad_h = patch_size - (H % patch_size)
     if W % patch_size > 0:

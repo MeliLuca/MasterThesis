@@ -226,7 +226,7 @@ class RelViT(pl.LightningModule):
         if self.use_supervision:
             out['clf'] = self.clf_head(feats['z'])
         if self.use_segmentation:
-            out['seg'] = self.segm_head(z_patches)
+            out['seg'] = self.segm_head(z_patches) if self.args.backbone in ['vit'] else self.segm_head(feats)
         return out
 
     def training_step(self, batch, batch_idx, part='train'):
