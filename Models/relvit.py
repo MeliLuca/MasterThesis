@@ -350,7 +350,7 @@ class RelViT(pl.LightningModule):
         else:
             raise Exception(f'Error. Optimizer "{self.args.optimizer}" not supported.')
         if self.args.decay_lr_sched == 'polynomial':
-            self.scheduler = PolynomialLRDecay(optimizer, self.args.max_decay_steps)
+            self.scheduler = PolynomialLRDecay(optimizer, self.args.epochs)
             self.optimizer = optimizer
             return {"optimizer": optimizer, "lr_scheduler": self.scheduler}
         self.optimizer = optimizer
