@@ -25,4 +25,4 @@ python3 $HOME/storage/MasterThesis/main.py \
  --patch_size 16 \
  --use_positional_embeddings \
  --metric_monitor val_miou \
- --exp_id original
+ --exp_id originalADAMW
