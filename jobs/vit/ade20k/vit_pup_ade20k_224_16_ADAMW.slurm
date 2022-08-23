@@ -8,7 +8,7 @@ pwd
 source $HOME/miniconda3/etc/profile.d/conda.sh
 conda activate new_env
 echo "conda version from echo $(conda --version)"
-export WANDB_API_KEY=1c9bad0d162960a36cc8fecc456d0dc024cb834c
+export WANDB_API_KEY=ea6aee9ecbca9ca1ea2625da6ebe714375849129
 python3 $HOME/storage/MasterThesis/main.py \
  --epochs 150 \
  --logger wandb \
