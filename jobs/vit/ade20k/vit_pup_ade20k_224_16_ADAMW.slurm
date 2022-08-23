@@ -19,4 +19,5 @@ python3 $HOME/storage/MasterThesis/main.py \
  --backbone vit \
  --use_segmentation \
  --model_version pup \
- --patch_size 16
+ --patch_size 16 \
+ --metric_monitor val_miou 
