@@ -19,4 +19,5 @@ python3 $HOME/storage/MasterThesis/main.py \
  --optimizer adamw \
  --backbone vit \
  --use_segmentation \
+ --model_version naive \
  --exp_id up
