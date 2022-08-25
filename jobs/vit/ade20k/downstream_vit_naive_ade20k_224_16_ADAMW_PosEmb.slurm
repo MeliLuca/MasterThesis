@@ -19,5 +19,6 @@ python3 $HOME/storage/MasterThesis/main.py \
  --optimizer adamw \
  --backbone vit \
  --use_segmentation \
+ --use_positional_embeddings \
  --model_version naive \
  --model_checkpoint stats/upstream_vit_naive_ade20k_224_16_ADAMW_PosEmb/checkpoints/best.ckpt
