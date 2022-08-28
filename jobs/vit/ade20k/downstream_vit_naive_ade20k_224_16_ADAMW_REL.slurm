@@ -20,4 +20,4 @@ python3 $HOME/storage/MasterThesis/main.py \
  --backbone vit \
  --use_segmentation \
  --model_version naive \
- --model_checkpoint stats/upstream_vit_naive_ade20k_224_16_ADAMW_REL/checkpoints/best.ckpt
+ --model_checkpoint stats/upstream_vit_ade20k_224_16_ADAMW_REL/checkpoints/best.ckpt
