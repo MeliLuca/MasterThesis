@@ -68,14 +68,14 @@ class PUPDecoder(nn.Module):
         segm_in = self.decoder(segm_in)
         return segm_in
 
-class SegmenterDecoder(nn.Module):
-    def __init__(self, args_model):
-        super().__init__()
-        self.decoder = Segmenter.MaskTransformer(**args_model)
+# class SegmenterDecoder(nn.Module):
+#     def __init__(self, args_model):
+#         super().__init__()
+#         self.decoder = Segmenter.MaskTransformer(**args_model)
 
-    def forward(self, x):
-        segm_in = self.decoder(x)
-        return segm_in
+#     def forward(self, x):
+#         segm_in = self.decoder(x)
+#         return segm_in
 
 class RelViT(pl.LightningModule):
     """
