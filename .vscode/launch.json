@@ -16,6 +16,8 @@
                 "--use_segmentation",
                 "--patch_size=8",
                 "--use_relations",
+                "--use_angles",
+                "--use_distances",
                 "--model_version=naive",
             ],
             "request": "launch",
