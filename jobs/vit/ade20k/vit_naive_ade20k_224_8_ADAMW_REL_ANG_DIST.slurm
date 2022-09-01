@@ -12,6 +12,7 @@ export WANDB_API_KEY=1c9bad0d162960a36cc8fecc456d0dc024cb834c
 python3 $HOME/storage/MasterThesis/main.py \
  --epochs 150 \
  --logger wandb \
+ --num_workers 4 \
  --stats_path vit_naive_ade20k_224_8_ADAMW_REL_ANG_DIST \
  --dataset ade20k \
  --batch_size 64 \
